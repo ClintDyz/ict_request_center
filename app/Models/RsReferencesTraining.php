@@ -12,7 +12,7 @@ class RsReferencesTraining extends Model
     protected $table = 'rs_references_trainings';
 
     protected $fillable = [
-        'name_agency',         
+        'name_agency',
         'address',
         'contact_person',
         'position',
@@ -20,6 +20,8 @@ class RsReferencesTraining extends Model
         'cell_no',
         'fax_no'
     ];
+
+
 
     public function rstbl()
     {

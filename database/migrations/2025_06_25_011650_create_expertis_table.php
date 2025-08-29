@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateRsPublicationsTable extends Migration
+class CreateExpertisTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateRsPublicationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('rs_publications', function (Blueprint $table) {
+        Schema::create('expertis', function (Blueprint $table) {
             $table->id();
             $table->foreignId('rs_id')->constrained('rstbl');
-            $table->string('title');
-            $table->string('nature');
-            $table->date('date_venue');
+            $table->string('expertis');
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ class CreateRsPublicationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rs_publications');
+        Schema::dropIfExists('expertis');
     }
 }

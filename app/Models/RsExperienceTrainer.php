@@ -10,11 +10,14 @@ class RsExperienceTrainer extends Model
     use HasFactory;
 
     protected $table = 'rs_experience_trainer';
-    protected $fillable = [
-        'title',
-        'date_venue',
-        'no_hours'
+
+    protected $fillable =[
+        'rst_title', 'rst_venue', 'rst_date', 'rst_no_hours'
     ];
+
+    // public function RsExperienceTrainer() {
+    //     return $this->hasMany(Training::class);
+    // }
 
     public function rstbl()
     {

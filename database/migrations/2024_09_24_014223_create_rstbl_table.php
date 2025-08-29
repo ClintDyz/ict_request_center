@@ -34,6 +34,7 @@ class CreateRstblTable extends Migration
             $table->string('home_tel_no')->nullable();
             $table->string('home_cell_no')->nullable();
             $table->string('home_fax_no')->nullable();
+            $table->string('created_by');
             $table->timestamps();
         });
     }

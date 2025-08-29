@@ -105,14 +105,16 @@
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email" name="email" required>
                             </div>
+                                <div class="mb-3">
+                                <label for="mobile_no" class="form-label">Mobile Number</label>
+                                <input type="text" class="form-control" id="mobile_no" name="mobile_no">
+                           </div>
+
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
                                 <input type="text" class="form-control" id="username" name="username" required>
                             </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
+
                         </div>
                         <div class="col-md-6">
                             <?php
@@ -173,11 +175,21 @@
                             </div>
                             <div class="mb-3">
                                 <label for="address" class="form-label">Address</label>
-                                <textarea class="form-control" id="address" name="address"></textarea>
+                                <input type="text" class="form-control" id="address" name="address">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
                             </div>
                             <div class="mb-3">
-                                <label for="mobile_no" class="form-label">Mobile Number</label>
-                                <input type="text" class="form-control" id="mobile_no" name="mobile_no">
+                                <label for="emp_type" class="form-label">Access Level</label>
+                                <select name="emp_type" class="form-control" id="emp_type">
+                                    <option>--Select--</option> <!-- Default empty option -->
+                                        <option value="0">Administrator</option> <!-- Assuming 'province_name' is the column -->
+                                        <option value="1">Accreditor</option> <!-- Assuming 'province_name' is the column -->
+                                        <option value="2">Employee</option> <!-- Assuming 'province_name' is the column -->
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -215,30 +227,47 @@
                         <label for="firstname" class="form-label">First Name</label>
                         <input type="text" class="form-control" id="editFirstname" name="firstname" required>
                     </div>
+                            <div class="mb-3">
+                                <label for="middlename" class="form-label">Middle Name</label>
+                                <input type="text" class="form-control" id="middlename" name="middlename" required>
+                            </div>
                     <div class="mb-3">
                         <label for="lastname" class="form-label">Last Name</label>
                         <input type="text" class="form-control" id="editLastname" name="lastname" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="position" class="form-label">Position</label>
-                        <input type="text" class="form-control" id="editPosition" name="position" required>
-                    </div>
-                    <div class="mb-3">
+                            <div class="mb-3">
+                                <label for="gender" class="form-label">Gender</label>
+                            <select class="form-control" id="gender" name="gender" required>
+                            <option> <--Select Gender--> </option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            </select>
+                            </div>
+                             <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" class="form-control" id="editEmail" name="email" required>
                     </div>
+                             <div class="mb-3">
+                                <label for="mobile_no" class="form-label">Mobile Number</label>
+                                <input type="text" class="form-control" id="mobile_no" name="mobile_no">
+                           </div>
+
                     <div class="mb-3">
                         <label for="email" class="form-label">Username</label>
                         <input type="text" class="form-control" id="editusername" name="username" required>
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="editpassword" name="password" required>
+                        {{-- <label for="roles" class="form-label">Roles</label> --}}
+                        {{-- <input type="text" class="form-control" id="editRoles" name="roles" required> --}}
+                <label for="emp_type" class="form-label">Access Level</label>
+                <select name="emp_type" class="form-control" id="emp_type" required>
+                    <option disabled {{ old('emp_type', $user->emp_type ?? '') === null ? 'selected' : '' }}>--Select--</option>
+                    <option value="0" {{ old('emp_type', $user->emp_type ?? '') == 0 ? 'selected' : '' }}>Administrator</option>
+                    <option value="1" {{ old('emp_type', $user->emp_type ?? '') == 1 ? 'selected' : '' }}>Accreditor</option>
+                    <option value="2" {{ old('emp_type', $user->emp_type ?? '') == 2 ? 'selected' : '' }}>Employee</option>
+                </select>
+
                     </div>
-                <div class="mb-3">
-                    <label for="password_confirmation" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation">
-                </div>
                   </div>
 
                   <div class="col-md-6">
@@ -249,11 +278,9 @@
                         <div class="mb-3">
                             <label for="division" class="form-label">Division</label>
                             <select name="division" class="form-control" id="editDivision">
-                                <option value=""></option> <!-- Default empty option -->
+                                <option value="">-- Select Division --</option>
                                 @foreach ($divisions as $division)
-                                    <option value="{{ $division->division }}" {{ $division->division == $user->division ? 'selected' : '' }}>
-                                        {{ $division->division }}
-                                    </option>
+                                    <option value="{{ $division->division }}" {{ $division->division == $user->division ? 'selected' : '' }}>{{ $division->division }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -302,20 +329,23 @@
                                 @endforeach
                             </select>
                         </div>
-
-
                     <div class="mb-3">
                         <label for="region" class="form-label">Region</label>
                         <input type="text" class="form-control" id="editRegion" name="region" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="groups" class="form-label">Groups</label>
-                        <input type="text" class="form-control" id="editGroups" name="groups" required>
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address</label>
+                                <input type="text" class="form-control" id="address" name="address">
+                            </div>
+                                        <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="editpassword" name="password" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="roles" class="form-label">Roles</label>
-                        <input type="text" class="form-control" id="editRoles" name="roles" required>
-                    </div>
+                <div class="mb-3">
+                    <label for="password_confirmation" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation">
+                </div>
+
                   </div>
                 </div>
                 </div>
@@ -375,45 +405,43 @@
 
 @section('scripts')
 <script>
-// Set values in the edit modal
 function editUser(id) {
-    // Fetch user data via AJAX
     $.ajax({
-        url: '/users/' + id, // The endpoint to fetch user data
+        url: '/users/' + id,
         type: 'GET',
         success: function(data) {
-            // Assuming the response contains the user data in the following format
-            // { id, emp_id, division, unit, province, region, groups, roles, firstname, lastname, position, email }
+        $('#editUserId').val(data.id);
+        $('#editEmpId').val(data.emp_id);
+        $('#editFirstname').val(data.firstname);
+        $('#middlename').val(data.middlename);
+        $('#editLastname').val(data.lastname);
+        $('#gender').val(data.gender).trigger('change');
+        $('#editEmail').val(data.email);
+        $('#mobile_no').val(data.mobile_no);
+        $('#editusername').val(data.username);
+        $('#emp_type').val(data.emp_type).trigger('change');
+        $('#editRegion').val(data.region);
+        $('#address').val(data.address);
+        $('#editpassword').val('');
+        $('#password_confirmation').val('');
 
-            // Set values in the modal fields
-            $('#editUserId').val(data.id); // Assuming you have an ID field in the response
-            $('#editEmpId').val(data.emp_id);
-            $('#editDivision').val(data.division);
-            $('#editUnit').val(data.unit);
-            $('#editProvince').val(data.province);
-            $('#editRegion').val(data.region);
-            $('#editGroups').val(data.groups);
-            $('#editRoles').val(data.roles);
-            $('#editFirstname').val(data.firstname);
-            $('#editLastname').val(data.lastname);
-            $('#editPosition').val(data.position);
-            $('#editEmail').val(data.email);
-            $('#editusername').val(data.username);
-            $('#editpassword').val(data.password);
+        // ✅ Set selected options
+        $('#editDivision').val(data.division).trigger('change');
+        $('#editUnit').val(data.unit).trigger('change');
+        $('#editPosition').val(data.position).trigger('change');
+        $('#editProvince').val(data.province).trigger('change');
 
-            // Set the action attribute for the form
-            $('#editUserForm').attr('action', '/users/' + id); // Dynamically set the form action
-
-            // Show the modal
+            // Set form action dynamically
+            $('#editUserForm').attr('action', '/users/' + id);
             $('#editUserModal').modal('show');
         },
-        error: function(xhr, status, error) {
-            // Handle errors if the AJAX request fails
-            console.error('Error fetching user data:', error);
-            alert('An error occurred while fetching user data. Please try again.');
+        error: function(xhr) {
+            console.error(xhr.responseText);
+            alert('Failed to load user data.');
         }
     });
 }
+
 
 // Handle the form submission
 $('#editUserForm').on('submit', function(e) {

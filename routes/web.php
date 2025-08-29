@@ -27,12 +27,15 @@ Auth::routes();
 Route::middleware(['auth', 'web', 'throttle:60,1'])->group(function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('/rstbl', [App\Http\Controllers\RstblController::class, 'index'])->name('resource_speaker.index');
-    Route::get('/resource_speaker/create', [App\Http\Controllers\RstblController::class, 'create'])->name('resource_speaker.create');
-    Route::post('resource_speaker', [App\Http\Controllers\RstblController::class, 'store'])->name('resource_speaker.store');
-    Route::get('resource_speaker/{id}', [App\Http\Controllers\RstblController::class, 'show'])->name('resource_speaker.show');
+    Route::get('/resource_speaker/create', [App\Http\Controllers\RstblController::class, 'create'])->name('resource_speaker.create'); // Show form
+    Route::post('/resource_speaker', [App\Http\Controllers\RstblController::class, 'store'])->name('resource_speaker.store'); // Handle form submission
+    Route::get('resource_speaker/{id}', [App\Http\Controllers\RstblController::class, 'show'])->name('resource_speaker.view');
     Route::get('resource_speaker/{id}/edit', [App\Http\Controllers\RstblController::class, 'edit'])->name('resource_speaker.edit');
     Route::put('resource_speaker/{id}', [App\Http\Controllers\RstblController::class, 'update'])->name('resource_speaker.update');
     Route::delete('resource_speaker/{id}', [App\Http\Controllers\RstblController::class, 'destroy'])->name('resource_speaker.destroy');
+
+Route::get('/resource_speaker/pdf/{id}', [App\Http\Controllers\RstblController::class, 'printPDF'])->name('resource_speaker.print');
+
 
 // User routes
 Route::get('user', [App\Http\Controllers\UserController::class, 'index'])->name('accounts.index');
@@ -42,6 +45,38 @@ Route::get('users/{user}', [App\Http\Controllers\UserController::class, 'show'])
 Route::get('users/{user}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
 Route::put('users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
 Route::delete('users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.destroy');
+
+//Tranings
+Route::get('training', [App\Http\Controllers\RequestResourceSpeakerController::class, 'index'])->name('training.index');
+Route::get('training/create', [App\Http\Controllers\RequestResourceSpeakerController::class, 'create'])->name('training.create');
+Route::post('/training', [App\Http\Controllers\RequestResourceSpeakerController::class, 'store'])->name('training.store');
+Route::delete('/training{id}', [App\Http\Controllers\RequestResourceSpeakerController::class, 'destroy'])->name('training.destroy');
+
+// Show edit form (for the modal, we're using AJAX to fetch data)
+Route::get('/request-resource-speaker/{id}/edit', [App\Http\Controllers\RequestResourceSpeakerController::class, 'edit'])->name('request_resource_speaker.edit');
+Route::put('/request-resource-speaker/{id}', [App\Http\Controllers\RequestResourceSpeakerController::class, 'update'])->name('request_resource_speaker.update');
+Route::post('/accreditations', [App\Http\Controllers\RequestResourceSpeakerController::class, 'add'])->name('request_resource_speaker.add');
+
+// Update the training record
+// Route::put('trainings/{id}', [App\Http\Controllers\RequestResourceSpeakerController::class, 'update'])->name('trainings.update');
+
+//AccreditationContller
+Route::get('accreditation', [App\Http\Controllers\AccreditationController::class, 'index'])->name('accreditation.index');
+// Route::get('/accreditation-form', [RequestResourceSpeakerController::class, 'showAccreditationForm'])->name('accreditation.form');
+Route::post('accreditation/create', [App\Http\Controllers\AccreditationController::class, 'create'])->name('accreditation.create');
+Route::get('/accreditation/{id}/edit', [App\Http\Controllers\AccreditationController::class, 'edit'])->name('accreditation.edit');
+Route::put('/accreditation/{id}', [App\Http\Controllers\AccreditationController::class, 'update'])->name('accreditation.update');
+Route::delete('/accreditation/{id}', [App\Http\Controllers\AccreditationController::class, 'destroy'])->name('accreditation.destroy');
+
+Route::post('/accreditation/approve', [App\Http\Controllers\AccreditationController::class, 'approve'])->name('accreditation.approve');
+Route::get('/accreditation/pdf/{id}', [App\Http\Controllers\AccreditationController::class, 'printPDF'])->name('accreditation.print');
+
+// Route::get('/accreditation/pdf/{trainer}', [App\Http\Controllers\AccreditationController::class, 'generatePDF'])->name('accreditation.print');
+
+
+//Average
+Route::get('/accreditation_average', [App\Http\Controllers\AccreditationAverageController::class, 'index'])->name('accreditation.index');
+
 
     // Division routes
 Route::get('/divisions', [App\Http\Controllers\DivisionController::class, 'index'])->name('divisions.index');

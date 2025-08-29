@@ -11,6 +11,9 @@ class RsTraining extends Model
 
     protected $table = 'rs_training';
 
+    protected $fillable =[
+        'rt_title', 'rt_venue', 'rt_date', 'rt_no_hours'
+    ];
 
     public function rstbl()
     {

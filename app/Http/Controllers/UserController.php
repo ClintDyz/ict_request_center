@@ -48,6 +48,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
+
         // Validate the input
         $request->validate([
             'emp_id' => 'required|string|max:191',
@@ -60,7 +62,7 @@ class UserController extends Controller
             'firstname' => 'required|string|max:191',
             'middlename' => 'nullable|string|max:191',
             'lastname' => 'required|string|max:191',
-            'gender' => 'nullable|string|max:191',
+            'gender' => 'required|string|max:191',
             'position' => 'nullable|string|max:191',
             'emp_type' => 'nullable|string|max:191',
             'username' => 'required|string|max:191|unique:users',
@@ -126,7 +128,6 @@ class UserController extends Controller
             'province' => 'nullable|string|max:191',
             'region' => 'nullable|string|max:191',
             'groups' => 'nullable|string|max:191',
-            'roles' => 'nullable|string|max:191',
             'firstname' => 'required|string|max:191',
             'middlename' => 'nullable|string|max:191',
             'lastname' => 'required|string|max:191',

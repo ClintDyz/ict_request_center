@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Rstbl; // Add this at the top
 
 class HomeController extends Controller
 {
@@ -23,6 +24,11 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+
+        $resourceSpeakerCount = Rstbl::count();
+        $maleCount = Rstbl::where('gender', 'Male')->count();
+        $femaleCount = Rstbl::where('gender', 'Female')->count();
+
+        return view('home', compact('resourceSpeakerCount','maleCount', 'femaleCount'));
     }
 }

@@ -11,10 +11,14 @@ class RsPublication extends Model
 
     protected $table = 'rs_publications';
     protected $fillable = [
-        'title',
-        'nature',
-        'date_venue',
+        'p_title',
+        'p_nature',
+        'p_date',
+        'p_venue',
     ];
+    public function publications() {
+        return $this->hasMany(Publication::class);
+    }
 
     public function rstbl()
     {

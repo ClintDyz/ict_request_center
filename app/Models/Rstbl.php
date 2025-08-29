@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\RsTraining;
 
 class Rstbl extends Model
 {
@@ -12,10 +13,10 @@ class Rstbl extends Model
     protected $table = 'rstbl';
 
     protected $fillable = [
-        'last_name', 'given_name', 'middle_name', 'ext_name', 'date_of_birth',
-        'place_of_birth', 'age', 'email', 'expertise', 'building_no', 'home_address',
-        'home_building_no', 'home_barangay', 'home_municipality', 'home_province',
-        'home_zip_code', 'home_tel_no', 'home_cell_no', 'home_fax_no'
+        'img','last_name', 'given_name', 'middle_name', 'ext_name', 'date_of_birth',
+        'place_of_birth', 'age', 'email', 'building_no', 'home_address',
+        'building_no', 'home_barangay', 'home_municipality', 'home_province',
+        'home_zip_code', 'home_tel_no', 'home_cell_no', 'home_fax_no', 'gender', 'img', 'created_by'
     ];
 
     public function referencesTrainings()
@@ -25,7 +26,7 @@ class Rstbl extends Model
 
     public function educationalBackground()
     {
-        return $this->hasMany(RsEducational::class, 'rs_id');
+        return $this->hasMany(RsEducational::class, 'rs_id', 'id');
     }
 
     public function workExperiences()
@@ -39,11 +40,6 @@ class Rstbl extends Model
             return $this->hasOne(Office::class, 'rs_id');
         }
 
-        // Relationship with RsTraining
-        public function trainings()
-        {
-            return $this->hasMany(RsTraining::class, 'rs_id');
-        }
 
         // Relationship with RsExperienceTrainer
         public function experienceTrainer()
@@ -57,6 +53,27 @@ class Rstbl extends Model
             return $this->hasMany(RsPublication::class, 'rs_id');
         }
 
+          // Relationship with RsTraining
+          public function trainings()
+          {
+              return $this->hasMany(RsTraining::class, 'rs_id');
+          }
+
+          public function accreditation()
+            {
+                return $this->hasOne(Accreditation::class, 'rstbl_id', 'id');
+            }
+            public function expertises()
+            {
+                return $this->hasMany(Expertis::class, 'rs_id', 'id');
+            }
+                public function updatedByUser()
+                {
+                    return $this->belongsTo(User::class, 'updated_by');
+                }
+
+
+
         protected static function boot()
 {
     parent::boot();
@@ -68,7 +85,10 @@ class Rstbl extends Model
         $rstbl->experienceTrainer()->delete();
         $rstbl->publications()->delete();
         $rstbl->office()->delete();
+        $rstbl->trainings()->delete(); // <-- ADD THIS LINE
+
     });
 }
+
 
 }
