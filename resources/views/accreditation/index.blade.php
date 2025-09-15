@@ -71,7 +71,7 @@
             </div>
             <div>
            <button type="button" id="getAverageBtn" class="btn btn-primary">
-                <i class="fa-solid fa-circle-plus"></i> Get Average
+                <i class="fa-solid fa-calculator"></i> Get Average
             </button>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#accreditationModal">
                 <i class="fa-solid fa-circle-plus"></i> Add
@@ -96,7 +96,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                        @foreach ($trainers as $trainer)
+                            @foreach ($trainers as $trainer)
                         <tr>
                                         <td><input type="checkbox" class="trainer-checkbox" value="{{ $trainer->id }}"></td>
                                         <td>
@@ -131,9 +131,10 @@
                                 </form>
                                 <!-- Trigger Modal Button -->
                            <!-- Trigger Modal Button -->
-                                            <button type="button" class="btn btn-sm btn-info" onclick="loadPDF({{ $trainer->id }})" data-bs-toggle="modal" data-bs-target="#pdfModal-{{ $trainer->id }}">
+                                            {{-- <button type="button" class="btn btn-sm btn-info" onclick="loadPDF({{ $trainer->id }})" data-bs-toggle="modal" data-bs-target="#pdfModal-{{ $trainer->id }}">
                                                 <i class="fa-solid fa-print"></i>
-                                            </button>
+                                            </button> --}}
+<a href="{{ route('accreditation.print', $trainer->id) }}" target="_blank" class="btn btn-sm btn-info"> <i class="fa-solid fa-print"></i></a>
 
                                 {{-- <button type="button" class="btn btn-sm btn-info" onclick="loadPDF({{ $trainer->id }})" data-bs-toggle="modal" data-bs-target="#pdfModal-{{ $trainer->id }}">
                                         <i class="fa-solid fa-print"></i>
@@ -335,8 +336,8 @@
                                         </div>
                                     </div>
                                         <div class="modal-footer bg-light">
-                                            <button type="submit" class="btn btn-primary">Submit</button>
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            {{-- <button type="submit" class="btn btn-primary">Submit</button> --}}
+                                            <button type="button" class="btn btn-info" data-bs-dismiss="modal">Close</button>
                                         </div>
                                 </form>
                             </div>
@@ -352,7 +353,9 @@
 <div class="card-footer bg-success"></div>
 
     </div>
+
 </div>
+
 </div>
 
 <!-- Accreditation Modal -->

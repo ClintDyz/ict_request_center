@@ -446,330 +446,421 @@ public function update(Request $request, $id)
         return redirect()->back()->with('success', 'Accreditation deleted successfully.');
         }
 
+    public function printPDF($id)
+    {
+        try {
+            // Get speaker data from database - load only existing relationships
+            $speaker = Rstbl::with([
+                'office',
+                'expertises',
+                'workExperiences',
+                'experienceTrainer', // <-- Corrected
+                'publications',
+                'referencesTrainings'
+            ])->findOrFail($id);
 
-public function printPDF($id)
-{
-    try {
-        // Get speaker data from database - load only existing relationships
-        $speaker = Rstbl::findOrFail($id);
+            // Create custom TCPDF class
+            $pdf = new class extends TCPDF {
+                // Page header
+                public function Header()
+                {
+                    // Header text
+                    $this->SetFont('helvetica', 'B', 10);
+                    $this->SetXY(40, 10);
+                    $this->Cell(0, 5, 'Republic of the Philippines', 0, 1, 'C');
+                    $this->SetXY(40, 15);
+                    $this->Cell(0, 5, 'Department of Science and Technology', 0, 1, 'C');
+                    $this->SetXY(40, 20);
+                    $this->Cell(0, 5, 'Cordillera Administrative Region', 0, 1, 'C');
 
-        // Create custom TCPDF class
-        $pdf = new class extends TCPDF {
-            // Page header
-            public function Header() {
-                // Logo (you can replace this with actual logo path)
-                // $this->Image(public_path('images/logo.png'), 15, 10, 20, '', 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+                    // Page number
+                    $this->SetFont('helvetica', '', 8);
+                    $this->SetXY(170, 10);
+                    $this->Cell(0, 5, 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages(), 0, 1, 'R');
+                }
 
-                // Header text
-                $this->SetFont('helvetica', 'B', 10);
-                $this->SetXY(40, 10);
-                $this->Cell(0, 5, 'Republic of the Philippines', 0, 1, 'C');
-                $this->SetXY(40, 15);
-                $this->Cell(0, 5, 'Department of Science and Technology', 0, 1, 'C');
-                $this->SetXY(40, 20);
-                $this->Cell(0, 5, 'Cordillera Administrative Region', 0, 1, 'C');
+                // Page footer
+                public function Footer()
+                {
+                    // Position at 15 mm from bottom
+                    $this->SetY(-15);
+                    $this->SetFont('helvetica', 'I', 8);
+                    $this->Cell(0, 10, 'Generated on ' . date('Y-m-d H:i:s'), 0, false, 'C', 0, '', 0, false, 'T', 'M');
+                }
+            };
 
-                // Page number
-                $this->SetFont('helvetica', '', 8);
-                $this->SetXY(170, 10);
-                $this->Cell(0, 5, 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages(), 0, 1, 'R');
-            }
+            // Set document information
+            $pdf->SetCreator('DOST Cordillera');
+            $pdf->SetAuthor('Department of Science and Technology');
+            $pdf->SetTitle('Application Form - ' . $speaker->last_name . ', ' . $speaker->given_name);
+            $pdf->SetSubject('Technical Personnel/Trainer/Subject Matter Specialist');
 
-            // Page footer
-            public function Footer() {
-                // Position at 15 mm from bottom
-                $this->SetY(-15);
-                $this->SetFont('helvetica', 'I', 8);
-                $this->Cell(0, 10, 'Generated on ' . date('Y-m-d H:i:s'), 0, false, 'C', 0, '', 0, false, 'T', 'M');
-            }
-        };
+            // Set default header data
+            $pdf->SetHeaderData('', 0, '', '');
 
-        // Set document information
-        $pdf->SetCreator('DOST Cordillera');
-        $pdf->SetAuthor('Department of Science and Technology');
-        $pdf->SetTitle('Application Form - ' . $speaker->last_name . ', ' . $speaker->given_name);
-        $pdf->SetSubject('Technical Personnel/Trainer/Subject Matter Specialist');
+            // Set header and footer fonts
+            $pdf->setHeaderFont(Array('helvetica', '', 10));
+            $pdf->setFooterFont(Array('helvetica', '', 8));
 
-        // Set default header data
-        $pdf->SetHeaderData('', 0, '', '');
+            // Set default monospaced font
+            $pdf->SetDefaultMonospacedFont('courier');
 
-        // Set header and footer fonts
-        $pdf->setHeaderFont(Array('helvetica', '', 10));
-        $pdf->setFooterFont(Array('helvetica', '', 8));
+            // Set margins
+            $pdf->SetMargins(15, 35, 15);
+            $pdf->SetHeaderMargin(5);
+            $pdf->SetFooterMargin(10);
 
-        // Set default monospaced font
-        $pdf->SetDefaultMonospacedFont('courier');
+            // Set auto page breaks
+            $pdf->SetAutoPageBreak(TRUE, 25);
 
-        // Set margins
-        $pdf->SetMargins(15, 35, 15);
-        $pdf->SetHeaderMargin(5);
-        $pdf->SetFooterMargin(10);
+            // Set image scale factor
+            $pdf->setImageScale(1.25);
 
-        // Set auto page breaks
-        $pdf->SetAutoPageBreak(TRUE, 25);
+            // Add a page
+            $pdf->AddPage();
 
-        // Set image scale factor
-        $pdf->setImageScale(1.25);
+            // Generate form content with speaker data
+            $this->generateFormContent($pdf, $speaker);
 
-        // Add a page
-        $pdf->AddPage();
+            // Generate filename
+            $filename = 'Application_Form_' . $speaker->last_name . '_' . $speaker->given_name . '_' . date('Y-m-d') . '.pdf';
 
-        // Generate form content with speaker data
-        $this->generateFormContent($pdf, $speaker);
+            // Output PDF for inline display
+            return response($pdf->Output($filename, 'S'), 200)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
 
-        // Generate filename
-        $filename = 'Application_Form_' . $speaker->last_name . '_' . $speaker->given_name . '_' . date('Y-m-d') . '.pdf';
-
-        // Output PDF for inline display
-        return response($pdf->Output($filename, 'S'), 200)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="' . $filename . '"');
-
-    } catch (\Exception $e) {
-        // Handle errors gracefully
-        return response()->json(['error' => 'Failed to generate PDF: ' . $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            // Handle errors gracefully
+            return response()->json(['error' => 'Failed to generate PDF: ' . $e->getMessage()], 500);
+        }
     }
-}
 
-/**
- * Generate form content with speaker data
+    /**
+     * Generate form content with speaker data
+     */
+    private function generateFormContent($pdf, $speaker)
+    {
+        // Set font
+        $pdf->SetFont('helvetica', '', 10);
+
+        // Title
+        $pdf->SetFont('helvetica', 'B', 12);
+        $pdf->Cell(0, 10, 'APPLICATION FORM FOR THE ACCREDITATION OF', 0, 1, 'C');
+        $pdf->Cell(0, 10, 'TECHNICAL PERSONNEL/TRAINER/SUBJECT MATTER SPECIALIST', 0, 1, 'C');
+        $pdf->Ln(5);
+
+        // Personal Information Section
+        // $pdf->SetFont('helvetica', 'B', 10);
+        // $pdf->Cell(0, 8, 'Name:', 0, 1, 'L');
+
+        // Name with data
+        $pdf->SetFont('helvetica', '', 10);
+        // $y = $pdf->GetY();
+
+        // Fill in the actual name data
+        // $pdf->SetY($y);
+        $pdf->Cell(15, 8, 'Name:', 0, 0, 'L');
+        $pdf->Cell(45, 8, $speaker->last_name ?? '', 'B', 0, 'L');
+        $pdf->Cell(45, 8, $speaker->given_name ?? '', 'B', 0, 'L');
+        $pdf->Cell(40, 8, $speaker->middle_name ?? '', 'B', 0, 'L');
+        $pdf->Cell(35, 8, $speaker->ext_name ?? '', 'B', 1, 'L');
+
+        // Name labels
+        $pdf->SetFont('helvetica', '', 8);
+        $pdf->Cell(15, 8, '', 0, 0, 'L');
+        $pdf->Cell(45, 5, 'Last Name', 0, 0, 'L');
+        $pdf->Cell(45, 5, 'Given Name', 0, 0, 'L');
+        $pdf->Cell(40, 5, 'Middle Name', 0, 0, 'L');
+        $pdf->Cell(35, 5, 'Name Ext\'n (e.g., III, Sr)', 0, 1, 'L');
+
+        $pdf->Ln(5);
+
+        // Date of Birth and Place of Birth
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(27, 8, 'Date of Birth:', 0, 0, 'L');
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->Cell(35, 8, $speaker->date_of_birth ?? '', 'B', 0, 'L');
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(27, 8, 'Place of Birth:', 0, 0, 'L');
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->Cell(35, 8, $speaker->place_of_birth ?? '', 'B', 0, 'L');
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(15, 8, 'Age:', 0, 0, 'L');
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->Cell(35, 8, $speaker->age ?? '', 'B', 1, 'L');
+
+        $pdf->Ln(3);
+
+        // Gender and Email
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(40, 8, 'Office/Organization::', 0, 0, 'L');
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->Cell(100, 8, $speaker->office->office_organization ?? 'N/A', 'B', 0, 'L');
+
+        $pdf->Ln(5);
+        $pdf->Ln(5);
+
+
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(20, 8, 'Position:', 0, 0, 'L');
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->Cell(75, 8, $speaker->office->position ?? 'N/A', 'B', 1, 'L');
+
+        $pdf->Ln(5);
+
+         $pdf->SetFont('helvetica', 'B', 10);
+    $pdf->Cell(40, 8, 'Office/Organization::', 0, 0, 'L');
+    $pdf->SetFont('helvetica', '', 10);
+    $pdf->Cell(100, 8, $speaker->office->office_organization ?? 'N/A', 'B', 0, 'L');
+
+    $pdf->Ln(5);
+    $pdf->Ln(5);
+
+    $pdf->SetFont('helvetica', 'B', 10);
+    $pdf->Cell(20, 8, 'Position:', 0, 0, 'L');
+    $pdf->SetFont('helvetica', '', 10);
+    $pdf->Cell(75, 8, $speaker->office->position ?? 'N/A', 'B', 1, 'L');
+
+    $pdf->Ln(3);
+        // This is the correct, inline code you have added
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(0, 8, 'Office Address:', 0, 1, 'L');
+        $pdf->SetFont('helvetica', '', 10);
+
+        $pdf->SetX(20);
+        $pdf->Cell(25, 8, 'Building No.:', 0, 0, 'L');
+        $pdf->Cell(65, 8, $speaker->office->building_no ?? '', 'B', 0, 'L');
+        $pdf->Cell(30, 8, 'Street/Barangay:', 0, 0, 'L');
+        $pdf->Cell(60, 8, $speaker->office->barangay ?? '', 'B', 1, 'L');
+
+        $pdf->SetX(20);
+        $pdf->Cell(30, 8, 'Municipality/City:', 0, 0, 'L');
+        $pdf->Cell(65, 8, $speaker->office->municipality ?? '', 'B', 0, 'L');
+        $pdf->Cell(20, 8, 'Province:', 0, 0, 'L');
+        $pdf->Cell(60, 8, $speaker->office->province ?? '', 'B', 1, 'L');
+
+        $pdf->SetX(20);
+        $pdf->Cell(20, 8, 'Zip Code:', 0, 0, 'L');
+        $pdf->Cell(65, 8, $speaker->office->zip_code ?? '', 'B', 1, 'L');
+
+        $pdf->SetX(20);
+        $pdf->Cell(35, 8, 'Contact Number:', 0, 0, 'L');
+        $pdf->Cell(15, 8, 'Tel. No.:', 0, 0, 'L');
+        $pdf->Cell(50, 8, $speaker->office->tel_no ?? '', 'B', 0, 'L');
+        $pdf->Cell(25, 8, 'Cellphone No.:', 0, 0, 'L');
+        $pdf->Cell(50, 8, $speaker->office->cell_no ?? '', 'B', 1, 'L');
+
+        $pdf->SetX(20);
+        $pdf->Cell(35, 8, '', 0, 0, 'L');
+        $pdf->Cell(15, 8, 'Fax No.:', 0, 0, 'L');
+        $pdf->Cell(50, 8, $speaker->office->fax_no ?? '', 'B', 1, 'L');
+
+        // Home/Residence Address
+        // $this->generateAddressSection($pdf, 'Home/Residence Address:', $speaker, 'home_');
+
+        $pdf->Ln(3);
+                // Home/Residence Address
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(0, 8, 'Home/Residence Address:', 0, 1, 'L');
+        $pdf->SetFont('helvetica', '', 10);
+
+        $pdf->SetX(20);
+        $pdf->Cell(25, 8, 'Building No.:', 0, 0, 'L');
+        $pdf->Cell(65, 8, $speaker->home_building_no ?? '', 'B', 0, 'L');
+        $pdf->Cell(30, 8, 'Street/Barangay:', 0, 0, 'L');
+        $pdf->Cell(60, 8, $speaker->home_barangay ?? '', 'B', 1, 'L');
+
+        $pdf->SetX(20);
+        $pdf->Cell(30, 8, 'Municipality/City:', 0, 0, 'L');
+        $pdf->Cell(65, 8, $speaker->home_municipality ?? '', 'B', 0, 'L');
+        $pdf->Cell(20, 8, 'Province:', 0, 0, 'L');
+        $pdf->Cell(60, 8, $speaker->home_province ?? '', 'B', 1, 'L');
+
+        $pdf->SetX(20);
+        $pdf->Cell(20, 8, 'Zip Code:', 0, 0, 'L');
+        $pdf->Cell(65, 8, $speaker->home_zip_code ?? '', 'B', 1, 'L');
+
+        $pdf->SetX(20);
+        $pdf->Cell(35, 8, 'Contact Number:', 0, 0, 'L');
+        $pdf->Cell(15, 8, 'Tel. No.:', 0, 0, 'L');
+        $pdf->Cell(50, 8, $speaker->home_tel_no ?? '', 'B', 0, 'L');
+        $pdf->Cell(25, 8, 'Cellphone No.:', 0, 0, 'L');
+        $pdf->Cell(50, 8, $speaker->home_cell_no ?? '', 'B', 1, 'L');
+
+        $pdf->SetX(20);
+        $pdf->Cell(35, 8, '', 0, 0, 'L');
+        $pdf->Cell(15, 8, 'Fax No.:', 0, 0, 'L');
+        $pdf->Cell(50, 8, $speaker->home_fax_no ?? '', 'B', 1, 'L');
+
+
+        $pdf->Ln(5);
+
+        // Expert Information
+        $this->generateExpertSection($pdf, $speaker);
+
+        // Rearranged section calls
+        $this->generateEducationalTable($pdf, $speaker);
+
+        // Add new page to ensure sections start on a fresh page if needed
+        // $pdf->AddPage();
+
+        $this->generateWorkExperienceSection($pdf, $speaker);
+        $this->generateTrainingSection($pdf, $speaker);
+        $this->generateExperienceTrainerSection($pdf, $speaker);
+        $this->generatePublicationsSection($pdf, $speaker);
+        $this->generateReferencesSection($pdf, $speaker);
+    }
+
+    /**
+ * Generate office address section with data
  */
-private function generateFormContent($pdf, $speaker)
+    /**
+     * Generate address section with data
+     */
+/**
+ * Generate educational background table
+ */
+private function generateEducationalTable($pdf, $speaker)
 {
-    // Set font
-    $pdf->SetFont('helvetica', '', 10);
-
-    // Title
-    $pdf->SetFont('helvetica', 'B', 12);
-    $pdf->Cell(0, 10, 'APPLICATION FORM FOR THE ACCREDITATION OF', 0, 1, 'C');
-    $pdf->Cell(0, 10, 'TECHNICAL PERSONNEL/TRAINER/SUBJECT MATTER SPECIALIST', 0, 1, 'C');
-    $pdf->Ln(5);
-
-    // Personal Information Section
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(0, 8, 'Name:', 0, 1, 'L');
-
-    // Name with data
-    $pdf->SetFont('helvetica', '', 10);
-    $y = $pdf->GetY();
-
-    // Fill in the actual name data
-    $pdf->SetY($y);
-    $pdf->SetX(15);
-    $pdf->Cell(45, 8, $speaker->last_name ?? '', 'B', 0, 'L');
-    $pdf->Cell(45, 8, $speaker->given_name ?? '', 'B', 0, 'L');
-    $pdf->Cell(45, 8, $speaker->middle_name ?? '', 'B', 0, 'L');
-    $pdf->Cell(40, 8, $speaker->ext_name ?? '', 'B', 1, 'L');
-
-    // Name labels
-    $pdf->SetFont('helvetica', '', 8);
-    $pdf->SetX(15);
-    $pdf->Cell(45, 5, 'Last Name', 0, 0, 'L');
-    $pdf->Cell(45, 5, 'Given Name', 0, 0, 'L');
-    $pdf->Cell(45, 5, 'Middle Name', 0, 0, 'L');
-    $pdf->Cell(40, 5, 'Name Ext\'n (e.g., III, Sr)', 0, 1, 'L');
-
-    $pdf->Ln(5);
-
-    // Date of Birth and Place of Birth
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(50, 8, 'Date of Birth:', 0, 0, 'L');
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->Cell(35, 8, $speaker->date_of_birth ?? '', 'B', 0, 'L');
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(40, 8, 'Place of Birth:', 0, 0, 'L');
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->Cell(35, 8, $speaker->place_of_birth ?? '', 'B', 0, 'L');
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(15, 8, 'Age:', 0, 0, 'L');
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->Cell(15, 8, $speaker->age ?? '', 'B', 1, 'L');
-
-    $pdf->Ln(3);
-
-    // Gender and Email
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(25, 8, 'Gender:', 0, 0, 'L');
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->Cell(50, 8, $speaker->gender ?? '', 'B', 0, 'L');
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(30, 8, 'E-mail Address:', 0, 0, 'L');
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->Cell(75, 8, $speaker->email ?? '', 'B', 1, 'L');
-
-    $pdf->Ln(3);
-
     // Expertise
     $pdf->SetFont('helvetica', 'B', 10);
     $pdf->Cell(70, 8, 'Field/s of Specialization/Expertise:', 0, 0, 'L');
 
     $pdf->SetFont('helvetica', '', 10);
     $expertiseList = $speaker->expertises ? $speaker->expertises->pluck('expertis')->implode(', ') : 'N/A';
-    $pdf->Cell(110, 8, $expertiseList, 'B', 1, 'L');
+    $pdf->Cell(100, 8, $expertiseList, 'B', 1, 'L');
+    $pdf->Ln(10);
 
-
-    $pdf->Ln(3);
-
-    // Office Address
-    $this->generateAddressSection($pdf, 'Office Address:', $speaker, 'home_');
-
-    $pdf->Ln(3);
-
-    // Home/Residence Address
-    $this->generateAddressSection($pdf, 'Home/Residence Address:', $speaker, 'home_');
-
-    $pdf->Ln(5);
-
-    // Educational Background
-    $this->generateEducationalTable($pdf, $speaker);
-
-    // Add new page for additional sections
-    $pdf->AddPage();
-
-    // Training Experience
-    $this->generateTrainingSection($pdf, $speaker);
-
-    // Work Experience
-    $this->generateWorkExperienceSection($pdf, $speaker);
-
-    // Publications
-    $this->generatePublicationsSection($pdf, $speaker);
-
-    // References
-    $this->generateReferencesSection($pdf, $speaker);
-
-    // Expert Information
-    $this->generateExpertSection($pdf, $speaker);
-}
-
-/**
- * Generate address section with data
- */
-private function generateAddressSection($pdf, $title, $speaker, $prefix)
-{
+    // Section title
     $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(0, 8, $title, 0, 1, 'L');
-    $pdf->SetFont('helvetica', '', 10);
+    $pdf->Cell(0, 8, 'Educational Background:', 0, 1, 'L');
 
-    $pdf->SetX(20);
-    $pdf->Cell(35, 8, 'Building No.:', 0, 0, 'L');
-    $pdf->Cell(35, 8, $speaker->{$prefix . 'building_no'} ?? '', 'B', 0, 'L');
-    $pdf->Cell(35, 8, 'Street/Barangay:', 0, 0, 'L');
-    $pdf->Cell(35, 8, $speaker->{$prefix . 'barangay'} ?? '', 'B', 1, 'L');
-
-    $pdf->SetX(20);
-    $pdf->Cell(35, 8, 'Municipality/City:', 0, 0, 'L');
-    $pdf->Cell(35, 8, $speaker->{$prefix . 'municipality'} ?? '', 'B', 0, 'L');
-    $pdf->Cell(25, 8, 'Province:', 0, 0, 'L');
-    $pdf->Cell(35, 8, $speaker->{$prefix . 'province'} ?? '', 'B', 1, 'L');
-
-    $pdf->SetX(20);
-    $pdf->Cell(25, 8, 'Zip Code:', 0, 0, 'L');
-    $pdf->Cell(25, 8, $speaker->{$prefix . 'zip_code'} ?? '', 'B', 1, 'L');
-
-    $pdf->SetX(20);
-    $pdf->Cell(35, 8, 'Contact Number:', 0, 1, 'L');
-    $pdf->SetX(20);
-    $pdf->Cell(25, 8, 'Tel. No.:', 0, 0, 'L');
-    $pdf->Cell(30, 8, $speaker->{$prefix . 'tel_no'} ?? '', 'B', 0, 'L');
-    $pdf->Cell(35, 8, 'Cellphone No.:', 0, 0, 'L');
-    $pdf->Cell(30, 8, $speaker->{$prefix . 'cell_no'} ?? '', 'B', 1, 'L');
-
-    $pdf->SetX(20);
-    $pdf->Cell(25, 8, 'Fax No.:', 0, 0, 'L');
-    $pdf->Cell(50, 8, $speaker->{$prefix . 'fax_no'} ?? '', 'B', 1, 'L');
-}
-
-/**
- * Generate educational background table
- */
-private function generateEducationalTable($pdf, $speaker)
-{
-// ---------------------------
-// Educational Background PDF
-// ---------------------------
-
-// Section title
-$pdf->SetFont('helvetica', 'B', 10);
-$pdf->Cell(0, 8, 'Educational Background:', 0, 1, 'L');
-
-// Set font for table content
-$pdf->SetFont('helvetica', '', 8);
-
-// Table headers
-$pdf->Cell(30, 8, 'Level/Degree', 1, 0, 'C');
-$pdf->Cell(25, 8, 'From Year', 1, 0, 'C');
-$pdf->Cell(25, 8, 'To Year', 1, 0, 'C');
-$pdf->Cell(50, 8, 'School/Institution', 1, 0, 'C');
-$pdf->Cell(30, 8, 'Year Graduated', 1, 0, 'C');
-$pdf->Cell(25, 8, 'Awards', 1, 1, 'C');
-
-// Fetch educational data directly from the DB by rs_id
-$educationalData = DB::table('rs_educational')
-    ->where('rs_id', $speaker->id)  // fetch only for this speaker
-    ->get();
-
-// Display data
-foreach ($educationalData as $education) {
-    $pdf->Cell(30, 10, $education->level ?? '', 1, 0, 'L');
-    $pdf->Cell(25, 10, $education->from_year ?? '', 1, 0, 'C');
-    $pdf->Cell(25, 10, $education->to_year ?? '', 1, 0, 'C');
-    $pdf->Cell(50, 10, $education->school ?? '', 1, 0, 'L');
-    $pdf->Cell(30, 10, $education->year_graduated ?? '', 1, 0, 'C');
-    $pdf->Cell(25, 10, $education->awards ?? '', 1, 1, 'L');
-}
-
-}
-
-/**
- * Generate training section
- */
-private function generateTrainingSection($pdf, $speaker)
-{
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(0, 8, 'Training/Seminar Experience:', 0, 1, 'L');
-
-    // Create table
+    // Set font for table content
     $pdf->SetFont('helvetica', '', 8);
 
     // Table headers
-    $pdf->Cell(50, 8, 'Training Title', 1, 0, 'C');
-    $pdf->Cell(30, 8, 'Venue', 1, 0, 'C');
-    $pdf->Cell(20, 8, 'Date', 1, 0, 'C');
-    $pdf->Cell(20, 8, 'Hours', 1, 0, 'C');
-    $pdf->Cell(40, 8, 'Remarks', 1, 1, 'C');
+    $pdf->Cell(30, 8, 'Level/Degree', 1, 0, 'C');
+    $pdf->Cell(25, 8, 'From Year', 1, 0, 'C');
+    $pdf->Cell(25, 8, 'To Year', 1, 0, 'C');
+    $pdf->Cell(50, 8, 'School/Institution', 1, 0, 'C');
+    $pdf->Cell(30, 8, 'Year Graduated', 1, 0, 'C');
+    $pdf->Cell(25, 8, 'Awards', 1, 1, 'C');
 
-    // Get training data from related table (if relationship exists)
-    $trainingData = [];
-    if (method_exists($speaker, 'trainings') && $speaker->trainings) {
-        $trainingData = $speaker->trainings;
+    // Fetch educational data directly from the DB by rs_id
+    $educationalData = DB::table('rs_educational')
+        ->where('rs_id', $speaker->id)
+        ->get();
+
+    // Display data
+    foreach ($educationalData as $education) {
+        $pdf->Cell(30, 10, $education->level ?? '', 1, 0, 'L');
+        $pdf->Cell(25, 10, $education->from_year ?? '', 1, 0, 'C');
+        $pdf->Cell(25, 10, $education->to_year ?? '', 1, 0, 'C');
+        $pdf->Cell(50, 10, $education->school ?? '', 1, 0, 'L');
+        $pdf->Cell(30, 10, $education->year_graduated ?? '', 1, 0, 'C');
+        $pdf->Cell(25, 10, $education->awards ?? '', 1, 1, 'L');
     }
 
-    if (empty($trainingData)) {
-        // Add empty rows for manual filling
-        for ($i = 0; $i < 5; $i++) {
-            $pdf->Cell(50, 10, '', 1, 0, 'L');
-            $pdf->Cell(30, 10, '', 1, 0, 'L');
-            $pdf->Cell(20, 10, '', 1, 0, 'C');
-            $pdf->Cell(20, 10, '', 1, 0, 'C');
-            $pdf->Cell(40, 10, '', 1, 1, 'L');
-        }
-    } else {
-        foreach ($trainingData as $training) {
-            $pdf->Cell(50, 10, $training->rt_title ?? '', 1, 0, 'L');
-            $pdf->Cell(30, 10, $training->rt_venue ?? '', 1, 0, 'L');
-            $pdf->Cell(20, 10, $training->rt_date ?? '', 1, 0, 'C');
-            $pdf->Cell(20, 10, $training->rt_no_hours ?? '', 1, 0, 'C');
-            $pdf->Cell(40, 10, '', 1, 1, 'L');
-        }
+    // Check if any educational data was printed and add a line break to prevent the next table from starting too far down
+    if (!$educationalData->isEmpty()) {
+        $pdf->Ln(5);
     }
-
-    $pdf->Ln(5);
 }
 
-/**
- * Generate experience trainer section
- */
+    /**
+     * Generate work experience section
+     */
+    private function generateWorkExperienceSection($pdf, $speaker)
+    {
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(0, 8, 'Work Experience:', 0, 1, 'L');
+
+        // Create table
+        $pdf->SetFont('helvetica', '', 8);
+
+        // Table headers
+        $pdf->Cell(25, 8, 'Start Date', 1, 0, 'C');
+        $pdf->Cell(25, 8, 'End Date', 1, 0, 'C');
+        $pdf->Cell(50, 8, 'Company/Organization', 1, 0, 'C');
+        $pdf->Cell(40, 8, 'Position', 1, 0, 'C');
+        $pdf->Cell(40, 8, 'Division/Department', 1, 1, 'C');
+
+        // Get work experience data from related table (if relationship exists)
+        $workData = [];
+        if (method_exists($speaker, 'workExperiences') && $speaker->workExperiences) {
+            $workData = $speaker->workExperiences;
+        }
+
+        if (empty($workData)) {
+            // Add empty rows for manual filling
+            for ($i = 0; $i < 5; $i++) {
+                $pdf->Cell(25, 8, '', 1, 0, 'C');
+                $pdf->Cell(25, 8, '', 1, 0, 'C');
+                $pdf->Cell(50, 8, '', 1, 0, 'L');
+                $pdf->Cell(40, 8, '', 1, 0, 'L');
+                $pdf->Cell(40, 8, '', 1, 1, 'L');
+            }
+        } else {
+            foreach ($workData as $work) {
+                $pdf->Cell(25, 8, $work->date_started ?? '', 1, 0, 'C');
+                $pdf->Cell(25, 8, $work->date_ended ?? '', 1, 0, 'C');
+                $pdf->Cell(50, 8, $work->name_company ?? '', 1, 0, 'L');
+                $pdf->Cell(40, 8, $work->position ?? '', 1, 0, 'L');
+                $pdf->Cell(40, 8, $work->division ?? '', 1, 1, 'L');
+            }
+        }
+
+        $pdf->Ln(5);
+    }
+
+    /**
+     * Generate training section
+     */
+    private function generateTrainingSection($pdf, $speaker)
+    {
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(0, 8, 'Training/Seminar Experience:', 0, 1, 'L');
+
+        // Create table
+        $pdf->SetFont('helvetica', '', 8);
+
+        // Table headers - REMOVED the Remarks column
+            $pdf->Cell(80, 8, 'Training Title', 1, 0, 'C');
+            $pdf->Cell(40, 8, 'Venue', 1, 0, 'C');
+            $pdf->Cell(30, 8, 'Date', 1, 0, 'C');
+            $pdf->Cell(30, 8, 'Hours', 1, 1, 'C');
+
+        // Get training data from related table (if relationship exists)
+        $trainingData = [];
+        if (method_exists($speaker, 'trainings') && $speaker->trainings) {
+            $trainingData = $speaker->trainings;
+        }
+
+        if (empty($trainingData)) {
+            // Add empty rows for manual filling - REMOVED the empty Remarks cell
+            for ($i = 0; $i < 5; $i++) {
+                $pdf->Cell(80, 8, '', 1, 0, 'L');
+                $pdf->Cell(40, 8, '', 1, 0, 'L');
+                $pdf->Cell(30, 8, '', 1, 0, 'C');
+                $pdf->Cell(30, 8, '', 1, 1, 'C'); // Changed from 0 to 1 to end the row
+            }
+        } else {
+            foreach ($trainingData as $training) {
+                // Data rows - REMOVED the Remarks cell
+                $pdf->Cell(80, 8, $training->rt_title ?? '', 1, 0, 'L');
+                $pdf->Cell(40, 8, $training->rt_venue ?? '', 1, 0, 'L');
+                $pdf->Cell(30, 8, $training->rt_date ?? '', 1, 0, 'C');
+                $pdf->Cell(30, 8, $training->rt_no_hours ?? '', 1, 1, 'C'); // Changed from 0 to 1 to end the row
+            }
+        }
+
+        $pdf->Ln(5);
+    }
+
+    /**
+     * Generate experience trainer section
+     */
 private function generateExperienceTrainerSection($pdf, $speaker)
 {
     $pdf->SetFont('helvetica', 'B', 10);
@@ -778,205 +869,154 @@ private function generateExperienceTrainerSection($pdf, $speaker)
     // Create table
     $pdf->SetFont('helvetica', '', 8);
 
-    // Table headers
-    $pdf->Cell(50, 8, 'Training Title', 1, 0, 'C');
-    $pdf->Cell(30, 8, 'Venue', 1, 0, 'C');
-    $pdf->Cell(20, 8, 'Date', 1, 0, 'C');
-    $pdf->Cell(20, 8, 'Hours', 1, 0, 'C');
-    $pdf->Cell(40, 8, 'Remarks', 1, 1, 'C');
-
+    // Table headers - REMOVED the Remarks column
+        $pdf->Cell(80, 8, 'Training Title', 1, 0, 'C');
+        $pdf->Cell(40, 8, 'Venue', 1, 0, 'C');
+        $pdf->Cell(30, 8, 'Date', 1, 0, 'C');
+        $pdf->Cell(30, 8, 'Hours', 1, 1, 'C');
     // Get experience trainer data from related table (if relationship exists)
     $experienceData = [];
-    if (method_exists($speaker, 'experienceTrainers') && $speaker->experienceTrainers) {
-        $experienceData = $speaker->experienceTrainers;
+    // Corrected the method name to 'experienceTrainer' to match the model's function
+    if (method_exists($speaker, 'experienceTrainer') && $speaker->experienceTrainer) {
+        $experienceData = $speaker->experienceTrainer;
     }
 
     if (empty($experienceData)) {
-        // Add empty rows for manual filling
+        // Add empty rows for manual filling - REMOVED the empty Remarks cell
         for ($i = 0; $i < 5; $i++) {
-            $pdf->Cell(50, 10, '', 1, 0, 'L');
-            $pdf->Cell(30, 10, '', 1, 0, 'L');
-            $pdf->Cell(20, 10, '', 1, 0, 'C');
-            $pdf->Cell(20, 10, '', 1, 0, 'C');
-            $pdf->Cell(40, 10, '', 1, 1, 'L');
+                $pdf->Cell(80, 8, '', 1, 0, 'L');
+                $pdf->Cell(40, 8, '', 1, 0, 'L');
+                $pdf->Cell(30, 8, '', 1, 0, 'C');
+                $pdf->Cell(30, 8, '', 1, 1, 'C'); // Changed from 0 to 1 to end the row
         }
     } else {
         foreach ($experienceData as $experience) {
-            $pdf->Cell(50, 10, $experience->rst_title ?? '', 1, 0, 'L');
-            $pdf->Cell(30, 10, $experience->rst_venue ?? '', 1, 0, 'L');
-            $pdf->Cell(20, 10, $experience->rst_date ?? '', 1, 0, 'C');
-            $pdf->Cell(20, 10, $experience->rst_no_hours ?? '', 1, 0, 'C');
-            $pdf->Cell(40, 10, '', 1, 1, 'L');
+            // Data rows - REMOVED the Remarks cell
+            $pdf->Cell(80, 8, $experience->rst_title ?? '', 1, 0, 'L');
+            $pdf->Cell(40, 8, $experience->rst_venue ?? '', 1, 0, 'L');
+            $pdf->Cell(30, 8, $experience->rst_date ?? '', 1, 0, 'C');
+            $pdf->Cell(30, 8, $experience->rst_no_hours ?? '', 1, 1, 'C'); // Changed from 0 to 1 to end the row
         }
     }
 
     $pdf->Ln(5);
 }
+    /**
+     * Generate publications section
+     */
+    private function generatePublicationsSection($pdf, $speaker)
+    {
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(0, 8, 'Publications:', 0, 1, 'L');
 
-/**
- * Generate work experience section
- */
-private function generateWorkExperienceSection($pdf, $speaker)
-{
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(0, 8, 'Work Experience:', 0, 1, 'L');
+        // Create table
+        $pdf->SetFont('helvetica', '', 8);
 
-    // Create table
-    $pdf->SetFont('helvetica', '', 8);
+        // Table headers - REMOVED the Publisher column
+        $pdf->Cell(100, 8, 'Publication Title', 1, 0, 'C'); // Increased width
+        $pdf->Cell(40, 8, 'Date Published', 1, 0, 'C');    // Increased width
+        $pdf->Cell(40, 8, 'Venue', 1, 1, 'C');            // Increased width
 
-    // Table headers
-    $pdf->Cell(25, 8, 'Start Date', 1, 0, 'C');
-    $pdf->Cell(25, 8, 'End Date', 1, 0, 'C');
-    $pdf->Cell(40, 8, 'Company/Organization', 1, 0, 'C');
-    $pdf->Cell(30, 8, 'Position', 1, 0, 'C');
-    $pdf->Cell(40, 8, 'Division/Department', 1, 1, 'C');
-
-    // Get work experience data from related table (if relationship exists)
-    $workData = [];
-    if (method_exists($speaker, 'workExperiences') && $speaker->workExperiences) {
-        $workData = $speaker->workExperiences;
-    }
-
-    if (empty($workData)) {
-        // Add empty rows for manual filling
-        for ($i = 0; $i < 5; $i++) {
-            $pdf->Cell(25, 10, '', 1, 0, 'C');
-            $pdf->Cell(25, 10, '', 1, 0, 'C');
-            $pdf->Cell(40, 10, '', 1, 0, 'L');
-            $pdf->Cell(30, 10, '', 1, 0, 'L');
-            $pdf->Cell(40, 10, '', 1, 1, 'L');
+        // Get publications data from related table (if relationship exists)
+        $publicationData = [];
+        if (method_exists($speaker, 'publications') && $speaker->publications) {
+            $publicationData = $speaker->publications;
         }
-    } else {
-        foreach ($workData as $work) {
-            $pdf->Cell(25, 10, $work->date_started ?? '', 1, 0, 'C');
-            $pdf->Cell(25, 10, $work->date_ended ?? '', 1, 0, 'C');
-            $pdf->Cell(40, 10, $work->name_company ?? '', 1, 0, 'L');
-            $pdf->Cell(30, 10, $work->position ?? '', 1, 0, 'L');
-            $pdf->Cell(40, 10, $work->division ?? '', 1, 1, 'L');
+
+        if (empty($publicationData)) {
+            // Add empty rows for manual filling - REMOVED the empty Publisher cell
+            for ($i = 0; $i < 5; $i++) {
+                $pdf->Cell(100, 8, '', 1, 0, 'L');
+                $pdf->Cell(40, 8, '', 1, 0, 'C');
+                $pdf->Cell(40, 8, '', 1, 1, 'L'); // Changed from 0 to 1 to end the row
+            }
+        } else {
+            foreach ($publicationData as $publication) {
+                // Data rows - REMOVED the Publisher cell
+                $pdf->Cell(100, 8, $publication->p_title ?? '', 1, 0, 'L');
+                $pdf->Cell(40, 8, $publication->p_date ?? '', 1, 0, 'C');
+                $pdf->Cell(40, 8, $publication->p_venue ?? '', 1, 1, 'L'); // Changed from 0 to 1 to end the row
+            }
         }
+
+        $pdf->Ln(5);
     }
 
-    $pdf->Ln(5);
-}
+    /**
+     * Generate references section
+     */
+    private function generateReferencesSection($pdf, $speaker)
+    {
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(0, 8, 'References for Training:', 0, 1, 'L');
 
-/**
- * Generate publications section
- */
-private function generatePublicationsSection($pdf, $speaker)
-{
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(0, 8, 'Publications:', 0, 1, 'L');
+        // Create table
+        $pdf->SetFont('helvetica', '', 8);
 
-    // Create table
-    $pdf->SetFont('helvetica', '', 8);
+        // Table headers
+        $pdf->Cell(50, 8, 'Name/Agency', 1, 0, 'C');
+        $pdf->Cell(40, 8, 'Address', 1, 0, 'C');
+        $pdf->Cell(25, 8, 'Contact Person', 1, 0, 'C');
+        $pdf->Cell(25, 8, 'Position', 1, 0, 'C');
+        $pdf->Cell(20, 8, 'Tel No.', 1, 0, 'C');
+        $pdf->Cell(20, 8, 'Cell No.', 1, 1, 'C');
 
-    // Table headers
-    $pdf->Cell(80, 8, 'Publication Title', 1, 0, 'C');
-    $pdf->Cell(40, 8, 'Publisher', 1, 0, 'C');
-    $pdf->Cell(30, 8, 'Date Published', 1, 0, 'C');
-    $pdf->Cell(30, 8, 'Venue', 1, 1, 'C');
-
-    // Get publications data from related table (if relationship exists)
-    $publicationData = [];
-    if (method_exists($speaker, 'publications') && $speaker->publications) {
-        $publicationData = $speaker->publications;
-    }
-
-    if (empty($publicationData)) {
-        // Add empty rows for manual filling
-        for ($i = 0; $i < 5; $i++) {
-            $pdf->Cell(80, 10, '', 1, 0, 'L');
-            $pdf->Cell(40, 10, '', 1, 0, 'L');
-            $pdf->Cell(30, 10, '', 1, 0, 'C');
-            $pdf->Cell(30, 10, '', 1, 1, 'L');
+        // Get references data from related table (if relationship exists)
+        $referenceData = [];
+        if (method_exists($speaker, 'referencesTrainings') && $speaker->referencesTrainings) {
+            $referenceData = $speaker->referencesTrainings;
         }
-    } else {
-        foreach ($publicationData as $publication) {
-            $pdf->Cell(80, 10, $publication->p_title ?? '', 1, 0, 'L');
-            $pdf->Cell(40, 10, $publication->p_publisher ?? '', 1, 0, 'L');
-            $pdf->Cell(30, 10, $publication->p_date ?? '', 1, 0, 'C');
-            $pdf->Cell(30, 10, $publication->p_venue ?? '', 1, 1, 'L');
+
+        if (empty($referenceData)) {
+            // Add empty rows for manual filling
+            for ($i = 0; $i < 3; $i++) {
+                $pdf->Cell(50, 10, '', 1, 0, 'L');
+                $pdf->Cell(40, 10, '', 1, 0, 'L');
+                $pdf->Cell(25, 10, '', 1, 0, 'L');
+                $pdf->Cell(25, 10, '', 1, 0, 'L');
+                $pdf->Cell(20, 10, '', 1, 0, 'C');
+                $pdf->Cell(20, 10, '', 1, 1, 'C');
+            }
+        } else {
+            foreach ($referenceData as $reference) {
+                $pdf->Cell(50, 10, $reference->name_agency ?? '', 1, 0, 'L');
+                $pdf->Cell(40, 10, $reference->address ?? '', 1, 0, 'L');
+                $pdf->Cell(25, 10, $reference->contact_person ?? '', 1, 0, 'L');
+                $pdf->Cell(25, 10, $reference->position ?? '', 1, 0, 'L');
+                $pdf->Cell(20, 10, $reference->tel_no ?? '', 1, 0, 'C');
+                $pdf->Cell(20, 10, $reference->cell_no ?? '', 1, 1, 'C');
+            }
         }
+
+        $pdf->Ln(5);
     }
 
-    $pdf->Ln(5);
-}
+    /**
+     * Generate expert information section
+     */
+    private function generateExpertSection($pdf, $speaker)
+    {
+        // $pdf->SetFont('helvetica', 'B', 10);
+        // $pdf->Cell(0, 8, 'E-mail Address:', 0, 1, 'L');
 
-/**
- * Generate references section
- */
-private function generateReferencesSection($pdf, $speaker)
-{
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(0, 8, 'References for Training:', 0, 1, 'L');
-
-    // Create table
-    $pdf->SetFont('helvetica', '', 8);
-
-    // Table headers
-    $pdf->Cell(40, 8, 'Name/Agency', 1, 0, 'C');
-    $pdf->Cell(40, 8, 'Address', 1, 0, 'C');
-    $pdf->Cell(25, 8, 'Contact Person', 1, 0, 'C');
-    $pdf->Cell(25, 8, 'Position', 1, 0, 'C');
-    $pdf->Cell(20, 8, 'Tel No.', 1, 0, 'C');
-    $pdf->Cell(20, 8, 'Cell No.', 1, 1, 'C');
-
-    // Get references data from related table (if relationship exists)
-    $referenceData = [];
-    if (method_exists($speaker, 'referencesTrainings') && $speaker->referencesTrainings) {
-        $referenceData = $speaker->referencesTrainings;
-    }
-
-    if (empty($referenceData)) {
-        // Add empty rows for manual filling
-        for ($i = 0; $i < 3; $i++) {
-            $pdf->Cell(40, 10, '', 1, 0, 'L');
-            $pdf->Cell(40, 10, '', 1, 0, 'L');
-            $pdf->Cell(25, 10, '', 1, 0, 'L');
-            $pdf->Cell(25, 10, '', 1, 0, 'L');
-            $pdf->Cell(20, 10, '', 1, 0, 'C');
-            $pdf->Cell(20, 10, '', 1, 1, 'C');
+        // Get expert data from related table (if relationship exists)
+        $expertData = [];
+        if (method_exists($speaker, 'expertis') && $speaker->expertis) {
+            $expertData = $speaker->expertis;
         }
-    } else {
-        foreach ($referenceData as $reference) {
-            $pdf->Cell(40, 10, $reference->name_agency ?? '', 1, 0, 'L');
-            $pdf->Cell(40, 10, $reference->address ?? '', 1, 0, 'L');
-            $pdf->Cell(25, 10, $reference->contact_person ?? '', 1, 0, 'L');
-            $pdf->Cell(25, 10, $reference->position ?? '', 1, 0, 'L');
-            $pdf->Cell(20, 10, $reference->tel_no ?? '', 1, 0, 'C');
-            $pdf->Cell(20, 10, $reference->cell_no ?? '', 1, 1, 'C');
-        }
-    }
 
-    $pdf->Ln(5);
-}
-
-/**
- * Generate expert information section
- */
-private function generateExpertSection($pdf, $speaker)
-{
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(0, 8, 'Expert Information:', 0, 1, 'L');
-
-    // Get expert data from related table (if relationship exists)
-    $expertData = [];
-    if (method_exists($speaker, 'expertis') && $speaker->expertis) {
-        $expertData = $speaker->expertis;
-    }
-
-    if (empty($expertData)) {
-        $pdf->SetFont('helvetica', '', 10);
-        $pdf->Cell(50, 8, 'Expert Field:', 0, 0, 'L');
-        $pdf->Cell(130, 8, '', 'B', 1, 'L');
-        $pdf->Ln(3);
-    } else {
-        foreach ($expertData as $expert) {
+        if (empty($expertData)) {
             $pdf->SetFont('helvetica', '', 10);
-            $pdf->Cell(50, 8, 'Expert Field:', 0, 0, 'L');
-            $pdf->Cell(130, 8, $expert->expertis ?? '', 'B', 1, 'L');
+            $pdf->Cell(30, 8, 'E-mail Address::', 0, 0, 'L');
+            $pdf->Cell(100, 8, $speaker->email ?? '', 'B', 1, 'L');
             $pdf->Ln(3);
+        } else {
+            foreach ($expertData as $expert) {
+                $pdf->SetFont('helvetica', '', 10);
+                $pdf->Cell(30, 8, 'Expert Field:', 0, 0, 'L');
+                $pdf->Cell(100, 8, $expert->expertis ?? '', 'B', 1, 'L');
+                $pdf->Ln(3);
+            }
         }
     }
-}
 }

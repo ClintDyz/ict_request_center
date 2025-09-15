@@ -18,71 +18,374 @@
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     table, th, td { border: 1px solid #000; }
     th, td { padding: 5px; text-align: left; }
+
+            .form-container {
+                max-width: 800px;
+                margin: 40px auto;         /* space from top/bottom */
+                background-color: #fff;    /* clean white background */
+                border: 1px solid #ccc;    /* softer border */
+                border-radius: 8px;        /* rounded corners */
+                padding: 20px;             /* inner spacing */
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* floating effect */
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            /* subtle hover effect */
+            .form-container:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+            }
+
+
+         .header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 2px solid black;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .logo-placeholder {
+            width: 80px;
+            height: 80px;
+            background-color: #0066cc;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .header-text {
+            flex: 1;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .header-text .republic {
+            font-size: 14px;
+            font-weight: normal;
+            margin-bottom: 2px;
+        }
+
+        .header-text .department {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .header-text .region {
+            font-size: 12px;
+            font-weight: normal;
+            margin-bottom: 0;
+        }
+
+        .page-number {
+            text-align: right;
+            font-size: 12px;
+            width: 80px;
+            flex-shrink: 0;
+        }
+
+        .form-title {
+            text-align: center;
+            padding: 15px 20px;
+            border-bottom: 2px solid black;
+            background-color: #f8f8f8;
+        }
+
+        .form-title .title {
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1.3;
+            margin: 0;
+        }
+
+        .form-field {
+            margin-bottom: 8px;
+            padding: 8px 15px;
+        }
+
+        .form-field label {
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .form-field input {
+            border: none;
+            border-bottom: 1px solid black;
+            background: transparent;
+            padding: 2px 5px;
+            font-size: 14px;
+        }
+
+        .form-field input:focus {
+            outline: none;
+            border-bottom: 2px solid #007bff;
+        }
+
+        .name-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 8px 15px;
+        }
+
+        .name-section {
+            flex: 1;
+        }
+
+        .name-section label {
+            font-weight: bold;
+            display: block;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .name-section .value {
+            min-height: 20px;
+            padding: 5px 0;
+            border-bottom: 1px solid black;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .value {
+            display: inline-block;
+            min-width: 100px;
+            min-height: 18px;
+            padding: 2px 5px;
+            border-bottom: 1px solid black;
+            margin-right: 15px;
+            font-size: 14px;
+            vertical-align: bottom;
+        }
+
+        .birth-age-row {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            padding: 8px 15px;
+        }
+
+        .address-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 8px 15px;
+        }
+
+        .address-section {
+            flex: 1;
+        }
+
+        .contact-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 8px 15px;
+        }
+
+        .contact-section {
+            flex: 1;
+        }
+
+        .short-input {
+            width: 120px !important;
+        }
+
+        .medium-input {
+            width: 200px !important;
+        }
+
+        .long-input {
+            width: 300px !important;
+        }
+
+        .full-input {
+            width: 100% !important;
+        }
+
+        hr {
+            margin: 0;
+            border: none;
+            border-top: 1px solid black;
+        }
   </style>
 </head>
 <body>
 
-  <h2>APPLICATION FORM FOR THE ACCREDITATION OF</h2>
-  <h2>TECHNICAL PERSONNEL / TRAINER / SUBJECT MATTER SPECIALIST</h2>
+    <div class="form-container mt-5">
 
   {{-- Personal Info --}}
-  <div class="section">
-    <div class="label">Name:</div>
-    <div class="row">
-      <div class="cell-1">{{ $speaker->last_name }}</div>
-      <div class="cell-2">{{ $speaker->given_name }}</div>
-      <div class="cell-3">{{ $speaker->middle_name }}</div>
-      <div class="cell-4">{{ $speaker->ext_name }}</div>
-    </div>
-    <div class="row">
-      <div class="cell-1 label">Last Name</div>
-      <div class="cell-2 label">Given Name</div>
-      <div class="cell-3 label">Middle Name</div>
-      <div class="cell-4 label">Name Ext’n</div>
-    </div>
+  <div class="header">
+            <div class="logo">
+                <!-- Replace this div with actual logo image -->
+                <div class="logo-placeholder">DOST LOGO</div>
+            </div>
 
-    <div class="row">
-      <div class="cell-2 label">Date of Birth:</div>
-      <div class="cell-2">{{ $speaker->date_of_birth }}</div>
-      <div class="cell-2 label">Place of Birth:</div>
-      <div class="cell-2">{{ $speaker->place_of_birth }}</div>
-      <div class="cell-1 label">Age:</div>
-      <div class="cell-1">{{ $speaker->age }}</div>
-    </div>
+            <div class="header-text">
+                <div class="republic">Republic of the Philippines</div>
+                <div class="department">Department of Science and Technology</div>
+                <div class="region">Cordillera Administrative Region</div>
+            </div>
 
-    <div class="row">
-      <div class="cell-1 label">Gender:</div>
-      <div class="cell-2">{{ $speaker->gender }}</div>
-      <div class="cell-2 label">E‑mail Address:</div>
-      <div class="cell-3">{{ $speaker->email }}</div>
-    </div>
+            <div class="page-number">
+                {{-- Page 1 of 4 --}}
+            </div>
+        </div>
 
-    <div class="row">
-      <div class="cell-1 label">Field/s of Expertise:</div>
-      <div class="cell-4">{{ optional($speaker->expertises)->pluck('expertis')->implode(', ') ?? 'N/A' }}</div>
-    </div>
-  </div>
+        <!-- Form Title -->
+        <div class="form-title">
+            <div class="title">
+                APPLICATION FORM FOR THE ACCREDITATION OF<br>
+                TECHNICAL PERSONNEL/TRAINER/SUBJECT MATTER SPECIALIST
+            </div>
+        </div>
+    <!-- Name Row -->
+        <div class="name-row">
+            <div class="name-section">
+                <div><label><strong>Name: </strong></label></div>
+                <label></label>
+            </div>
+            <div class="name-section">
+                <div class="value">{{ $speaker->last_name }}</div>
+                <label>Last Name</label>
+            </div>
+            <div class="name-section">
+                <div class="value">{{ $speaker->given_name }}</div>
+                <label>Given Name</label>
+            </div>
+            <div class="name-section">
+                <div class="value">{{ $speaker->middle_name }}</div>
+                <label>Middle Name</label>
+            </div>
+            <div class="name-section">
+                <div class="value">{{ $speaker->ext_name }}</div>
+                <label>Name Ext'n (Jr., III, Sr)</label>
+            </div>
+        </div>
 
-  {{-- Office & Home --}}
-  <div class="section">
-    <div class="label">Office Address</div>
-    <div class="row">
-      <div class="cell-2 label">Building No.:</div><div class="cell-2">{{ $speaker->home_building_no }}</div>
-      <div class="cell-2 label">Street/Barangay:</div><div class="cell-2">{{ $speaker->home_barangay }}</div>
-    </div>
-    <div class="row">
-      <div class="cell-2 label">Municipality/City:</div><div class="cell-2">{{ $speaker->home_municipality }}</div>
-      <div class="cell-2 label">Province:</div><div class="cell-2">{{ $speaker->home_province }}</div>
-    </div>
-    <div class="row">
-      <div class="cell-2 label">Zip Code:</div><div class="cell-2">{{ $speaker->home_zip_code }}</div>
-      <div class="cell-2 label">Tel.:</div><div class="cell-2">{{ $speaker->home_tel_no }}</div>
-    </div>
-    <div class="row">
-      <div class="cell-2 label">Cellphone:</div><div class="cell-2">{{ $speaker->home_cell_no }}</div>
-      <div class="cell-2 label">Fax:</div><div class="cell-2">{{ $speaker->home_fax_no }}</div>
-    </div>
-  </div>
+        <!-- Date of Birth, Place of Birth, Age Row -->
+        <div class="birth-age-row">
+            <label><strong>Date of Birth:</strong></label>
+            <div class="value">{{ $speaker->date_of_birth }}</div>
+
+            <label><strong>Place of Birth:</strong></label>
+            <div class="value">{{ $speaker->place_of_birth }}</div>
+
+            <label><strong>Age:</strong></label>
+            <div class="value">{{ $speaker->age }}</div>
+        </div>
+
+
+        <div class="birth-age-row">
+            <label><strong>Office/Organization:</strong></label>
+            <div class="value">{{ $speaker->office->office_organization ?? 'N/A' }}</div>
+        </div>
+        <div class="birth-age-row">
+            <label><strong>Position:</strong></label>
+            <div class="value">{{ $speaker->office->position ?? 'N/A' }}</div>
+        </div>
+        {{-- <hr> --}}
+
+        <!-- Office Address -->
+        <div class="form-field">
+            <label>Office Address:</label>
+        </div>
+
+        <div class="address-row">
+            <label>Building No.:</label>
+            <div class="value">{{ $speaker->home_building_no }}</div>
+            <label>Street/Barangay:</label>
+            <div class="value">{{ $speaker->home_barangay }}</div>
+        </div>
+
+        <div class="address-row">
+            <label>Municipality/City:</label>
+            <div class="value">{{ $speaker->home_municipality }}</div>
+            <label>Province:</label>
+            <div class="value">{{ $speaker->home_province }}</div>
+        </div>
+
+        <div class="form-field">
+            <label>Zip Code:</label>
+            <div class="value">{{ $speaker->home_zip_code }}</div>
+        </div>
+
+        <div class="contact-row">
+            <label>Tel. No.:</label>
+            <div class="value">{{ $speaker->home_tel_no }}</div>
+            <label>Cellphone No.:</label>
+            <div class="value">{{ $speaker->home_cell_no }}</div>
+        </div>
+
+        <div class="form-field">
+            <label style="margin-left: 50px;">Fax No.:</label>
+            <div class="value">{{ $speaker->home_fax_no }}</div>
+        </div>
+
+
+        <!-- Home/Residence Address -->
+        <div class="form-field">
+            <label>Home/Residence Address:</label>
+        </div>
+
+        <div class="address-row">
+            <label>Building No.:</label>
+            <div class="value">{{ $speaker->home_building_no }}</div>
+            <label>Street/Barangay:</label>
+            <div class="value">{{ $speaker->home_barangay }}</div>
+        </div>
+
+        <div class="address-row">
+            <label>Municipality/City:</label>
+            <div class="value">{{ $speaker->home_municipality }}</div>
+            <label>Province:</label>
+            <div class="value">{{ $speaker->home_province }}</div>
+        </div>
+
+        <div class="form-field">
+            <label>Zip Code:</label>
+            <div class="value">{{ $speaker->home_zip_code }}</div>
+        </div>
+
+        <div class="contact-row">
+            <label>Tel. No.:</label>
+            <div class="value">{{ $speaker->home_tel_no }}</div>
+            <label>Cellphone No.:</label>
+            <div class="value">{{ $speaker->home_cell_no }}</div>
+        </div>
+
+        <div class="form-field">
+            <label style="margin-left: 50px;">Fax No.:</label>
+            <div class="value">{{ $speaker->home_fax_no }}</div>
+        </div>
+
+
+        <!-- Gender and Email Row -->
+        <div class="birth-age-row">
+            {{-- <label><strong>Gender:</strong></label>
+            <div class="value">{{ $speaker->gender }}</div> --}}
+
+            <label><strong>E-mail Address:</strong></label>
+            <div class="value">{{ $speaker->email }}</div>
+        </div>
+
+        <!-- Fields of Specialization/Expertise -->
+        <div class="form-field">
+            <label>Field/s of Expertise:</label>
+            <div class="value">{{ optional($speaker->expertises)->pluck('expertis')->implode(', ') ?? 'N/A' }}</div>
+        </div>
 
   {{-- Educational Background --}}
   <div class="section">
@@ -109,39 +412,6 @@
     </table>
   </div>
 
-  {{-- Training / Seminar Experience --}}
-  <div class="section">
-    <div class="label">Training/Seminar Experience</div>
-    <table>
-      <tr><th>Title</th><th>Venue</th><th>Date</th><th>Hours</th><th>Remarks</th></tr>
-      @foreach($speaker->trainings as $t)
-        <tr>
-          <td>{{ $t->rt_title }}</td>
-          <td>{{ $t->rt_venue }}</td>
-          <td>{{ $t->rt_date }}</td>
-          <td>{{ $t->rt_no_hours }}</td>
-          <td>&nbsp;</td>
-        </tr>
-      @endforeach
-    </table>
-  </div>
-
-  {{-- Training as Trainer --}}
-  <div class="section">
-    <div class="label">Training Experience as Trainer</div>
-    <table>
-      <tr><th>Title</th><th>Venue</th><th>Date</th><th>Hours</th><th>Remarks</th></tr>
-      @foreach($speaker->experienceTrainer as $et)
-        <tr>
-          <td>{{ $et->rst_title }}</td>
-          <td>{{ $et->rst_venue }}</td>
-          <td>{{ $et->rst_date }}</td>
-          <td>{{ $et->rst_no_hours }}</td>
-          <td>&nbsp;</td>
-        </tr>
-      @endforeach
-    </table>
-  </div>
 
   {{-- Work Experience --}}
   <div class="section">
@@ -160,15 +430,46 @@
     </table>
   </div>
 
+  {{-- Training / Seminar Experience --}}
+  <div class="section">
+    <div class="label">Training/Seminar Experience</div>
+    <table>
+      <tr><th>Title</th><th>Venue</th><th>Date</th><th>Hours</th></tr>
+      @foreach($speaker->trainings as $t)
+        <tr>
+          <td>{{ $t->rt_title }}</td>
+          <td>{{ $t->rt_venue }}</td>
+          <td>{{ $t->rt_date }}</td>
+          <td>{{ $t->rt_no_hours }}</td>
+        </tr>
+      @endforeach
+    </table>
+  </div>
+
+  {{-- Training as Trainer --}}
+  <div class="section">
+    <div class="label">Training Experience as Trainer</div>
+    <table>
+      <tr><th>Title</th><th>Venue</th><th>Date</th><th>Hours</th></tr>
+      @foreach($speaker->experienceTrainer as $et)
+        <tr>
+          <td>{{ $et->rst_title }}</td>
+          <td>{{ $et->rst_venue }}</td>
+          <td>{{ $et->rst_date }}</td>
+          <td>{{$et->rst_no_hours}}</td>
+        </tr>
+      @endforeach
+    </table>
+  </div>
+
   {{-- Publications --}}
   <div class="section">
     <div class="label">Publications</div>
     <table>
-      <tr><th>Title</th><th>Publisher</th><th>Date</th><th>Venue</th></tr>
+      <tr><th>Title</th><th>Date</th><th>Venue</th></tr>
       @foreach($speaker->publications as $p)
         <tr>
           <td>{{ $p->p_title }}</td>
-          <td>{{ $p->p_publisher }}</td>
           <td>{{ $p->p_date }}</td>
           <td>{{ $p->p_venue }}</td>
         </tr>
@@ -193,5 +494,7 @@
       @endforeach
     </table>
   </div>
+
+</div>
 
 @endsection

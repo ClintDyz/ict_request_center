@@ -17,14 +17,18 @@
                 <div class="sb-nav-link-icon"><i class="fa-solid fa-person-chalkboard"></i></div>
                 List of To Be Accredited
             </a>
+            <a class="nav-link" href="{{ url('/accreditation/viewaccredited') }}">
+                <div class="sb-nav-link-icon"><i class="fa-solid fa-person-chalkboard"></i></div>
+                List of The Accredited
+            </a>
             <a class="nav-link" href="{{ url('/accreditation_average') }}">
                 <div class="sb-nav-link-icon"><i class="fa-solid fa-person-chalkboard"></i></div>
-                List of the accredited
+                List of The Average
             </a>
-            <a class="nav-link" href="{{ url('/training') }}">
+            {{-- <a class="nav-link" href="{{ url('/training') }}">
                 <div class="sb-nav-link-icon"><i class="fas fa-line-chart"></i></div>
                 Training
-            </a>
+            </a> --}}
 
             <div class="sb-sidenav-menu-heading">Libraries</div>
 
@@ -38,10 +42,10 @@
             <!-- Dropdown Items -->
             <div class="collapse" id="collapseLibraries" data-bs-parent="#sidenavAccordion">
                 <nav class="sb-sidenav-menu-nested nav">
-                    <a class="nav-link" href="{{ url('/divisions') }}">Division</a>
-                    <a class="nav-link" href="{{ url('/positions') }}">Position</a>
-                    <a class="nav-link" href="{{ url('/provinces') }}">Provinces</a>
-                    <a class="nav-link" href="{{ url('/units') }}">Units</a>
+                    <a class="nav-link" href="{{ url('/divisions') }}">  <div class="sb-nav-link-icon"> <i class="fa fa-object-ungroup" aria-hidden="true"></i> Division </div></a>
+                    <a class="nav-link" href="{{ url('/positions') }}">  <div class="sb-nav-link-icon"> <i class="fa fa-address-card" aria-hidden="true"></i> Position </div></a>
+                    <a class="nav-link" href="{{ url('/provinces') }}">  <div class="sb-nav-link-icon"> <i class="fa fa-map-marker" aria-hidden="true"></i> Provinces </div></a>
+                    <a class="nav-link" href="{{ url('/units') }}">      <div class="sb-nav-link-icon"> <i class="fa fa-book" aria-hidden="true"></i> Units </div></a>
                 </nav>
             </div>
 

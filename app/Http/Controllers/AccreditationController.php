@@ -25,12 +25,19 @@ class AccreditationController extends Controller
             $speakers = Rstbl::with(['office', 'expertises'])->get();
 
             // Load accreditations with speaker relationship
-            $trainers = Accreditation::with('speaker')->get();
+            $trainers = Accreditation::with('speaker')->where('status', 0)->get();
 
             return view('accreditation.index', compact('trainers', 'requests', 'speakers'));
         }
 
+        public function showAccredited()
+        {
+            $requests = RequestResourceSpeaker::with('speaker')->get();
+            $speakers = Rstbl::with(['office', 'expertises'])->get();
+            $trainers = Accreditation::with('speaker')->where('status', 1)->get();
 
+            return view('accreditation.view_accredited', compact('trainers', 'requests', 'speakers'));
+        }
     public function create(Request $request)
     {
 
@@ -74,7 +81,7 @@ class AccreditationController extends Controller
      */
     public function show($id)
     {
-        //
+
     }
 
     /**

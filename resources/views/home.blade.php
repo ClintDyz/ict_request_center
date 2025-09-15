@@ -29,6 +29,27 @@
             </div>
         </div>
 
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                <h4> List of To Be Accredited </h4>
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $toBeAccreditedCount }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fa-solid fa-chalkboard-user fa-4x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="{{ url('/accreditation') }}">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
 
         <div class="col-xl-4 col-md-6">
             <div class="card bg-success text-white mb-4">
@@ -36,27 +57,32 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-uppercase mb-1">
-                                <h4>  List of To Be Acrredited </h4> </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">56</div>
+                                <h4> List of the Accredited </h4>
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $accreditedCount }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fa-solid fa-chalkboard-user fa-4x"></i>
                         </div>
                     </div>
-               </div>
+                </div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <a class="small text-white stretched-link" href="{{ url('/accreditation_average') }}">View Details</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
         </div>
+
     </div>
 
+        <div class="row">
 
-        <div class="row col-xl-4 col-md-6">
+        <div class="col-xl-4 col-md-6">
 
         <div class="card">
-            <div class="card-header">Resource Speaker Gender Distribution</div>
+            <div class="card-header">
+                 <i class="fas fa-chart-pie me-1"></i>
+                Resource Speaker Gender Distribution</div>
             <div class="card-body">
                 <canvas id="genderChart"></canvas>
             </div>
@@ -64,6 +90,17 @@
 
         </div>
 
+                <div class="col-xl-4 col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie me-1"></i>
+                        Accreditation Status Overview
+                    </div>
+                    <div class="card-body"><canvas id="accreditationChart" width="100%" height="40"></canvas></div>
+                </div>
+            </div>
+
+        </div>
     {{-- <div class="col-xl-3 col-md-6">
         <div class="card bg-warning text-white mb-4">
             <div class="card-body">Warning Card</div>
@@ -119,6 +156,31 @@
                 }
             }
         }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('accreditationChart');
+
+        new Chart(ctx, {
+            type: 'pie', // You can also use 'bar' for a bar chart
+            data: {
+                labels: ['To Be Accredited', 'Accredited'],
+                datasets: [{
+                    data: [{{ $toBeAccreditedCount }}, {{ $accreditedCount }}],
+                    backgroundColor: ['#17a2b8', '#28a745'], // Info and Success colors
+                    hoverBackgroundColor: ['#138496', '#218838']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                }
+            }
+        });
     });
 </script>
 @endsection

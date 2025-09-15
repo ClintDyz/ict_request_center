@@ -22,6 +22,7 @@
                                 <th>Experience</th>
                                 <th>Award</th>
                                 <th>Total</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -46,6 +47,14 @@
                         <td id="avgExperience">{{ $trainer->avg_experience }}</td>
                         <td id="avgAward">{{ $trainer->avg_award }}</td>
                         <td id="avgTotal">{{ $trainer->avg_total }}</td>
+                        <td>
+                            {{-- <a href="{{ route('accreditation.pdf', $trainer->id) }}" target="_blank" class="btn btn-sm btn-info">
+                                <i class="fa-solid fa-print"></i>
+                            </a> --}}
+
+                            <a href="{{ route('accreditation.average.print', $trainer->id) }}" target="_blank" class="btn btn-sm btn-info"><i class="fa-solid fa-print"></i></a>
+
+                        </td>
                     </tr>
                 @endforeach
                 </tbody>

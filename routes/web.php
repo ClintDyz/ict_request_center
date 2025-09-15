@@ -57,21 +57,30 @@ Route::get('/request-resource-speaker/{id}/edit', [App\Http\Controllers\RequestR
 Route::put('/request-resource-speaker/{id}', [App\Http\Controllers\RequestResourceSpeakerController::class, 'update'])->name('request_resource_speaker.update');
 Route::post('/accreditations', [App\Http\Controllers\RequestResourceSpeakerController::class, 'add'])->name('request_resource_speaker.add');
 
+// Route::get('/resource-speaker/{id}/form-preview',[App\Http\Controllers\RstblController::class, 'formPreview'])->name('resource_speaker.form_preview');
+
 // Update the training record
 // Route::put('trainings/{id}', [App\Http\Controllers\RequestResourceSpeakerController::class, 'update'])->name('trainings.update');
 
 //AccreditationContller
 Route::get('accreditation', [App\Http\Controllers\AccreditationController::class, 'index'])->name('accreditation.index');
+Route::get('accreditation/viewaccredited', [App\Http\Controllers\AccreditationController::class, 'showAccredited'])->name('accreditation.viewaccredited');
 // Route::get('/accreditation-form', [RequestResourceSpeakerController::class, 'showAccreditationForm'])->name('accreditation.form');
 Route::post('accreditation/create', [App\Http\Controllers\AccreditationController::class, 'create'])->name('accreditation.create');
 Route::get('/accreditation/{id}/edit', [App\Http\Controllers\AccreditationController::class, 'edit'])->name('accreditation.edit');
 Route::put('/accreditation/{id}', [App\Http\Controllers\AccreditationController::class, 'update'])->name('accreditation.update');
 Route::delete('/accreditation/{id}', [App\Http\Controllers\AccreditationController::class, 'destroy'])->name('accreditation.destroy');
-
 Route::post('/accreditation/approve', [App\Http\Controllers\AccreditationController::class, 'approve'])->name('accreditation.approve');
-Route::get('/accreditation/pdf/{id}', [App\Http\Controllers\AccreditationController::class, 'printPDF'])->name('accreditation.print');
+
 
 // Route::get('/accreditation/pdf/{trainer}', [App\Http\Controllers\AccreditationController::class, 'generatePDF'])->name('accreditation.print');
+// For AccreditationController
+Route::get('/accreditation/pdf/{id}', [App\Http\Controllers\AccreditationController::class, 'printPDF'])
+    ->name('accreditation.print');
+
+// For AccreditationAverageController
+Route::get('/accreditation/average/pdf/{id}', [App\Http\Controllers\AccreditationAverageController::class, 'generate'])
+    ->name('accreditation.average.print');
 
 
 //Average
