@@ -43,14 +43,19 @@
                             <td>{{ $user->unit }}</td>
                             <td>{{ $user->province }}</td>
                             <td>{{ $user->position }}</td>
-                            <td >
+                            <td>
                                 <!-- Edit button for User -->
-                                <button class="btn btn-primary" onclick="editUser({{ $user->id }})">
+                                <button class="btn btn-primary btn-sm" onclick="editUser({{ $user->id }})" title="Edit">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
 
+                                <!-- Reset Password button -->
+                                <button class="btn btn-warning btn-sm" onclick="resetPassword({{ $user->id }})" title="Reset Password">
+                                    <i class="fa-solid fa-key"></i>
+                                </button>
+
                                 <!-- Delete button for User -->
-                                <button class="btn btn-danger" onclick="deleteUser({{ $user->id }})">
+                                <button class="btn btn-danger btn-sm" onclick="deleteUser({{ $user->id }})" title="Delete">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </td>
@@ -74,7 +79,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -95,48 +99,46 @@
                             </div>
                             <div class="mb-3">
                                 <label for="gender" class="form-label">Gender</label>
-                            <select class="form-control" id="gender" name="gender" required>
-                            <option> <--Select Gender--> </option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            </select>
+                                <select class="form-control" id="gender" name="gender" required>
+                                    <option value="">--Select Gender--</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email" name="email" required>
                             </div>
-                                <div class="mb-3">
+                            <div class="mb-3">
                                 <label for="mobile_no" class="form-label">Mobile Number</label>
                                 <input type="text" class="form-control" id="mobile_no" name="mobile_no">
-                           </div>
-
+                            </div>
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
                                 <input type="text" class="form-control" id="username" name="username" required>
                             </div>
-
                         </div>
                         <div class="col-md-6">
                             <?php
-                            $divisions = App\Models\Division::select('id', 'division')->distinct()->get(); // Assuming the Unit model has 'id' and 'unit_name' fields
+                            $divisions = App\Models\Division::select('id', 'division')->distinct()->get();
                             ?>
                             <div class="mb-3">
                                 <label for="division" class="form-label">Division</label>
                                 <select name="division" class="form-control" id="division">
-                                    <option value=""></option> <!-- Default empty option -->
+                                    <option value="">--Select Division--</option>
                                     @foreach ($divisions as $division)
-                                        <option value="{{ $division->division }}">{{ $division->division }}</option> <!-- Assuming 'division_name' is the column -->
+                                        <option value="{{ $division->division }}">{{ $division->division }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <?php
-                            $units = App\Models\Unit::select('id', 'unit')->distinct()->get(); // Assuming the Unit model has 'id' and 'unit_name' fields
+                            $units = App\Models\Unit::select('id', 'unit')->distinct()->get();
                             ?>
                             <div class="mb-3">
                                 <label for="unit" class="form-label">Unit</label>
                                 <select name="unit" class="form-control" id="unit">
-                                    <option value=""></option> <!-- Default empty option -->
+                                    <option value="">--Select Unit--</option>
                                     @foreach ($units as $unit)
                                         <option value="{{ $unit->unit }}">{{ $unit->unit }}</option>
                                     @endforeach
@@ -144,27 +146,27 @@
                             </div>
 
                             <?php
-                            $positions = App\Models\Position::select('id', 'position')->distinct()->get(); // Assuming the Unit model has 'id' and 'unit_name' fields
+                            $positions = App\Models\Position::select('id', 'position')->distinct()->get();
                             ?>
                             <div class="mb-3">
                                 <label for="position" class="form-label">Position</label>
                                 <select name="position" class="form-control" id="position">
-                                    <option value=""></option> <!-- Default empty option -->
+                                    <option value="">--Select Position--</option>
                                     @foreach ($positions as $position)
-                                        <option value="{{ $position->position }}">{{ $position->position }}</option> <!-- Assuming 'position_name' is the column -->
+                                        <option value="{{ $position->position }}">{{ $position->position }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <?php
-                            $province = App\Models\Province::select('id', 'province')->distinct()->get(); // Assuming the Unit model has 'id' and 'unit_name' fields
+                            $provinces = App\Models\Province::select('id', 'province')->distinct()->get();
                             ?>
                             <div class="mb-3">
                                 <label for="province" class="form-label">Province</label>
                                 <select name="province" class="form-control" id="province">
-                                    <option value=""></option> <!-- Default empty option -->
+                                    <option value="">--Select Province--</option>
                                     @foreach ($provinces as $province)
-                                        <option value="{{ $province->province }}">{{ $province->province }}</option> <!-- Assuming 'province_name' is the column -->
+                                        <option value="{{ $province->province }}">{{ $province->province }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -185,10 +187,10 @@
                             <div class="mb-3">
                                 <label for="emp_type" class="form-label">Access Level</label>
                                 <select name="emp_type" class="form-control" id="emp_type">
-                                    <option>--Select--</option> <!-- Default empty option -->
-                                        <option value="0">Administrator</option> <!-- Assuming 'province_name' is the column -->
-                                        <option value="1">Accreditor</option> <!-- Assuming 'province_name' is the column -->
-                                        <option value="2">Employee</option> <!-- Assuming 'province_name' is the column -->
+                                    <option value="">--Select--</option>
+                                    <option value="0">Administrator</option>
+                                    <option value="1">Accreditor</option>
+                                    <option value="2">Employee</option>
                                 </select>
                             </div>
                         </div>
@@ -215,143 +217,155 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-
                     <div class="row">
                         <div class="col-md-6">
-                    <input type="hidden" id="editUserId" name="id">
-                    <div class="mb-3">
-                        <label for="emp_id" class="form-label">Employee ID</label>
-                        <input type="text" class="form-control" id="editEmpId" name="emp_id" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="firstname" class="form-label">First Name</label>
-                        <input type="text" class="form-control" id="editFirstname" name="firstname" required>
-                    </div>
+                            <input type="hidden" id="editUserId" name="id">
                             <div class="mb-3">
-                                <label for="middlename" class="form-label">Middle Name</label>
-                                <input type="text" class="form-control" id="middlename" name="middlename" required>
+                                <label for="editEmpId" class="form-label">Employee ID</label>
+                                <input type="text" class="form-control" id="editEmpId" name="emp_id" required>
                             </div>
-                    <div class="mb-3">
-                        <label for="lastname" class="form-label">Last Name</label>
-                        <input type="text" class="form-control" id="editLastname" name="lastname" required>
-                    </div>
                             <div class="mb-3">
-                                <label for="gender" class="form-label">Gender</label>
-                            <select class="form-control" id="gender" name="gender" required>
-                            <option> <--Select Gender--> </option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            </select>
+                                <label for="editFirstname" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="editFirstname" name="firstname" required>
                             </div>
-                             <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="editEmail" name="email" required>
-                    </div>
-                             <div class="mb-3">
-                                <label for="mobile_no" class="form-label">Mobile Number</label>
-                                <input type="text" class="form-control" id="mobile_no" name="mobile_no">
-                           </div>
-
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="editusername" name="username" required>
-                    </div>
-                    <div class="mb-3">
-                        {{-- <label for="roles" class="form-label">Roles</label> --}}
-                        {{-- <input type="text" class="form-control" id="editRoles" name="roles" required> --}}
-                <label for="emp_type" class="form-label">Access Level</label>
-                <select name="emp_type" class="form-control" id="emp_type" required>
-                    <option disabled {{ old('emp_type', $user->emp_type ?? '') === null ? 'selected' : '' }}>--Select--</option>
-                    <option value="0" {{ old('emp_type', $user->emp_type ?? '') == 0 ? 'selected' : '' }}>Administrator</option>
-                    <option value="1" {{ old('emp_type', $user->emp_type ?? '') == 1 ? 'selected' : '' }}>Accreditor</option>
-                    <option value="2" {{ old('emp_type', $user->emp_type ?? '') == 2 ? 'selected' : '' }}>Employee</option>
-                </select>
-
-                    </div>
-                  </div>
-
-                  <div class="col-md-6">
-
-                        <?php
-                        $divisions = App\Models\Division::select('id', 'division')->distinct()->get();
-                        ?>
-                        <div class="mb-3">
-                            <label for="division" class="form-label">Division</label>
-                            <select name="division" class="form-control" id="editDivision">
-                                <option value="">-- Select Division --</option>
-                                @foreach ($divisions as $division)
-                                    <option value="{{ $division->division }}" {{ $division->division == $user->division ? 'selected' : '' }}>{{ $division->division }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <?php
-                        $units = App\Models\Unit::select('id', 'unit')->distinct()->get();
-                        ?>
-                        <div class="mb-3">
-                            <label for="unit" class="form-label">Unit</label>
-                            <select name="unit" class="form-control" id="editUnit">
-                                <option value=""></option> <!-- Default empty option -->
-                                @foreach ($units as $unit)
-                                    <option value="{{ $unit->unit }}" {{ $unit->unit == $user->unit ? 'selected' : '' }}>
-                                        {{ $unit->unit }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <?php
-                        $positions = App\Models\Position::select('id', 'position')->distinct()->get();
-                        ?>
-                        <div class="mb-3">
-                            <label for="position" class="form-label">Position</label>
-                            <select name="position" class="form-control" id="editPosition">
-                                <option value=""></option> <!-- Default empty option -->
-                                @foreach ($positions as $position)
-                                    <option value="{{ $position->position }}" {{ $position->position == $user->position ? 'selected' : '' }}>
-                                        {{ $position->position }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <?php
-                        $provinces = App\Models\Province::select('id', 'province')->distinct()->get();
-                        ?>
-                        <div class="mb-3">
-                            <label for="province" class="form-label">Province</label>
-                            <select name="province" class="form-control" id="editProvince">
-                                <option value=""></option> <!-- Default empty option -->
-                                @foreach ($provinces as $province)
-                                    <option value="{{ $province->province }}" {{ $province->province == $user->province ? 'selected' : '' }}>
-                                        {{ $province->province }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    <div class="mb-3">
-                        <label for="region" class="form-label">Region</label>
-                        <input type="text" class="form-control" id="editRegion" name="region" required>
-                    </div>
                             <div class="mb-3">
-                                <label for="address" class="form-label">Address</label>
-                                <input type="text" class="form-control" id="address" name="address">
+                                <label for="editMiddlename" class="form-label">Middle Name</label>
+                                <input type="text" class="form-control" id="editMiddlename" name="middlename">
                             </div>
-                                        <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="editpassword" name="password" required>
-                    </div>
-                <div class="mb-3">
-                    <label for="password_confirmation" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation">
-                </div>
+                            <div class="mb-3">
+                                <label for="editLastname" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="editLastname" name="lastname" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editGender" class="form-label">Gender</label>
+                                <select class="form-control" id="editGender" name="gender" required>
+                                    <option value="">--Select Gender--</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="editEmail" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editMobileNo" class="form-label">Mobile Number</label>
+                                <input type="text" class="form-control" id="editMobileNo" name="mobile_no">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editUsername" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="editUsername" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editEmpType" class="form-label">Access Level</label>
+                                <select name="emp_type" class="form-control" id="editEmpType" required>
+                                    <option value="">--Select--</option>
+                                    <option value="0">Administrator</option>
+                                    <option value="1">Accreditor</option>
+                                    <option value="2">Employee</option>
+                                </select>
+                            </div>
+                        </div>
 
-                  </div>
-                </div>
+                        <div class="col-md-6">
+                            <?php
+                            $divisions = App\Models\Division::select('id', 'division')->distinct()->get();
+                            ?>
+                            <div class="mb-3">
+                                <label for="editDivision" class="form-label">Division</label>
+                                <select name="division" class="form-control" id="editDivision">
+                                    <option value="">--Select Division--</option>
+                                    @foreach ($divisions as $division)
+                                        <option value="{{ $division->division }}">{{ $division->division }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <?php
+                            $units = App\Models\Unit::select('id', 'unit')->distinct()->get();
+                            ?>
+                            <div class="mb-3">
+                                <label for="editUnit" class="form-label">Unit</label>
+                                <select name="unit" class="form-control" id="editUnit">
+                                    <option value="">--Select Unit--</option>
+                                    @foreach ($units as $unit)
+                                        <option value="{{ $unit->unit }}">{{ $unit->unit }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <?php
+                            $positions = App\Models\Position::select('id', 'position')->distinct()->get();
+                            ?>
+                            <div class="mb-3">
+                                <label for="editPosition" class="form-label">Position</label>
+                                <select name="position" class="form-control" id="editPosition">
+                                    <option value="">--Select Position--</option>
+                                    @foreach ($positions as $position)
+                                        <option value="{{ $position->position }}">{{ $position->position }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <?php
+                            $provinces = App\Models\Province::select('id', 'province')->distinct()->get();
+                            ?>
+                            <div class="mb-3">
+                                <label for="editProvince" class="form-label">Province</label>
+                                <select name="province" class="form-control" id="editProvince">
+                                    <option value="">--Select Province--</option>
+                                    @foreach ($provinces as $province)
+                                        <option value="{{ $province->province }}">{{ $province->province }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="editRegion" class="form-label">Region</label>
+                                <input type="text" class="form-control" id="editRegion" name="region">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editAddress" class="form-label">Address</label>
+                                <input type="text" class="form-control" id="editAddress" name="address">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editPassword" class="form-label">Password (Leave blank to keep current)</label>
+                                <input type="password" class="form-control" id="editPassword" name="password">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editPasswordConfirmation" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="editPasswordConfirmation" name="password_confirmation">
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer bg-success">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="resetPasswordForm">
+                @csrf
+                @method('PUT')
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="resetPasswordModalLabel">Reset Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to reset this user's password to <strong>"12345678"</strong>?</p>
+                    <p class="text-muted">The user will need to change their password after logging in.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Reset Password</button>
                 </div>
             </form>
         </div>
@@ -374,7 +388,7 @@
                 </div>
                 <div class="modal-footer bg-warning">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-danger">Delete User</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
                 </div>
             </form>
         </div>
@@ -405,43 +419,46 @@
 
 @section('scripts')
 <script>
+// Get the base URL dynamically
+var baseUrl = "{{ url('/') }}";
+
 function editUser(id) {
     $.ajax({
-        url: '/users/' + id,
+        url: baseUrl + '/users/' + id,
         type: 'GET',
         success: function(data) {
-        $('#editUserId').val(data.id);
-        $('#editEmpId').val(data.emp_id);
-        $('#editFirstname').val(data.firstname);
-        $('#middlename').val(data.middlename);
-        $('#editLastname').val(data.lastname);
-        $('#gender').val(data.gender).trigger('change');
-        $('#editEmail').val(data.email);
-        $('#mobile_no').val(data.mobile_no);
-        $('#editusername').val(data.username);
-        $('#emp_type').val(data.emp_type).trigger('change');
-        $('#editRegion').val(data.region);
-        $('#address').val(data.address);
-        $('#editpassword').val('');
-        $('#password_confirmation').val('');
+            $('#editUserId').val(data.id);
+            $('#editEmpId').val(data.emp_id);
+            $('#editFirstname').val(data.firstname);
+            $('#editMiddlename').val(data.middlename);
+            $('#editLastname').val(data.lastname);
+            $('#editGender').val(data.gender).trigger('change');
+            $('#editEmail').val(data.email);
+            $('#editMobileNo').val(data.mobile_no);
+            $('#editUsername').val(data.username);
+            $('#editEmpType').val(data.emp_type).trigger('change');
+            $('#editRegion').val(data.region);
+            $('#editAddress').val(data.address);
+            $('#editPassword').val('');
+            $('#editPasswordConfirmation').val('');
 
-        // ✅ Set selected options
-        $('#editDivision').val(data.division).trigger('change');
-        $('#editUnit').val(data.unit).trigger('change');
-        $('#editPosition').val(data.position).trigger('change');
-        $('#editProvince').val(data.province).trigger('change');
+            // Set selected options
+            $('#editDivision').val(data.division).trigger('change');
+            $('#editUnit').val(data.unit).trigger('change');
+            $('#editPosition').val(data.position).trigger('change');
+            $('#editProvince').val(data.province).trigger('change');
 
             // Set form action dynamically
-            $('#editUserForm').attr('action', '/users/' + id);
+            $('#editUserForm').attr('action', baseUrl + '/users/' + id);
             $('#editUserModal').modal('show');
         },
         error: function(xhr) {
-            console.error(xhr.responseText);
-            alert('Failed to load user data.');
+            console.error('XHR Status:', xhr.status);
+            console.error('Response:', xhr.responseText);
+            alert('Failed to load user data. Check console for details.');
         }
     });
 }
-
 
 // Handle the form submission
 $('#editUserForm').on('submit', function(e) {
@@ -462,9 +479,9 @@ $('#editUserForm').on('submit', function(e) {
             if (xhr.status === 422) {
                 // Handle validation errors
                 var errors = xhr.responseJSON.errors;
-                var errorMessage = 'Validation errors: ';
+                var errorMessage = 'Validation errors:\n';
                 for (var field in errors) {
-                    errorMessage += errors[field].join(', ') + ' ';
+                    errorMessage += '- ' + errors[field].join(', ') + '\n';
                 }
                 alert(errorMessage);
             } else {
@@ -475,11 +492,35 @@ $('#editUserForm').on('submit', function(e) {
     });
 });
 
+// Function to reset password
+function resetPassword(id) {
+    $('#resetPasswordForm').attr('action', baseUrl + '/users/' + id + '/reset-password');
+    $('#resetPasswordModal').modal('show');
+}
 
+// Handle reset password form submission
+$('#resetPasswordForm').on('submit', function(e) {
+    e.preventDefault();
+
+    $.ajax({
+        url: $(this).attr('action'),
+        type: 'POST',
+        data: $(this).serialize(),
+        success: function(response) {
+            $('#resetPasswordModal').modal('hide');
+            alert('Password has been reset to 12345678 successfully!');
+            location.reload();
+        },
+        error: function(xhr) {
+            console.error('Error resetting password:', xhr.responseText);
+            alert('An error occurred while resetting the password. Please try again.');
+        }
+    });
+});
 
 // Function to set the delete form action and open the modal
 function deleteUser(id) {
-    $('#deleteUserForm').attr('action', '/users/' + id); // Dynamically set the form action
+    $('#deleteUserForm').attr('action', baseUrl + '/users/' + id); // Dynamically set the form action
     $('#deleteUserModal').modal('show');
 }
 
@@ -503,19 +544,20 @@ $('#deleteUserForm').on('submit', function(e) {
     });
 });
 
+// Set show modal details
+function showUser(firstname, lastname, email) {
+    $('#showFirstname').text(firstname);
+    $('#showLastname').text(lastname);
+    $('#showEmail').text(email);
+    $('#showUserModal').modal('show');
+}
 
-    // Set show modal details
-    function showUser(firstname, lastname, email) {
-        $('#showFirstname').text(firstname);
-        $('#showLastname').text(lastname);
-        $('#showEmail').text(email);
-        $('#showUserModal').modal('show');
+// Automatically hide the success message after 5 seconds (5000 milliseconds)
+setTimeout(function() {
+    var alert = document.getElementById('success-alert');
+    if (alert) {
+        alert.style.display = 'none';
     }
-
-    // Automatically hide the success message after 5 seconds (5000 milliseconds)
-    setTimeout(function() {
-        document.getElementById('success-alert').style.display = 'none';
-    }, 5000); // 5000ms = 5 seconds
+}, 5000); // 5000ms = 5 seconds
 </script>
 @endsection
-

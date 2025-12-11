@@ -1,208 +1,207 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Application Form</title>
+@extends('layouts.admin')
+
+@section('content')
+    <div class="card mb-4 mt-4">
+        <div class="card-header bg-success d-flex justify-content-between align-items-center">
+            <div class="col-md-6" style="color: white">
+                <i class="fas fa-table me-1"></i>
+                List of Accredited
+            </div>
+        </div>
+        <div class="card-body">
+            <table id="datatablesSimple" class="table table-hover table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Speaker Name</th>
+                        <th>Field of Expertise</th>
+                        <th>Education</th>
+                        <th>Work</th>
+                        <th>Seminar</th>
+                        <th>Experience</th>
+                        <th>Award</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($accredited as $trainer)
+                        <tr>
+                            {{-- Speaker Name --}}
+                            <td id="avgSpeaker">
+                                <a href="{{ route('resource_speaker.view', optional($trainer->speaker)->id) }}" style="text-decoration:none">
+                                    {{ optional($trainer->speaker)->given_name }} {{ optional($trainer->speaker)->last_name }}
+                                </a>
+                            </td>
+                            {{-- Field of Expertise --}}
+                            <td id="avgExpertise">
+                                {{ $trainer->speaker->expertises->pluck('expertis')->implode(', ') ?: 'N/A' }}
+                            </td>
+                            {{-- Averages --}}
+                            <td id="avgEducation">{{ $trainer->avg_education }}</td>
+                            <td id="avgWork">{{ $trainer->avg_work }}</td>
+                            <td id="avgSeminar">{{ $trainer->avg_seminar }}</td>
+                            <td id="avgExperience">{{ $trainer->avg_experience }}</td>
+                            <td id="avgAward">{{ $trainer->avg_award }}</td>
+                            <td id="avgTotal">{{ $trainer->avg_total }}</td>
+                            <td>
+                                {{-- Print Button - Opens PDF in Modal --}}
+                                <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#printPdfModal-{{ $trainer->id }}">
+                                    <i class="fa-solid fa-print"></i>
+                                </button>
+                                {{-- View Raw Scores --}}
+                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#accreditationModal-{{ $trainer->id }}">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-success"></div>
+    </div>
+    {{-- Raw Scores Modal --}}
+    @foreach($accredited as $trainer)
+        <div class="modal fade" id="accreditationModal-{{ $trainer->id }}" tabindex="-1" aria-labelledby="accreditationModalLabel-{{ $trainer->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="accreditationModalLabel-{{ $trainer->id }}">
+                            Raw Accreditation Scores - {{ optional($trainer->speaker)->given_name }} {{ optional($trainer->speaker)->last_name }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if($trainer->rawAccreditations->isEmpty())
+                            <p class="text-center">No raw accreditation scores available for this trainer.</p>
+                        @else
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th>Education</th>
+                                        <th>Work</th>
+                                        <th>Seminar</th>
+                                        <th>Experience</th>
+                                        <th>Award</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($trainer->rawAccreditations as $raw)
+                                        <tr>
+                                            <td>{{ $raw->education }}</td>
+                                            <td>{{ $raw->work }}</td>
+                                            <td>{{ $raw->seminar }}</td>
+                                            <td>{{ $raw->experience }}</td>
+                                            <td>{{ $raw->award }}</td>
+                                            <td>{{ $raw->total }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{-- PDF Preview Modal - Original Size (modal-xl), Resizable, With Controls --}}
+        <div class="modal fade" id="printPdfModal-{{ $trainer->id }}" tabindex="-1" aria-labelledby="printPdfModalLabel-{{ $trainer->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-resizable">
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title" id="printPdfModalLabel-{{ $trainer->id }}">
+                            Accreditation Average Report - {{ optional($trainer->speaker)->given_name }} {{ optional($trainer->speaker)->last_name }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0" style="height: 80vh;">
+                        <iframe
+                            id="pdfIframe-{{ $trainer->id }}"
+                            src="{{ route('accreditation.average.print', $trainer->id) }}"
+                            style="width: 100%; height: 100%; border: none;"
+                            title="PDF Preview">
+                        </iframe>
+                    </div>
+                    <div class="modal-footer bg-light py-2 d-flex justify-content-start gap-4 align-items-center">
+                        <div class="d-flex align-items-center">
+                            <label for="fontScaleInput-{{ $trainer->id }}" class="me-2 mb-0 small text-muted">Font (%):</label>
+                            <input
+                                type="number"
+                                id="fontScaleInput-{{ $trainer->id }}"
+                                class="form-control form-control-sm"
+                                style="width: 75px;"
+                                value="100"
+                                min="-100"
+                                max="150"
+                                step="1"
+                            >
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <label for="paperSize-{{ $trainer->id }}" class="me-2 mb-0 small text-muted">Paper:</label>
+                            <select id="paperSize-{{ $trainer->id }}" class="form-select form-select-sm" style="width: auto;">
+                                <option value="A4">A4</option>
+                                <option value="Letter" selected>Letter</option>
+                                <option value="Legal">Legal</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+@endsection
+
+@section('styles')
     <style>
-        body { font-family: helvetica, sans-serif; font-size: 10pt; }
-        .container {
-            width: 100%;
-            padding: 5px;
+        /* Make modal resizable */
+        .modal-dialog-resizable {
+            resize: both;
+            overflow: auto;
         }
-        h3, h4 { text-align: center; margin: 5px 0; }
-        .section-title {
-            font-weight: bold;
-            margin-top: 15px;
-            margin-bottom: 5px;
+        .modal-dialog-resizable .modal-content {
+            overflow: hidden;
         }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-        th, td { border: 1px solid #000; padding: 5px; }
-        th { background-color: #f2f2f2; }
-        .no-border td, .no-border th { border: none; }
-        .underline { border-bottom: 1px solid #000; display: inline-block; min-width: 200px; }
     </style>
-</head>
-<body>
-<div class="container">
-    <h3>APPLICATION FORM FOR THE ACCREDITATION OF</h3>
-    <h4>TECHNICAL PERSONNEL / TRAINER / SUBJECT MATTER SPECIALIST</h4>
+@endsection
 
-    {{-- Applicant Info --}}
-    <p><strong>Name of Applicant:</strong>
-        <span class="underline">{{ $speaker->given_name }} {{ $speaker->middle_name }} {{ $speaker->last_name }} {{ $speaker->ext_name }}</span>
-    </p>
+@section('scripts')
+    <script>
+        // Initialize DataTables
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.getElementById('datatablesSimple');
+            if (table) {
+                new simpleDatatables.DataTable(table);
+            }
+        });
 
-    <p><strong>Field of Expertise:</strong>
-        <span class="underline">
-            {{ $speaker->expertises->pluck('expertis')->implode(', ') ?: 'N/A' }}
-        </span>
-    </p>
+        // Update iframe src with query params on change
+        document.querySelectorAll('[data-bs-toggle="modal"]').forEach(button => {
+            button.addEventListener('click', function () {
+                const target = this.getAttribute('data-bs-target');
+                const modal = document.querySelector(target);
+                if (modal && target.includes('printPdfModal')) {
+                    modal.addEventListener('shown.bs.modal', function () {
+                        const iframe = this.querySelector('iframe');
+                        const fontInput = this.querySelector('input[id^="fontScaleInput-"]');
+                        const paperSelect = this.querySelector('select[id^="paperSize-"]');
+                        const baseSrc = iframe.src; // Original route without params
 
-    <p><strong>Office/Organization:</strong>
-        <span class="underline">{{ $speaker->office->office_name ?? 'N/A' }}</span>
-    </p>
+                        function updatePdf() {
+                            let font = parseInt(fontInput.value, 10);
+                            if (isNaN(font) || font < -100) font = -100;
+                            if (font > 150) font = 150;
+                            const paper = paperSelect.value;
+                            iframe.src = baseSrc + `?font=${font}&paper=${paper}`;
+                        }
 
-    {{-- Educational Background --}}
-    <div class="section-title">Educational Background</div>
-    <table>
-        <thead>
-        <tr>
-            <th>Level/Degree</th>
-            <th>From Year</th>
-            <th>To Year</th>
-            <th>School/Institution</th>
-            <th>Year Graduated</th>
-            <th>Awards</th>
-        </tr>
-        </thead>
-        <tbody>
-        @forelse($speaker->educationalBackground as $edu)
-            <tr>
-                <td>{{ $edu->level }}</td>
-                <td>{{ $edu->from_year }}</td>
-                <td>{{ $edu->to_year }}</td>
-                <td>{{ $edu->school }}</td>
-                <td>{{ $edu->year_graduated }}</td>
-                <td>{{ $edu->awards }}</td>
-            </tr>
-        @empty
-            <tr><td colspan="6" align="center">No educational background records.</td></tr>
-        @endforelse
-        </tbody>
-    </table>
-
-    {{-- Work Experience --}}
-    <div class="section-title">Work Experience</div>
-    <table>
-        <thead>
-        <tr>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Company/Organization</th>
-            <th>Position</th>
-            <th>Division/Department</th>
-        </tr>
-        </thead>
-        <tbody>
-        @forelse($speaker->workExperiences as $work)
-            <tr>
-                <td>{{ $work->date_started }}</td>
-                <td>{{ $work->date_ended }}</td>
-                <td>{{ $work->name_company }}</td>
-                <td>{{ $work->position }}</td>
-                <td>{{ $work->division }}</td>
-            </tr>
-        @empty
-            <tr><td colspan="5" align="center">No work experience records.</td></tr>
-        @endforelse
-        </tbody>
-    </table>
-
-    {{-- Training / Seminar --}}
-    <div class="section-title">Training / Seminar Experience</div>
-    <table>
-        <thead>
-        <tr>
-            <th>Title</th>
-            <th>Venue</th>
-            <th>Date</th>
-            <th>Hours</th>
-            <th>Remarks</th>
-        </tr>
-        </thead>
-        <tbody>
-        @forelse($speaker->trainings as $training)
-            <tr>
-                <td>{{ $training->rt_title }}</td>
-                <td>{{ $training->rt_venue }}</td>
-                <td>{{ $training->rt_date }}</td>
-                <td>{{ $training->rt_no_hours }}</td>
-                <td>{{ $training->remarks ?? '' }}</td>
-            </tr>
-        @empty
-            <tr><td colspan="5" align="center">No training records.</td></tr>
-        @endforelse
-        </tbody>
-    </table>
-
-    {{-- Trainer Experience --}}
-    <div class="section-title">Experience as Trainer</div>
-    <table>
-        <thead>
-        <tr>
-            <th>Title</th>
-            <th>Venue</th>
-            <th>Date</th>
-            <th>Hours</th>
-        </tr>
-        </thead>
-        <tbody>
-        @forelse($speaker->experienceTrainer as $exp)
-            <tr>
-                <td>{{ $exp->rst_title }}</td>
-                <td>{{ $exp->rst_venue }}</td>
-                <td>{{ $exp->rst_date }}</td>
-                <td>{{ $exp->rst_no_hours }}</td>
-            </tr>
-        @empty
-            <tr><td colspan="4" align="center">No trainer experience records.</td></tr>
-        @endforelse
-        </tbody>
-    </table>
-
-    {{-- Publications --}}
-    <div class="section-title">Publications</div>
-    <table>
-        <thead>
-        <tr>
-            <th>Title</th>
-            <th>Publisher</th>
-            <th>Date</th>
-            <th>Venue</th>
-        </tr>
-        </thead>
-        <tbody>
-        @forelse($speaker->publications as $pub)
-            <tr>
-                <td>{{ $pub->p_title }}</td>
-                <td>{{ $pub->p_publisher }}</td>
-                <td>{{ $pub->p_date }}</td>
-                <td>{{ $pub->p_venue }}</td>
-            </tr>
-        @empty
-            <tr><td colspan="4" align="center">No publication records.</td></tr>
-        @endforelse
-        </tbody>
-    </table>
-
-    {{-- References --}}
-    <div class="section-title">References</div>
-    <table>
-        <thead>
-        <tr>
-            <th>Name/Agency</th>
-            <th>Address</th>
-            <th>Contact Person</th>
-            <th>Position</th>
-            <th>Tel No.</th>
-            <th>Cell No.</th>
-        </tr>
-        </thead>
-        <tbody>
-        @forelse($speaker->referencesTrainings as $ref)
-            <tr>
-                <td>{{ $ref->name_agency }}</td>
-                <td>{{ $ref->address }}</td>
-                <td>{{ $ref->contact_person }}</td>
-                <td>{{ $ref->position }}</td>
-                <td>{{ $ref->tel_no }}</td>
-                <td>{{ $ref->cell_no }}</td>
-            </tr>
-        @empty
-            <tr><td colspan="6" align="center">No references records.</td></tr>
-        @endforelse
-        </tbody>
-    </table>
-</div>
-</body>
-</html>
+                        fontInput.addEventListener('input', updatePdf);
+                        paperSelect.addEventListener('change', updatePdf);
+                    });
+                }
+            });
+        });
+    </script>
+@endsection

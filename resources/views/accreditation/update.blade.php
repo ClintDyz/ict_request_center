@@ -3,126 +3,214 @@
 @section('content')
 
 <style>
-    .jio {
-        pointer-events: none;
+    .criteria-box {
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        background: #fff;
     }
+    .criteria-header {
+        font-size: 17px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .score-input {
+        width: 90px;
+        float: right;
+        padding: 5px;
+        font-size: 16px;
+        text-align: center;
+    }
+    .total-box {
+        width: 90px;
+        padding: 8px;
+        font-size: 18px;
+        background: #fff6cc;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        text-align: center;
+        font-weight: bold;
+    }
+    .jio { pointer-events: none; }
 </style>
 
-<div class="col-md-12 mt-4 card card-default color-palette-box">
+<div class="col-md-12 mt-4 card card-default">
     <div class="card-header">
-        <div class="card-title card-info">
-            <strong>Update Accreditation</strong>
-        </div>
-        <hr>
-        <div class="card-body">
-            <form action="{{ route('accreditation.update', $accreditation->id) }}" method="POST">
-                @csrf
-                @method('PUT')
+        <strong>Update Accreditation</strong>
+    </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                <input type="hidden" name="training_title_rs" value="{{ $accreditation->training_title_rs }}">
+    <div class="card-body">
 
-                        <!-- Speaker Dropdown -->
-                        <label class="form-label">Speaker</label>
-                        <select name="rstbl_id" id="rstbl_id" class="form-select select2" required>
-                            <option value="">Select Speaker</option>
-                            @foreach($speakers as $speaker)
-                                <option value="{{ $speaker->id }}"
-                                        data-expertise="{{ $speaker->expertises->pluck('expertis')->implode(', ') }}"
-                                    {{ $accreditation->rstbl_id == $speaker->id ? 'selected' : '' }}>
-                                    {{ $speaker->given_name }} {{ $speaker->last_name }}
-                                </option>
-                            @endforeach
-                        </select>
+        <form action="{{ route('accreditation.update', $accreditation->id) }}" method="POST">
+            @csrf
+            @method('PUT')
 
-                        <!-- Field of Expertise -->
-                        <label class="form-label mt-3">Field of Expertise</label>
-                        <input type="text" name="field_of_expertise" id="field_of_expertise" class="form-control jio"
-                               value="{{ $accreditation->field_of_expertise }}" readonly>
-                    </div>
+            {{-- Speaker Details --}}
+            <div class="mb-4">
+                <label>Resource Speaker</label>
+                <input type="text" class="form-control jio"
+                    value="{{ $accreditation->speaker->given_name }} {{ $accreditation->speaker->last_name }}" readonly>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Education</label>
-                        <input type="number" name="education" class="form-control score-box" value="{{ $accreditation->education }}">
+                <input type="hidden" name="rstbl_id" value="{{ $accreditation->speaker->id }}">
 
-                        <label class="form-label mt-3">Work</label>
-                        <input type="number" name="work" class="form-control score-box" value="{{ $accreditation->work }}">
+                <label class="mt-3">Field of Expertise</label>
+                <input type="text" class="form-control jio"
+                       value="{{ $accreditation->field_of_expertise }}" readonly>
+            </div>
 
-                        <label class="form-label mt-3">Seminar</label>
-                        <input type="number" name="seminar" class="form-control score-box" value="{{ $accreditation->seminar }}">
+            {{-- ============================ CRITERIA BOXES ============================ --}}
 
-                        <label class="form-label mt-3">Experience</label>
-                        <input type="number" name="experience" class="form-control score-box" value="{{ $accreditation->experience }}">
-
-                        <label class="form-label mt-3">Award</label>
-                        <input type="number" name="award" class="form-control score-box" value="{{ $accreditation->award }}">
-
-                        <label class="form-label mt-3">Total</label>
-                        <input type="number" name="total" class="form-control score-box jio" value="{{ $accreditation->total }}" readonly>
-
-                        <p class="mt-2"><em>Note: Standard Passing Score is 75 points.</em>
-                            <span class="pass-fail-status fw-bold"></span>
-                        </p>
-                    </div>
-                <input type="hidden" name="status" value="{{ $accreditation->status }}" readonly>
-                <input type="hidden" name="updated_by" value="{{ auth()->id() }}">
+            {{-- 1.0 EDUCATIONAL QUALIFICATIONS --}}
+            <div class="criteria-box">
+                <div class="criteria-header">1.0 Relevant Educational Qualifications – 30 points
+                    <input type="number" name="education" class="score-input score-box"
+                           value="{{ $accreditation->education }}">
                 </div>
 
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-success">Update Accreditation</button>
+                            <div class="col-md-10">
+                            <div class="d-flex justify-content-between">
+                            <div>Technical/ Vocational Course </div><div>(15)</div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                            <div>Bachelor's Degree </div><div>(20)</div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                            <div>Master's Degree </div><div>(25)</div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                            <div>Doctorate Degree </div><div>(30)</div>
+                            </div>
+                            </div>
+            </div>
+
+            {{-- 2.0 WORK EXPERIENCE --}}
+            <div class="criteria-box">
+                <div class="criteria-header">2.0 Relevant Work Experience – 30 points
+                    <input type="number" name="work" class="score-input score-box"
+                           value="{{ $accreditation->work }}">
                 </div>
-            </form>
-        </div>
+                 <div class="col-md-10">
+                <div class="d-flex justify-content-between">
+                  <div>At least two (2) years </div><div>(20)</div>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <div>Three (3) to five (5) years</div><div> (25)</div>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <div>More than five (5) years </div><div>(30)</div>
+                </div>
+                </div>
+            </div>
+
+            {{-- 3.0 TRAININGS --}}
+            <div class="criteria-box">
+                <div class="criteria-header">3.0 Relevant Trainings/Seminars Attended – 20 points
+                    <input type="number" name="seminar" class="score-input score-box"
+                           value="{{ $accreditation->seminar }}">
+                </div>
+                <div class="col-md-10">
+                <div class="d-flex justify-content-between">
+                  <div>40 – 80 hours </div><div>(10)</div>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <div>81 – 120 hours </div><div>(15)</div>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <div>121 hours and above </div><div>(20)</div>
+                </div>
+                </div>
+            </div>
+
+            {{-- 4.0 TRAINER EXPERIENCE --}}
+            <div class="criteria-box">
+                <div class="criteria-header">4.0 Experience As Trainer/ Resource Person – 10 points
+                    <input type="number" name="experience" class="score-input score-box"
+                           value="{{ $accreditation->experience }}">
+                </div>
+                <div class="col-md-10">
+                <div class="d-flex justify-content-between">
+                  <div>Conducted training/lecture for at least 30 hrs or</div>
+                  <div> (10)</div>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <div>recognized as trainer by institutions on specific subject matter </div>
+                  <div>(5)</div>
+                </div>
+                </div>
+            </div>
+
+            {{-- 5.0 TECHNICAL MERITS --}}
+            <div class="criteria-box">
+                <div class="criteria-header">5.0 Relevant Technical Merits – 10 points
+                    <input type="number" name="award" class="score-input score-box"
+                           value="{{ $accreditation->award }}">
+                </div>
+                <div class="col-md-10">
+                <div class="d-flex justify-content-between">
+                  <div>National Recognitions/ Awards/ Publications </div><div>(10)</div>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <div>Local Recognition/ Awards/ Publications </div><div>(5)</div>
+                </div>
+                    </div>
+            </div>
+
+            {{-- ============================ TOTAL SECTION ============================ --}}
+
+                                <!-- Total -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
+                        <div><strong>TOTAL</strong></div>
+                        <div class="d-flex align-items-center">
+                            <input type="number" name="total" class="form-control total-input" readonly value="">
+                        </div>
+                    </div>
+            <div class="mt-4">
+                <p class="mt-2">
+                    <em>Note: Standard Passing Score is 75 points.</em>
+                    <span class="pass-fail-status fw-bold"></span>
+                </p>
+            </div>
+
+            <input type="hidden" name="training_title_rs" value="{{ $accreditation->training_title_rs }}">
+            <input type="hidden" name="status" value="{{ $accreditation->status }}">
+            <input type="hidden" name="updated_by" value="{{ auth()->id() }}">
+
+            <button type="submit" class="btn btn-success mt-3">Update Accreditation</button>
+        </form>
+
     </div>
 </div>
+
 @endsection
 
+
 @section('scripts')
-<!-- Include Select2 CSS/JS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
 <script>
-    $(document).ready(function () {
-        // Initialize Select2 on speaker dropdown
-        $('#rstbl_id').select2({
-            placeholder: 'Select Speaker',
-            allowClear: true
+$(document).ready(function () {
+
+    function calculateTotal() {
+        let total = 0;
+
+        $('.score-box').each(function () {
+            let val = parseFloat($(this).val());
+            if (!isNaN(val)) total += val;
         });
 
-        // Set expertise when a speaker is selected
-        $('#rstbl_id').on('change', function () {
-            const selectedOption = $(this).find(':selected');
-            const expertise = selectedOption.data('expertise') || '';
-            $('#field_of_expertise').val(expertise);
-        });
+        $('input[name="total"]').val(total);
 
-        // Score calculation
-        $('.score-box').on('input', function () {
-            let total = 0;
-            $('input.score-box[name]:not([name="total"])').each(function () {
-                const val = parseFloat($(this).val());
-                if (!isNaN(val)) {
-                    total += val;
-                }
-            });
+        const status = $('.pass-fail-status');
 
-            $('input[name="total"]').val(total);
+        if (total >= 75) {
+            status.text('PASSED').removeClass('text-danger').addClass('text-success');
+        } else {
+            status.text('FAILED').removeClass('text-success').addClass('text-danger');
+        }
+    }
 
-            const statusEl = $('.pass-fail-status');
-            if (total >= 75) {
-                statusEl.text('PASSED').removeClass('text-danger').addClass('text-success');
-            } else {
-                statusEl.text('FAILED').removeClass('text-success').addClass('text-danger');
-            }
-        });
+    $('.score-box').on('input', calculateTotal);
 
-        // Trigger calculation on load
-        $('.score-box').first().trigger('input');
-
-        // Pre-fill field of expertise on load
-        $('#rstbl_id').trigger('change');
-    });
+    calculateTotal();
+});
 </script>
 @endsection

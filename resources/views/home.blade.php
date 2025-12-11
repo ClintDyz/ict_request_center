@@ -5,182 +5,233 @@
 <ol class="breadcrumb mb-4">
     <li class="breadcrumb-item active">Dashboard</li>
 </ol>
-{{-- <div class="row"> --}}
 
+<style>
+    .dashboard-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: transform .2s ease;
+    }
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+    }
+    .card-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        margin-bottom: 4px;
+    }
+    .stat-value {
+        font-size: 32px;
+        font-weight: 900;
+    }
+</style>
 
-    <div class="row">
-        <div class="col-xl-4 col-md-6">
-            <div class="card bg-primary text-white mb-4">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs row font-weight-bold text-uppercase mb-1">
-                                <h4> Resource Speaker </h4> </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $resourceSpeakerCount }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-user-group fa-4x"></i>
-                        </div>
-                    </div>       </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ url('/rstbl') }}">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
+<div class="row">
+
+    {{-- Pending --}}
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-white dashboard-card">
+            <div class="card-body">
+                <div class="card-title">Pending</div>
+                <div class="stat-value">{{ $pendingCount }}</div>
+                <i class="fas fa-hourglass-start fa-3x float-end opacity-75"></i>
+            </div>
+            <div class="card-footer text-white d-flex justify-content-between">
+                <a class="small text-white stretched-link" href="{{ url('/rstbl') }}">View Details</a>
+                <i class="fas fa-arrow-right"></i>
             </div>
         </div>
-
-        <div class="col-xl-4 col-md-6">
-            <div class="card bg-info text-white mb-4">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-uppercase mb-1">
-                                <h4> List of To Be Accredited </h4>
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $toBeAccreditedCount }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fa-solid fa-chalkboard-user fa-4x"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ url('/accreditation') }}">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-4 col-md-6">
-            <div class="card bg-success text-white mb-4">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-uppercase mb-1">
-                                <h4> List of the Accredited </h4>
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $accreditedCount }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fa-solid fa-chalkboard-user fa-4x"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="{{ url('/accreditation_average') }}">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-        <div class="row">
+    {{-- Approved --}}
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white dashboard-card">
+            <div class="card-body">
+                <div class="card-title">Approved</div>
+                <div class="stat-value">{{ $approvedCount }}</div>
+                <i class="fas fa-thumbs-up fa-3x float-end opacity-75"></i>
+            </div>
+            <div class="card-footer text-white d-flex justify-content-between">
+                <a class="small text-white stretched-link" href="{{ url('/approved-speakers') }}">View Details</a>
+                <i class="fas fa-arrow-right"></i>
+            </div>
+        </div>
+    </div>
 
-        <div class="col-xl-4 col-md-6">
+    {{-- Accredited --}}
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white dashboard-card">
+            <div class="card-body">
+                <div class="card-title">Accredited</div>
+                <div class="stat-value">{{ $accreditedCount }}</div>
+                <i class="fas fa-certificate fa-3x float-end opacity-75"></i>
+            </div>
+            <div class="card-footer text-white d-flex justify-content-between">
+                <a class="small text-white stretched-link" href="{{ url('/accreditation_average') }}">View Details</a>
+                <i class="fas fa-arrow-right"></i>
+            </div>
+        </div>
+    </div>
 
-        <div class="card">
-            <div class="card-header">
-                 <i class="fas fa-chart-pie me-1"></i>
-                Resource Speaker Gender Distribution</div>
+    {{-- Resource Speakers --}}
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary text-white dashboard-card">
+            <div class="card-body">
+                <div class="card-title">Specialist</div>
+                <div class="stat-value">{{ $resourceSpeakerCount }}</div>
+                <i class="fas fa-users fa-3x float-end opacity-75"></i>
+            </div>
+            <div class="card-footer text-white d-flex justify-content-between">
+                <a class="small text-white stretched-link" href="#">View Details</a>
+                <i class="fas fa-arrow-right"></i>
+            </div>
+        </div>
+    </div>
+
+
+    {{-- <div class="col-xl-4 col-md-6 mb-4">
+    <div class="card bg-dark text-white dashboard-card">
+        <div class="card-body">
+            <div class="card-title">Age Profile</div>
+            <div class="stat-value">{{ $age_18_25 + $age_26_35 + $age_36_45 + $age_46_60 + $age_60_plus }}</div>
+            <i class="fas fa-user-clock fa-3x float-end opacity-75"></i>
+        </div>
+        <div class="card-footer text-white d-flex justify-content-between">
+            <span>Total Profiles Analyzed</span>
+        </div>
+    </div>
+</div> --}}
+
+</div>
+
+{{-- Charts --}}
+<div class="row mt-4">
+
+    {{-- Gender Chart --}}
+    <div class="col-xl-4 col-md-12 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-header bg-light fw-bold">
+                <i class="fas fa-chart-pie me-1"></i> Gender Distribution
+            </div>
             <div class="card-body">
                 <canvas id="genderChart"></canvas>
             </div>
         </div>
+    </div>
 
-        </div>
-
-                <div class="col-xl-4 col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-chart-pie me-1"></i>
-                        Accreditation Status Overview
-                    </div>
-                    <div class="card-body"><canvas id="accreditationChart" width="100%" height="40"></canvas></div>
-                </div>
+    {{-- Status Chart --}}
+    <div class="col-xl-4 col-md-12 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-header bg-light fw-bold">
+                <i class="fas fa-chart-pie me-1"></i> Accreditation Status Overview
             </div>
-
-        </div>
-    {{-- <div class="col-xl-3 col-md-6">
-        <div class="card bg-warning text-white mb-4">
-            <div class="card-body">Warning Card</div>
-            <div class="card-footer d-flex align-items-center justify-content-between">
-                <a class="small text-white stretched-link" href="#">View Details</a>
-                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+            <div class="card-body">
+                <canvas id="accreditationChart"></canvas>
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card bg-success text-white mb-4">
-            <div class="card-body">Success Card</div>
-            <div class="card-footer d-flex align-items-center justify-content-between">
-                <a class="small text-white stretched-link" href="#">View Details</a>
-                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-            </div>
+
+    {{-- <div class="col-xl-4 col-md-12 mb-4">
+    <div class="card dashboard-card">
+        <div class="card-header bg-light fw-bold">
+            <i class="fas fa-chart-bar me-1"></i> Age Profile Distribution
         </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card bg-danger text-white mb-4">
-            <div class="card-body">Danger Card</div>
-            <div class="card-footer d-flex align-items-center justify-content-between">
-                <a class="small text-white stretched-link" href="#">View Details</a>
-                <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-            </div>
+        <div class="card-body">
+            <canvas id="ageChart"></canvas>
         </div>
     </div>
 </div> --}}
+
+
+</div>
 
 @endsection
 
 
 @section('scripts')
-
+{{-- Gender Chart --}}
 <script>
-    const ctx = document.getElementById('genderChart').getContext('2d');
-    const genderChart = new Chart(ctx, {
+    new Chart(document.getElementById('genderChart'), {
         type: 'pie',
         data: {
             labels: ['Male', 'Female'],
             datasets: [{
-                label: 'Gender Distribution',
                 data: [{{ $maleCount }}, {{ $femaleCount }}],
-                backgroundColor: ['#36A2EB', '#FF6384'],
-                borderWidth: 1
+                backgroundColor: ['#007bff', '#e83e8c']
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: {
-                    position: 'bottom'
-                }
+                legend: { position: 'bottom' }
             }
         }
     });
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('accreditationChart');
 
-        new Chart(ctx, {
-            type: 'pie', // You can also use 'bar' for a bar chart
-            data: {
-                labels: ['To Be Accredited', 'Accredited'],
-                datasets: [{
-                    data: [{{ $toBeAccreditedCount }}, {{ $accreditedCount }}],
-                    backgroundColor: ['#17a2b8', '#28a745'], // Info and Success colors
-                    hoverBackgroundColor: ['#138496', '#218838']
-                }]
+{{-- Accreditation Chart --}}
+<script>
+    new Chart(document.getElementById('accreditationChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Pending', 'Approved', 'Accredited'],
+            datasets: [{
+                data: [
+                    {{ $pendingCount }},
+                    {{ $approvedCount }},
+                    {{ $accreditedCount }}
+                ],
+                backgroundColor: ['#ffc107', '#17a2b8', '#28a745']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+        new Chart(document.getElementById('ageChart'), {
+        type: 'bar',
+        data: {
+            labels: [
+                '18–25',
+                '26–35',
+                '36–45',
+                '46–60',
+                '60+'
+            ],
+            datasets: [{
+                label: 'Age Count',
+                data: [
+                    {{ $age_18_25 }},
+                    {{ $age_26_35 }},
+                    {{ $age_36_45 }},
+                    {{ $age_46_60 }},
+                    {{ $age_60_plus }}
+                ],
+                backgroundColor: [
+                    '#007bff',
+                    '#17a2b8',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                    },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
                 }
             }
-        });
+        }
     });
 </script>
 @endsection

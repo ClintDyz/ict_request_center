@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect('/login');
 });
+    Route::get('/resource_speaker/create', [App\Http\Controllers\RstblController::class, 'create'])->name('resource_speaker.create'); // Show form
+    Route::post('/resource_speaker', [App\Http\Controllers\RstblController::class, 'store'])->name('resource_speaker.store'); // Handle form submission
 
 Auth::routes();
 
@@ -27,24 +29,38 @@ Auth::routes();
 Route::middleware(['auth', 'web', 'throttle:60,1'])->group(function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('/rstbl', [App\Http\Controllers\RstblController::class, 'index'])->name('resource_speaker.index');
-    Route::get('/resource_speaker/create', [App\Http\Controllers\RstblController::class, 'create'])->name('resource_speaker.create'); // Show form
-    Route::post('/resource_speaker', [App\Http\Controllers\RstblController::class, 'store'])->name('resource_speaker.store'); // Handle form submission
     Route::get('resource_speaker/{id}', [App\Http\Controllers\RstblController::class, 'show'])->name('resource_speaker.view');
     Route::get('resource_speaker/{id}/edit', [App\Http\Controllers\RstblController::class, 'edit'])->name('resource_speaker.edit');
     Route::put('resource_speaker/{id}', [App\Http\Controllers\RstblController::class, 'update'])->name('resource_speaker.update');
     Route::delete('resource_speaker/{id}', [App\Http\Controllers\RstblController::class, 'destroy'])->name('resource_speaker.destroy');
 
-Route::get('/resource_speaker/pdf/{id}', [App\Http\Controllers\RstblController::class, 'printPDF'])->name('resource_speaker.print');
+    Route::get('/resource_speaker/pdf/{id}', [App\Http\Controllers\RstblController::class, 'printPDF'])->name('resource_speaker.print');
+        // In your web.php or routes file
+    Route::put('resource-speaker/{id}/update-status', [App\Http\Controllers\RstblController::class, 'updateStatus'])->name('resource_speaker.updateStatus');
 
+Route::get('/masterlist', [App\Http\Controllers\ResourceSpeakerMasterListController::class, 'index'])
+    ->name('resource_speaker.masterlist');
 
-// User routes
+Route::get('/resource-speaker/export', [App\Http\Controllers\ResourceSpeakerMasterListController::class, 'export'])
+    ->name('resource_speaker.export');
+// Excel Export (Alternative)
+Route::get('/resource-speaker/export-excel', [App\Http\Controllers\ResourceSpeakerMasterListController::class, 'exportExcel'])
+    ->name('resource_speaker.export_excel');
+
+    // User routes
 Route::get('user', [App\Http\Controllers\UserController::class, 'index'])->name('accounts.index');
 Route::get('users/create', [App\Http\Controllers\UserController::class, 'create'])->name('users.create');
 Route::post('users', [App\Http\Controllers\UserController::class, 'store'])->name('users.store');
-Route::get('users/{user}', [App\Http\Controllers\UserController::class, 'show'])->name('users.show');
-Route::get('users/{user}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
-Route::put('users/{user}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
-Route::delete('users/{user}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.destroy');
+Route::get('users/{id}', [App\Http\Controllers\UserController::class, 'show'])->name('users.show');
+Route::get('users/{id}/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('users.edit');
+Route::put('users/{id}', [App\Http\Controllers\UserController::class, 'update'])->name('users.update');
+Route::put('users/{id}/reset-password', [App\Http\Controllers\UserController::class, 'resetPassword'])->name('users.resetPassword');
+Route::delete('users/{id}', [App\Http\Controllers\UserController::class, 'destroy'])->name('users.destroy');
+
+Route::get('/profile', [App\Http\Controllers\UserController::class, 'profile'])->name('accounts.profile');
+Route::put('/profile/update', [App\Http\Controllers\UserController::class, 'updateProfile'])->name('accounts.updateProfile');
+Route::put('/profile/change-password', [App\Http\Controllers\UserController::class, 'changePassword'])->name('accounts.changePassword');
+
 
 //Tranings
 Route::get('training', [App\Http\Controllers\RequestResourceSpeakerController::class, 'index'])->name('training.index');
@@ -72,6 +88,9 @@ Route::put('/accreditation/{id}', [App\Http\Controllers\AccreditationController:
 Route::delete('/accreditation/{id}', [App\Http\Controllers\AccreditationController::class, 'destroy'])->name('accreditation.destroy');
 Route::post('/accreditation/approve', [App\Http\Controllers\AccreditationController::class, 'approve'])->name('accreditation.approve');
 
+Route::get('/approved-speakers', [App\Http\Controllers\AccreditationController::class, 'show'])->name('approved_speakers.show');
+
+
 
 // Route::get('/accreditation/pdf/{trainer}', [App\Http\Controllers\AccreditationController::class, 'generatePDF'])->name('accreditation.print');
 // For AccreditationController
@@ -84,7 +103,7 @@ Route::get('/accreditation/average/pdf/{id}', [App\Http\Controllers\Accreditatio
 
 
 //Average
-Route::get('/accreditation_average', [App\Http\Controllers\AccreditationAverageController::class, 'index'])->name('accreditation.index');
+Route::get('/accreditation_average', [App\Http\Controllers\AccreditationAverageController::class, 'index'])->name('accreditationn_average.index');
 
 
     // Division routes

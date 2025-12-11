@@ -124,10 +124,17 @@ window.onload = function() {
                                 {{-- <button class="btn btn-info" onclick="showPosition('{{ $position->position }}')">Show</button> --}}
 
                                 <!-- Button trigger modal for Edit -->
-                                <button class="btn btn-primary" onclick="editPosition({{ $position->id }}, '{{ $position->position }}')">Edit</button>
+                                <button class="btn btn-primary" onclick="editPosition({{ $position->id }}, '{{ $position->position }}')">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+
+                                </button>
 
                                 <!-- Button trigger modal for Delete -->
-                                <button class="btn btn-danger" onclick="deletePosition({{ $position->id }})">Delete</button>
+                              @if(auth()->user()->emp_type == '0')
+                                <button class="btn btn-danger" onclick="deletePosition({{ $position->id }})">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -157,7 +164,7 @@ window.onload = function() {
                     </div>
                     <div class="modal-footer bg-success">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save Division</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
             </div>
@@ -184,7 +191,7 @@ window.onload = function() {
                 </div>
                 <div class="modal-footer bg-success">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Update Position</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
         </div>
@@ -208,7 +215,7 @@ window.onload = function() {
                     </div>
                     <div class="modal-footer bg-warning">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-danger">Delete Position</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
                     </div>
                 </form>
             </div>

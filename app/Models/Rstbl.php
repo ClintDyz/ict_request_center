@@ -15,8 +15,8 @@ class Rstbl extends Model
     protected $fillable = [
         'img','last_name', 'given_name', 'middle_name', 'ext_name', 'date_of_birth',
         'place_of_birth', 'age', 'email', 'building_no', 'home_address',
-        'building_no', 'home_barangay', 'home_municipality', 'home_province',
-        'home_zip_code', 'home_tel_no', 'home_cell_no', 'home_fax_no', 'gender', 'img', 'created_by'
+        'home_building_no', 'home_barangay', 'home_municipality', 'home_province',
+        'home_zip_code', 'home_tel_no', 'home_cell_no', 'home_fax_no', 'gender',  'status', 'created_by'
     ];
 
     public function referencesTrainings()

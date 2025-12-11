@@ -230,10 +230,11 @@
   <div class="header">
             <div class="logo">
                 <!-- Replace this div with actual logo image -->
-                <div class="logo-placeholder">DOST LOGO</div>
+                <img src="{{ asset('img/DOST-CAR.png') }}" width="90" height="90">
+                {{-- <div class="logo-placeholder">DOST LOGO</div> --}}
             </div>
 
-            <div class="header-text">
+            <div class="header-text mt-2">
                 <div class="republic">Republic of the Philippines</div>
                 <div class="department">Department of Science and Technology</div>
                 <div class="region">Cordillera Administrative Region</div>
@@ -251,6 +252,16 @@
                 TECHNICAL PERSONNEL/TRAINER/SUBJECT MATTER SPECIALIST
             </div>
         </div>
+
+        <!-- IMG -->
+            <div class="name-section mt-3" style="text-align:right;">
+                @if($speaker->img)
+                    <img src="{{ asset($speaker->img) }}" alt="User Photo" width="100" height="100" style="object-fit: cover; border:1px solid #000;">
+                @else
+                    <span><i class="fa fa-user-circle" aria-hidden="true" style="object-fit: cover; border:1px solid #000;height: 100px;width: 100px;"></i></span>
+                @endif
+            </div>
+
     <!-- Name Row -->
         <div class="name-row">
             <div class="name-section">
@@ -305,33 +316,33 @@
 
         <div class="address-row">
             <label>Building No.:</label>
-            <div class="value">{{ $speaker->home_building_no }}</div>
+            <div class="value">{{ $speaker->office->building_no ?? 'N/A' }}</div>
             <label>Street/Barangay:</label>
-            <div class="value">{{ $speaker->home_barangay }}</div>
+            <div class="value">{{ $speaker->office->barangay }}</div>
         </div>
 
         <div class="address-row">
             <label>Municipality/City:</label>
-            <div class="value">{{ $speaker->home_municipality }}</div>
+            <div class="value">{{ $speaker->office->municipality }}</div>
             <label>Province:</label>
-            <div class="value">{{ $speaker->home_province }}</div>
+            <div class="value">{{ $speaker->office->province }}</div>
         </div>
 
         <div class="form-field">
             <label>Zip Code:</label>
-            <div class="value">{{ $speaker->home_zip_code }}</div>
+            <div class="value">{{ $speaker->office->zip_code }}</div>
         </div>
 
         <div class="contact-row">
             <label>Tel. No.:</label>
-            <div class="value">{{ $speaker->home_tel_no }}</div>
+            <div class="value">{{ $speaker->office->tel_no }}</div>
             <label>Cellphone No.:</label>
-            <div class="value">{{ $speaker->home_cell_no }}</div>
+            <div class="value">{{ $speaker->office->cell_no }}</div>
         </div>
 
         <div class="form-field">
             <label style="margin-left: 50px;">Fax No.:</label>
-            <div class="value">{{ $speaker->home_fax_no }}</div>
+            <div class="value">{{ $speaker->office->fax_no }}</div>
         </div>
 
 
@@ -432,7 +443,7 @@
 
   {{-- Training / Seminar Experience --}}
   <div class="section">
-    <div class="label">Training/Seminar Experience</div>
+    <div class="label">Training Experience as Trainer</div>
     <table>
       <tr><th>Title</th><th>Venue</th><th>Date</th><th>Hours</th></tr>
       @foreach($speaker->trainings as $t)
@@ -448,7 +459,7 @@
 
   {{-- Training as Trainer --}}
   <div class="section">
-    <div class="label">Training Experience as Trainer</div>
+    <div class="label">Training/Seminar Experience</div>
     <table>
       <tr><th>Title</th><th>Venue</th><th>Date</th><th>Hours</th></tr>
       @foreach($speaker->experienceTrainer as $et)

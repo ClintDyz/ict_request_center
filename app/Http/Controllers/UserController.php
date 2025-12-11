@@ -8,6 +8,7 @@ use App\Models\Unit; // Changed from Province to Unit
 use App\Models\Province;
 use App\Models\Division;
 use App\Models\Position;
+use Illuminate\Validation\Rule;
 
 use DB;
 
@@ -182,4 +183,71 @@ class UserController extends Controller
         return response()->json(['success' => 'User deleted successfully.']);
     }
 
+   public function profile()
+    {
+        $user = auth()->user();
+        return view('accounts.profile', compact('user'));
+    }
+
+    /**
+     * Update the authenticated user's profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'firstname' => 'required|string|max:255',
+            'middlename' => 'nullable|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'gender' => 'nullable|string',
+            'division' => 'nullable|string|max:255',
+            'unit' => 'nullable|string|max:255',
+            'position' => 'nullable|string|max:255',
+            'province' => 'nullable|string|max:255',
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->route('accounts.profile')->with('success', 'Profile updated successfully!');
+    }
+
+    /**
+     * Change the authenticated user's password.
+     */
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = auth()->user();
+
+        // Check if current password is correct
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Current password is incorrect']);
+        }
+
+        // Update password
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return redirect()->route('accounts.profile')->with('success', 'Password changed successfully!');
+    }
+
+    public function resetPassword($id)
+{
+    try {
+        $user = User::findOrFail($id);
+        $user->password = bcrypt('12345678');
+        $user->save();
+
+        return response()->json(['success' => 'Password has been reset to 12345678 successfully.']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Failed to reset password.'], 500);
+    }
+}
 }

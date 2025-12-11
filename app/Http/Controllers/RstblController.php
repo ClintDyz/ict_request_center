@@ -20,15 +20,37 @@ use Illuminate\Support\Facades\Log;
 
 class RstblController extends Controller
 {
-    public function index()
-    {
-        // $speakers = Rstbl::all();
-        // $expertis = Expertis::with('expertis')->get();
-        $speakers = Rstbl::with('expertises')->get();
+public function index(Request $request)
+{
+    $perPage = $request->get('per_page', 10);
+    $search = $request->get('search', '');
 
-        return view('resource_speaker.index', compact('speakers'));
+    $query = Rstbl::with('expertises')
+                  ->where('status', 'Pending');
+
+    // Add search functionality
+    if (!empty($search)) {
+        $query->where(function($q) use ($search) {
+            $q->where('last_name', 'LIKE', "%{$search}%")
+              ->orWhere('given_name', 'LIKE', "%{$search}%")
+              ->orWhere('middle_name', 'LIKE', "%{$search}%")
+              ->orWhere('email', 'LIKE', "%{$search}%")
+              ->orWhere('home_address', 'LIKE', "%{$search}%")
+              ->orWhere('gender', 'LIKE', "%{$search}%");
+        });
     }
 
+    $speakers = $query->orderBy('created_at', 'desc')
+                      ->paginate($perPage);
+
+    // Append search and per_page to pagination links
+    $speakers->appends([
+        'search' => $search,
+        'per_page' => $perPage
+    ]);
+
+    return view('resource_speaker.index', compact('speakers'));
+}
     public function create()
     {
         // dd($request->all());
@@ -81,7 +103,7 @@ class RstblController extends Controller
                 'email' => $request->email,
                 'expertise' => $request->expertise,
                 'home_address' => $request->home_address,
-                'building_no' => $request->home_building_no,
+                'home_building_no' => $request->home_building_no,
                 'home_barangay' => $request->home_barangay,
                 'home_municipality' => $request->home_municipality,
                 'home_province' => $request->home_province,
@@ -89,8 +111,9 @@ class RstblController extends Controller
                 'home_tel_no' => $request->home_tel_no,
                 'home_cell_no' => $request->home_cell_no,
                 'home_fax_no' => $request->home_fax_no,
-                'created_by' =>  Auth::id(),
                 'img' => $imagePath, // Save the correct relative path
+
+                    'created_by' => Auth::check() ? Auth::id() : null,
 
             ]);
 
@@ -215,9 +238,17 @@ class RstblController extends Controller
 
 
         });
+// After transaction...
 
-        // Redirect back with success message
-        return redirect()->route('resource_speaker.index')->with('create', 'med_form');
+// If user is NOT logged in (guest)
+if (!Auth::check()) {
+    return redirect()->route('resource_speaker.create')
+        ->with('success', 'Thank you! Your Resource Speaker application has been submitted.');
+}
+
+// If admin/user is logged in
+return redirect()->route('resource_speaker.index')->with('create', 'med_form');
+
     }
 
 
@@ -439,6 +470,7 @@ public function update(Request $request, $id)
 
                 // Find the record by ID
                 $rstbl = Rstbl::findOrFail($id);
+    $rstbl->expertises()->delete();
 
                 // Delete the record
                 $rstbl->delete();
@@ -464,6 +496,12 @@ public function update(Request $request, $id)
                 // Page header
                 public function Header()
                 {
+                        // ✅ Add your logo image
+                        $image_file = public_path('img/Dostcar.jpg'); // path to your image
+                        if (file_exists($image_file)) {
+                            // x, y, width (height auto-calculated)
+                            $this->Image($image_file, 15, 10, 20); // adjust position & size
+                        }
                     // Header text
                     $this->SetFont('helvetica', 'B', 10);
                     $this->SetXY(40, 10);
@@ -541,42 +579,25 @@ public function update(Request $request, $id)
      */
     private function generateFormContent($pdf, $speaker)
     {
-        // Set font
-        $pdf->SetFont('helvetica', '', 10);
-
-        // Title
         $pdf->SetFont('helvetica', 'B', 12);
         $pdf->Cell(0, 10, 'APPLICATION FORM FOR THE ACCREDITATION OF', 0, 1, 'C');
         $pdf->Cell(0, 10, 'TECHNICAL PERSONNEL/TRAINER/SUBJECT MATTER SPECIALIST', 0, 1, 'C');
         $pdf->Ln(5);
 
-        // Personal Information Section
-        // $pdf->SetFont('helvetica', 'B', 10);
-        // $pdf->Cell(0, 8, 'Name:', 0, 1, 'L');
-
-        // Name with data
         $pdf->SetFont('helvetica', '', 10);
-        // $y = $pdf->GetY();
-
-        // Fill in the actual name data
-        // $pdf->SetY($y);
         $pdf->Cell(15, 8, 'Name:', 0, 0, 'L');
         $pdf->Cell(45, 8, $speaker->last_name ?? '', 'B', 0, 'L');
         $pdf->Cell(45, 8, $speaker->given_name ?? '', 'B', 0, 'L');
         $pdf->Cell(40, 8, $speaker->middle_name ?? '', 'B', 0, 'L');
         $pdf->Cell(35, 8, $speaker->ext_name ?? '', 'B', 1, 'L');
-
-        // Name labels
         $pdf->SetFont('helvetica', '', 8);
         $pdf->Cell(15, 8, '', 0, 0, 'L');
         $pdf->Cell(45, 5, 'Last Name', 0, 0, 'L');
         $pdf->Cell(45, 5, 'Given Name', 0, 0, 'L');
         $pdf->Cell(40, 5, 'Middle Name', 0, 0, 'L');
         $pdf->Cell(35, 5, 'Name Ext\'n (e.g., III, Sr)', 0, 1, 'L');
-
         $pdf->Ln(5);
 
-        // Date of Birth and Place of Birth
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->Cell(27, 8, 'Date of Birth:', 0, 0, 'L');
         $pdf->SetFont('helvetica', '', 10);
@@ -589,122 +610,78 @@ public function update(Request $request, $id)
         $pdf->Cell(15, 8, 'Age:', 0, 0, 'L');
         $pdf->SetFont('helvetica', '', 10);
         $pdf->Cell(35, 8, $speaker->age ?? '', 'B', 1, 'L');
-
         $pdf->Ln(3);
 
-        // Gender and Email
         $pdf->SetFont('helvetica', 'B', 10);
-        $pdf->Cell(40, 8, 'Office/Organization::', 0, 0, 'L');
+        $pdf->Cell(40, 8, 'Office/Organization:', 0, 0, 'L');
         $pdf->SetFont('helvetica', '', 10);
         $pdf->Cell(100, 8, $speaker->office->office_organization ?? 'N/A', 'B', 0, 'L');
-
         $pdf->Ln(5);
-        $pdf->Ln(5);
-
 
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->Cell(20, 8, 'Position:', 0, 0, 'L');
         $pdf->SetFont('helvetica', '', 10);
         $pdf->Cell(75, 8, $speaker->office->position ?? 'N/A', 'B', 1, 'L');
+        $pdf->Ln(3);
 
-        $pdf->Ln(5);
-
-         $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(40, 8, 'Office/Organization::', 0, 0, 'L');
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->Cell(100, 8, $speaker->office->office_organization ?? 'N/A', 'B', 0, 'L');
-
-    $pdf->Ln(5);
-    $pdf->Ln(5);
-
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(20, 8, 'Position:', 0, 0, 'L');
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->Cell(75, 8, $speaker->office->position ?? 'N/A', 'B', 1, 'L');
-
-    $pdf->Ln(3);
-        // This is the correct, inline code you have added
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->Cell(0, 8, 'Office Address:', 0, 1, 'L');
         $pdf->SetFont('helvetica', '', 10);
-
         $pdf->SetX(20);
         $pdf->Cell(25, 8, 'Building No.:', 0, 0, 'L');
         $pdf->Cell(65, 8, $speaker->office->building_no ?? '', 'B', 0, 'L');
         $pdf->Cell(30, 8, 'Street/Barangay:', 0, 0, 'L');
         $pdf->Cell(60, 8, $speaker->office->barangay ?? '', 'B', 1, 'L');
-
         $pdf->SetX(20);
         $pdf->Cell(30, 8, 'Municipality/City:', 0, 0, 'L');
         $pdf->Cell(65, 8, $speaker->office->municipality ?? '', 'B', 0, 'L');
         $pdf->Cell(20, 8, 'Province:', 0, 0, 'L');
         $pdf->Cell(60, 8, $speaker->office->province ?? '', 'B', 1, 'L');
-
         $pdf->SetX(20);
         $pdf->Cell(20, 8, 'Zip Code:', 0, 0, 'L');
         $pdf->Cell(65, 8, $speaker->office->zip_code ?? '', 'B', 1, 'L');
-
         $pdf->SetX(20);
         $pdf->Cell(35, 8, 'Contact Number:', 0, 0, 'L');
         $pdf->Cell(15, 8, 'Tel. No.:', 0, 0, 'L');
         $pdf->Cell(50, 8, $speaker->office->tel_no ?? '', 'B', 0, 'L');
         $pdf->Cell(25, 8, 'Cellphone No.:', 0, 0, 'L');
         $pdf->Cell(50, 8, $speaker->office->cell_no ?? '', 'B', 1, 'L');
-
         $pdf->SetX(20);
         $pdf->Cell(35, 8, '', 0, 0, 'L');
         $pdf->Cell(15, 8, 'Fax No.:', 0, 0, 'L');
         $pdf->Cell(50, 8, $speaker->office->fax_no ?? '', 'B', 1, 'L');
-
-        // Home/Residence Address
-        // $this->generateAddressSection($pdf, 'Home/Residence Address:', $speaker, 'home_');
-
         $pdf->Ln(3);
-                // Home/Residence Address
+
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->Cell(0, 8, 'Home/Residence Address:', 0, 1, 'L');
         $pdf->SetFont('helvetica', '', 10);
-
         $pdf->SetX(20);
         $pdf->Cell(25, 8, 'Building No.:', 0, 0, 'L');
         $pdf->Cell(65, 8, $speaker->home_building_no ?? '', 'B', 0, 'L');
         $pdf->Cell(30, 8, 'Street/Barangay:', 0, 0, 'L');
         $pdf->Cell(60, 8, $speaker->home_barangay ?? '', 'B', 1, 'L');
-
         $pdf->SetX(20);
         $pdf->Cell(30, 8, 'Municipality/City:', 0, 0, 'L');
         $pdf->Cell(65, 8, $speaker->home_municipality ?? '', 'B', 0, 'L');
         $pdf->Cell(20, 8, 'Province:', 0, 0, 'L');
         $pdf->Cell(60, 8, $speaker->home_province ?? '', 'B', 1, 'L');
-
         $pdf->SetX(20);
         $pdf->Cell(20, 8, 'Zip Code:', 0, 0, 'L');
         $pdf->Cell(65, 8, $speaker->home_zip_code ?? '', 'B', 1, 'L');
-
         $pdf->SetX(20);
         $pdf->Cell(35, 8, 'Contact Number:', 0, 0, 'L');
         $pdf->Cell(15, 8, 'Tel. No.:', 0, 0, 'L');
         $pdf->Cell(50, 8, $speaker->home_tel_no ?? '', 'B', 0, 'L');
         $pdf->Cell(25, 8, 'Cellphone No.:', 0, 0, 'L');
         $pdf->Cell(50, 8, $speaker->home_cell_no ?? '', 'B', 1, 'L');
-
         $pdf->SetX(20);
         $pdf->Cell(35, 8, '', 0, 0, 'L');
         $pdf->Cell(15, 8, 'Fax No.:', 0, 0, 'L');
         $pdf->Cell(50, 8, $speaker->home_fax_no ?? '', 'B', 1, 'L');
-
-
         $pdf->Ln(5);
 
-        // Expert Information
         $this->generateExpertSection($pdf, $speaker);
-
-        // Rearranged section calls
         $this->generateEducationalTable($pdf, $speaker);
-
-        // Add new page to ensure sections start on a fresh page if needed
-        // $pdf->AddPage();
-
         $this->generateWorkExperienceSection($pdf, $speaker);
         $this->generateTrainingSection($pdf, $speaker);
         $this->generateExperienceTrainerSection($pdf, $speaker);
@@ -712,311 +689,450 @@ public function update(Request $request, $id)
         $this->generateReferencesSection($pdf, $speaker);
     }
 
-    /**
- * Generate office address section with data
- */
-    /**
-     * Generate address section with data
-     */
-/**
- * Generate educational background table
- */
-private function generateEducationalTable($pdf, $speaker)
-{
-    // Expertise
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(70, 8, 'Field/s of Specialization/Expertise:', 0, 0, 'L');
+    private function generateExpertSection($pdf, $speaker)
+    {
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(70, 8, 'Field/s of Specialization/Expertise:', 0, 0, 'L');
+        $pdf->SetFont('helvetica', '', 10);
 
-    $pdf->SetFont('helvetica', '', 10);
-    $expertiseList = $speaker->expertises ? $speaker->expertises->pluck('expertis')->implode(', ') : 'N/A';
-    $pdf->Cell(100, 8, $expertiseList, 'B', 1, 'L');
-    $pdf->Ln(10);
+        // Get expertises and format them
+        $expertiseList = $speaker->expertises && $speaker->expertises->count() > 0
+            ? $speaker->expertises->pluck('expertis')->implode(', ')
+            : 'N/A';
 
-    // Section title
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(0, 8, 'Educational Background:', 0, 1, 'L');
-
-    // Set font for table content
-    $pdf->SetFont('helvetica', '', 8);
-
-    // Table headers
-    $pdf->Cell(30, 8, 'Level/Degree', 1, 0, 'C');
-    $pdf->Cell(25, 8, 'From Year', 1, 0, 'C');
-    $pdf->Cell(25, 8, 'To Year', 1, 0, 'C');
-    $pdf->Cell(50, 8, 'School/Institution', 1, 0, 'C');
-    $pdf->Cell(30, 8, 'Year Graduated', 1, 0, 'C');
-    $pdf->Cell(25, 8, 'Awards', 1, 1, 'C');
-
-    // Fetch educational data directly from the DB by rs_id
-    $educationalData = DB::table('rs_educational')
-        ->where('rs_id', $speaker->id)
-        ->get();
-
-    // Display data
-    foreach ($educationalData as $education) {
-        $pdf->Cell(30, 10, $education->level ?? '', 1, 0, 'L');
-        $pdf->Cell(25, 10, $education->from_year ?? '', 1, 0, 'C');
-        $pdf->Cell(25, 10, $education->to_year ?? '', 1, 0, 'C');
-        $pdf->Cell(50, 10, $education->school ?? '', 1, 0, 'L');
-        $pdf->Cell(30, 10, $education->year_graduated ?? '', 1, 0, 'C');
-        $pdf->Cell(25, 10, $education->awards ?? '', 1, 1, 'L');
-    }
-
-    // Check if any educational data was printed and add a line break to prevent the next table from starting too far down
-    if (!$educationalData->isEmpty()) {
+        $pdf->MultiCell(100, 8, $expertiseList, 'B', 'L', false, 1);
         $pdf->Ln(5);
     }
-}
 
-    /**
-     * Generate work experience section
-     */
+    private function generateEducationalTable($pdf, $speaker)
+    {
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(70, 8, 'Field/s of Specialization/Expertise:', 0, 0, 'L');
+        $pdf->SetFont('helvetica', '', 10);
+        $expertiseList = $speaker->expertises ? $speaker->expertises->pluck('expertis')->implode(', ') : 'N/A';
+        $pdf->MultiCell(100, 8, $expertiseList, 'B', 'L', false, 1);
+        $pdf->Ln(10);
+
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(0, 8, 'Educational Background:', 0, 1, 'L');
+        $pdf->SetFont('helvetica', '', 8);
+
+        // Calculate available page width (A4 = 210mm, margins = 15mm each)
+        $pageWidth = $pdf->getPageWidth() - 30; // 180mm
+        $borderWidth = 0.5; // Border width in mm
+        $totalBorders = 7 * $borderWidth; // 6 columns + outer border
+        $availableWidth = $pageWidth - $totalBorders;
+
+        // Define column widths proportionally
+        $columnWidths = [
+            'level' => max(30, min(40, $availableWidth * 0.20)),
+            'from_year' => max(20, min(25, $availableWidth * 0.15)),
+            'to_year' => max(20, min(25, $availableWidth * 0.15)),
+            'school' => max(40, min(50, $availableWidth * 0.30)),
+            'year_graduated' => max(20, min(30, $availableWidth * 0.15)),
+            'awards' => max(20, min(25, $availableWidth * 0.15)),
+        ];
+
+        // Scale if total width exceeds page width
+        $totalTableWidth = array_sum($columnWidths) + $totalBorders;
+        if ($totalTableWidth > $pageWidth) {
+            $scaleFactor = $pageWidth / $totalTableWidth;
+            foreach ($columnWidths as $key => $width) {
+                $columnWidths[$key] = max(10, $width * $scaleFactor);
+            }
+        }
+
+        // Table headers
+        $pdf->Cell($columnWidths['level'], 8, 'Level/Degree', 1, 0, 'C');
+        $pdf->Cell($columnWidths['from_year'], 8, 'From Year', 1, 0, 'C');
+        $pdf->Cell($columnWidths['to_year'], 8, 'To Year', 1, 0, 'C');
+        $pdf->Cell($columnWidths['school'], 8, 'School/Institution', 1, 0, 'C');
+        $pdf->Cell($columnWidths['year_graduated'], 8, 'Year Graduated', 1, 0, 'C');
+        $pdf->Cell($columnWidths['awards'], 8, 'Awards', 1, 1, 'C');
+
+        // Fetch educational data
+        $educationalData = DB::table('rs_educational')->where('rs_id', $speaker->id)->get();
+
+        foreach ($educationalData as $education) {
+            $maxHeight = 8;
+            $cellHeights = [
+                'level' => $pdf->getStringHeight($columnWidths['level'], $education->level ?? '', true, true, 1),
+                'from_year' => $pdf->getStringHeight($columnWidths['from_year'], $education->from_year ?? '', true, true, 1),
+                'to_year' => $pdf->getStringHeight($columnWidths['to_year'], $education->to_year ?? '', true, true, 1),
+                'school' => $pdf->getStringHeight($columnWidths['school'], $education->school ?? '', true, true, 1),
+                'year_graduated' => $pdf->getStringHeight($columnWidths['year_graduated'], $education->year_graduated ?? '', true, true, 1),
+                'awards' => $pdf->getStringHeight($columnWidths['awards'], $education->awards ?? '', true, true, 1),
+            ];
+            $maxHeight = max($maxHeight, ...array_values($cellHeights));
+
+            if ($pdf->GetY() + $maxHeight > $pdf->getPageHeight() - 25) {
+                $pdf->AddPage();
+            }
+
+            $pdf->MultiCell($columnWidths['level'], $maxHeight, $education->level ?? '', 1, 'L', false, 0);
+            $pdf->MultiCell($columnWidths['from_year'], $maxHeight, $education->from_year ?? '', 1, 'C', false, 0);
+            $pdf->MultiCell($columnWidths['to_year'], $maxHeight, $education->to_year ?? '', 1, 'C', false, 0);
+            $pdf->MultiCell($columnWidths['school'], $maxHeight, $education->school ?? '', 1, 'L', false, 0);
+            $pdf->MultiCell($columnWidths['year_graduated'], $maxHeight, $education->year_graduated ?? '', 1, 'C', false, 0);
+            $pdf->MultiCell($columnWidths['awards'], $maxHeight, $education->awards ?? '', 1, 'L', false, 1);
+        }
+
+        if (!$educationalData->isEmpty()) {
+            $pdf->Ln(5);
+        }
+    }
+
     private function generateWorkExperienceSection($pdf, $speaker)
     {
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->Cell(0, 8, 'Work Experience:', 0, 1, 'L');
-
-        // Create table
         $pdf->SetFont('helvetica', '', 8);
 
-        // Table headers
-        $pdf->Cell(25, 8, 'Start Date', 1, 0, 'C');
-        $pdf->Cell(25, 8, 'End Date', 1, 0, 'C');
-        $pdf->Cell(50, 8, 'Company/Organization', 1, 0, 'C');
-        $pdf->Cell(40, 8, 'Position', 1, 0, 'C');
-        $pdf->Cell(40, 8, 'Division/Department', 1, 1, 'C');
+        $pageWidth = $pdf->getPageWidth() - 30;
+        $borderWidth = 0.5;
+        $totalBorders = 6 * $borderWidth;
+        $availableWidth = $pageWidth - $totalBorders;
 
-        // Get work experience data from related table (if relationship exists)
-        $workData = [];
-        if (method_exists($speaker, 'workExperiences') && $speaker->workExperiences) {
-            $workData = $speaker->workExperiences;
+        $columnWidths = [
+            'date_started' => max(25, min(30, $availableWidth * 0.15)),
+            'date_ended' => max(25, min(30, $availableWidth * 0.15)),
+            'name_company' => max(50, min(60, $availableWidth * 0.35)),
+            'position' => max(40, min(50, $availableWidth * 0.25)),
+            'division' => max(30, min(40, $availableWidth * 0.20)),
+        ];
+
+        $totalTableWidth = array_sum($columnWidths) + $totalBorders;
+        if ($totalTableWidth > $pageWidth) {
+            $scaleFactor = $pageWidth / $totalTableWidth;
+            foreach ($columnWidths as $key => $width) {
+                $columnWidths[$key] = max(10, $width * $scaleFactor);
+            }
         }
 
+        $pdf->Cell($columnWidths['date_started'], 8, 'Start Date', 1, 0, 'C');
+        $pdf->Cell($columnWidths['date_ended'], 8, 'End Date', 1, 0, 'C');
+        $pdf->Cell($columnWidths['name_company'], 8, 'Company/Organization', 1, 0, 'C');
+        $pdf->Cell($columnWidths['position'], 8, 'Position', 1, 0, 'C');
+        $pdf->Cell($columnWidths['division'], 8, 'Division/Department', 1, 1, 'C');
+
+        $workData = $speaker->workExperiences ?? [];
+
         if (empty($workData)) {
-            // Add empty rows for manual filling
             for ($i = 0; $i < 5; $i++) {
-                $pdf->Cell(25, 8, '', 1, 0, 'C');
-                $pdf->Cell(25, 8, '', 1, 0, 'C');
-                $pdf->Cell(50, 8, '', 1, 0, 'L');
-                $pdf->Cell(40, 8, '', 1, 0, 'L');
-                $pdf->Cell(40, 8, '', 1, 1, 'L');
+                $pdf->Cell($columnWidths['date_started'], 8, '', 1, 0, 'C');
+                $pdf->Cell($columnWidths['date_ended'], 8, '', 1, 0, 'C');
+                $pdf->Cell($columnWidths['name_company'], 8, '', 1, 0, 'L');
+                $pdf->Cell($columnWidths['position'], 8, '', 1, 0, 'L');
+                $pdf->Cell($columnWidths['division'], 8, '', 1, 1, 'L');
             }
         } else {
             foreach ($workData as $work) {
-                $pdf->Cell(25, 8, $work->date_started ?? '', 1, 0, 'C');
-                $pdf->Cell(25, 8, $work->date_ended ?? '', 1, 0, 'C');
-                $pdf->Cell(50, 8, $work->name_company ?? '', 1, 0, 'L');
-                $pdf->Cell(40, 8, $work->position ?? '', 1, 0, 'L');
-                $pdf->Cell(40, 8, $work->division ?? '', 1, 1, 'L');
+                $maxHeight = 8;
+                $cellHeights = [
+                    'date_started' => $pdf->getStringHeight($columnWidths['date_started'], $work->date_started ?? '', true, true, 1),
+                    'date_ended' => $pdf->getStringHeight($columnWidths['date_ended'], $work->date_ended ?? '', true, true, 1),
+                    'name_company' => $pdf->getStringHeight($columnWidths['name_company'], $work->name_company ?? '', true, true, 1),
+                    'position' => $pdf->getStringHeight($columnWidths['position'], $work->position ?? '', true, true, 1),
+                    'division' => $pdf->getStringHeight($columnWidths['division'], $work->division ?? '', true, true, 1),
+                ];
+                $maxHeight = max($maxHeight, ...array_values($cellHeights));
+
+                if ($pdf->GetY() + $maxHeight > $pdf->getPageHeight() - 25) {
+                    $pdf->AddPage();
+                }
+
+                $pdf->MultiCell($columnWidths['date_started'], $maxHeight, $work->date_started ?? '', 1, 'C', false, 0);
+                $pdf->MultiCell($columnWidths['date_ended'], $maxHeight, $work->date_ended ?? '', 1, 'C', false, 0);
+                $pdf->MultiCell($columnWidths['name_company'], $maxHeight, $work->name_company ?? '', 1, 'L', false, 0);
+                $pdf->MultiCell($columnWidths['position'], $maxHeight, $work->position ?? '', 1, 'L', false, 0);
+                $pdf->MultiCell($columnWidths['division'], $maxHeight, $work->division ?? '', 1, 'L', false, 1);
             }
         }
-
         $pdf->Ln(5);
     }
 
-    /**
-     * Generate training section
-     */
     private function generateTrainingSection($pdf, $speaker)
     {
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->Cell(0, 8, 'Training/Seminar Experience:', 0, 1, 'L');
-
-        // Create table
         $pdf->SetFont('helvetica', '', 8);
 
-        // Table headers - REMOVED the Remarks column
-            $pdf->Cell(80, 8, 'Training Title', 1, 0, 'C');
-            $pdf->Cell(40, 8, 'Venue', 1, 0, 'C');
-            $pdf->Cell(30, 8, 'Date', 1, 0, 'C');
-            $pdf->Cell(30, 8, 'Hours', 1, 1, 'C');
+        $pageWidth = $pdf->getPageWidth() - 30;
+        $borderWidth = 0.5;
+        $totalBorders = 5 * $borderWidth;
+        $availableWidth = $pageWidth - $totalBorders;
 
-        // Get training data from related table (if relationship exists)
-        $trainingData = [];
-        if (method_exists($speaker, 'trainings') && $speaker->trainings) {
-            $trainingData = $speaker->trainings;
+        $columnWidths = [
+            'rt_title' => max(80, min(90, $availableWidth * 0.50)),
+            'rt_venue' => max(40, min(50, $availableWidth * 0.25)),
+            'rt_date' => max(30, min(35, $availableWidth * 0.15)),
+            'rt_no_hours' => max(20, min(25, $availableWidth * 0.10)),
+        ];
+
+        $totalTableWidth = array_sum($columnWidths) + $totalBorders;
+        if ($totalTableWidth > $pageWidth) {
+            $scaleFactor = $pageWidth / $totalTableWidth;
+            foreach ($columnWidths as $key => $width) {
+                $columnWidths[$key] = max(10, $width * $scaleFactor);
+            }
         }
 
+        $pdf->Cell($columnWidths['rt_title'], 8, 'Training Title', 1, 0, 'C');
+        $pdf->Cell($columnWidths['rt_venue'], 8, 'Venue', 1, 0, 'C');
+        $pdf->Cell($columnWidths['rt_date'], 8, 'Date', 1, 0, 'C');
+        $pdf->Cell($columnWidths['rt_no_hours'], 8, 'Hours', 1, 1, 'C');
+
+        $trainingData = $speaker->trainings ?? [];
+
         if (empty($trainingData)) {
-            // Add empty rows for manual filling - REMOVED the empty Remarks cell
             for ($i = 0; $i < 5; $i++) {
-                $pdf->Cell(80, 8, '', 1, 0, 'L');
-                $pdf->Cell(40, 8, '', 1, 0, 'L');
-                $pdf->Cell(30, 8, '', 1, 0, 'C');
-                $pdf->Cell(30, 8, '', 1, 1, 'C'); // Changed from 0 to 1 to end the row
+                $pdf->Cell($columnWidths['rt_title'], 8, '', 1, 0, 'L');
+                $pdf->Cell($columnWidths['rt_venue'], 8, '', 1, 0, 'L');
+                $pdf->Cell($columnWidths['rt_date'], 8, '', 1, 0, 'C');
+                $pdf->Cell($columnWidths['rt_no_hours'], 8, '', 1, 1, 'C');
             }
         } else {
             foreach ($trainingData as $training) {
-                // Data rows - REMOVED the Remarks cell
-                $pdf->Cell(80, 8, $training->rt_title ?? '', 1, 0, 'L');
-                $pdf->Cell(40, 8, $training->rt_venue ?? '', 1, 0, 'L');
-                $pdf->Cell(30, 8, $training->rt_date ?? '', 1, 0, 'C');
-                $pdf->Cell(30, 8, $training->rt_no_hours ?? '', 1, 1, 'C'); // Changed from 0 to 1 to end the row
+                $maxHeight = 8;
+                $cellHeights = [
+                    'rt_title' => $pdf->getStringHeight($columnWidths['rt_title'], $training->rt_title ?? '', true, true, 1),
+                    'rt_venue' => $pdf->getStringHeight($columnWidths['rt_venue'], $training->rt_venue ?? '', true, true, 1),
+                    'rt_date' => $pdf->getStringHeight($columnWidths['rt_date'], $training->rt_date ?? '', true, true, 1),
+                    'rt_no_hours' => $pdf->getStringHeight($columnWidths['rt_no_hours'], $training->rt_no_hours ?? '', true, true, 1),
+                ];
+                $maxHeight = max($maxHeight, ...array_values($cellHeights));
+
+                if ($pdf->GetY() + $maxHeight > $pdf->getPageHeight() - 25) {
+                    $pdf->AddPage();
+                }
+
+                $pdf->MultiCell($columnWidths['rt_title'], $maxHeight, $training->rt_title ?? '', 1, 'L', false, 0);
+                $pdf->MultiCell($columnWidths['rt_venue'], $maxHeight, $training->rt_venue ?? '', 1, 'L', false, 0);
+                $pdf->MultiCell($columnWidths['rt_date'], $maxHeight, $training->rt_date ?? '', 1, 'C', false, 0);
+                $pdf->MultiCell($columnWidths['rt_no_hours'], $maxHeight, $training->rt_no_hours ?? '', 1, 'C', false, 1);
             }
         }
-
         $pdf->Ln(5);
     }
 
-    /**
-     * Generate experience trainer section
-     */
-private function generateExperienceTrainerSection($pdf, $speaker)
-{
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(0, 8, 'Training Experience as Trainer:', 0, 1, 'L');
+    private function generateExperienceTrainerSection($pdf, $speaker)
+    {
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(0, 8, 'Training Experience as Trainer:', 0, 1, 'L');
+        $pdf->SetFont('helvetica', '', 8);
 
-    // Create table
-    $pdf->SetFont('helvetica', '', 8);
+        $pageWidth = $pdf->getPageWidth() - 30;
+        $borderWidth = 0.5;
+        $totalBorders = 5 * $borderWidth;
+        $availableWidth = $pageWidth - $totalBorders;
 
-    // Table headers - REMOVED the Remarks column
-        $pdf->Cell(80, 8, 'Training Title', 1, 0, 'C');
-        $pdf->Cell(40, 8, 'Venue', 1, 0, 'C');
-        $pdf->Cell(30, 8, 'Date', 1, 0, 'C');
-        $pdf->Cell(30, 8, 'Hours', 1, 1, 'C');
-    // Get experience trainer data from related table (if relationship exists)
-    $experienceData = [];
-    // Corrected the method name to 'experienceTrainer' to match the model's function
-    if (method_exists($speaker, 'experienceTrainer') && $speaker->experienceTrainer) {
-        $experienceData = $speaker->experienceTrainer;
+        $columnWidths = [
+            'rst_title' => max(80, min(90, $availableWidth * 0.50)),
+            'rst_venue' => max(40, min(50, $availableWidth * 0.25)),
+            'rst_date' => max(30, min(35, $availableWidth * 0.15)),
+            'rst_no_hours' => max(20, min(25, $availableWidth * 0.10)),
+        ];
+
+        $totalTableWidth = array_sum($columnWidths) + $totalBorders;
+        if ($totalTableWidth > $pageWidth) {
+            $scaleFactor = $pageWidth / $totalTableWidth;
+            foreach ($columnWidths as $key => $width) {
+                $columnWidths[$key] = max(10, $width * $scaleFactor);
+            }
+        }
+
+        $pdf->Cell($columnWidths['rst_title'], 8, 'Training Title', 1, 0, 'C');
+        $pdf->Cell($columnWidths['rst_venue'], 8, 'Venue', 1, 0, 'C');
+        $pdf->Cell($columnWidths['rst_date'], 8, 'Date', 1, 0, 'C');
+        $pdf->Cell($columnWidths['rst_no_hours'], 8, 'Hours', 1, 1, 'C');
+
+        $experienceData = $speaker->experienceTrainer ?? [];
+
+        if (empty($experienceData)) {
+            for ($i = 0; $i < 5; $i++) {
+                $pdf->Cell($columnWidths['rst_title'], 8, '', 1, 0, 'L');
+                $pdf->Cell($columnWidths['rst_venue'], 8, '', 1, 0, 'L');
+                $pdf->Cell($columnWidths['rst_date'], 8, '', 1, 0, 'C');
+                $pdf->Cell($columnWidths['rst_no_hours'], 8, '', 1, 1, 'C');
+            }
+        } else {
+            foreach ($experienceData as $experience) {
+                $maxHeight = 8;
+                $cellHeights = [
+                    'rst_title' => $pdf->getStringHeight($columnWidths['rst_title'], $experience->rst_title ?? '', true, true, 1),
+                    'rst_venue' => $pdf->getStringHeight($columnWidths['rst_venue'], $experience->rst_venue ?? '', true, true, 1),
+                    'rst_date' => $pdf->getStringHeight($columnWidths['rst_date'], $experience->rst_date ?? '', true, true, 1),
+                    'rst_no_hours' => $pdf->getStringHeight($columnWidths['rst_no_hours'], $experience->rst_no_hours ?? '', true, true, 1),
+                ];
+                $maxHeight = max($maxHeight, ...array_values($cellHeights));
+
+                if ($pdf->GetY() + $maxHeight > $pdf->getPageHeight() - 25) {
+                    $pdf->AddPage();
+                }
+
+                $pdf->MultiCell($columnWidths['rst_title'], $maxHeight, $experience->rst_title ?? '', 1, 'L', false, 0);
+                $pdf->MultiCell($columnWidths['rst_venue'], $maxHeight, $experience->rst_venue ?? '', 1, 'L', false, 0);
+                $pdf->MultiCell($columnWidths['rst_date'], $maxHeight, $experience->rst_date ?? '', 1, 'C', false, 0);
+                $pdf->MultiCell($columnWidths['rst_no_hours'], $maxHeight, $experience->rst_no_hours ?? '', 1, 'C', false, 1);
+            }
+        }
+        $pdf->Ln(5);
     }
 
-    if (empty($experienceData)) {
-        // Add empty rows for manual filling - REMOVED the empty Remarks cell
-        for ($i = 0; $i < 5; $i++) {
-                $pdf->Cell(80, 8, '', 1, 0, 'L');
-                $pdf->Cell(40, 8, '', 1, 0, 'L');
-                $pdf->Cell(30, 8, '', 1, 0, 'C');
-                $pdf->Cell(30, 8, '', 1, 1, 'C'); // Changed from 0 to 1 to end the row
-        }
-    } else {
-        foreach ($experienceData as $experience) {
-            // Data rows - REMOVED the Remarks cell
-            $pdf->Cell(80, 8, $experience->rst_title ?? '', 1, 0, 'L');
-            $pdf->Cell(40, 8, $experience->rst_venue ?? '', 1, 0, 'L');
-            $pdf->Cell(30, 8, $experience->rst_date ?? '', 1, 0, 'C');
-            $pdf->Cell(30, 8, $experience->rst_no_hours ?? '', 1, 1, 'C'); // Changed from 0 to 1 to end the row
-        }
-    }
-
-    $pdf->Ln(5);
-}
-    /**
-     * Generate publications section
-     */
     private function generatePublicationsSection($pdf, $speaker)
     {
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->Cell(0, 8, 'Publications:', 0, 1, 'L');
-
-        // Create table
         $pdf->SetFont('helvetica', '', 8);
 
-        // Table headers - REMOVED the Publisher column
-        $pdf->Cell(100, 8, 'Publication Title', 1, 0, 'C'); // Increased width
-        $pdf->Cell(40, 8, 'Date Published', 1, 0, 'C');    // Increased width
-        $pdf->Cell(40, 8, 'Venue', 1, 1, 'C');            // Increased width
+        $pageWidth = $pdf->getPageWidth() - 30;
+        $borderWidth = 0.5;
+        $totalBorders = 4 * $borderWidth;
+        $availableWidth = $pageWidth - $totalBorders;
 
-        // Get publications data from related table (if relationship exists)
-        $publicationData = [];
-        if (method_exists($speaker, 'publications') && $speaker->publications) {
-            $publicationData = $speaker->publications;
+        $columnWidths = [
+            'p_title' => max(100, min(110, $availableWidth * 0.60)),
+            'p_date' => max(40, min(45, $availableWidth * 0.25)),
+            'p_venue' => max(30, min(35, $availableWidth * 0.15)),
+        ];
+
+        $totalTableWidth = array_sum($columnWidths) + $totalBorders;
+        if ($totalTableWidth > $pageWidth) {
+            $scaleFactor = $pageWidth / $totalTableWidth;
+            foreach ($columnWidths as $key => $width) {
+                $columnWidths[$key] = max(10, $width * $scaleFactor);
+            }
         }
 
+        $pdf->Cell($columnWidths['p_title'], 8, 'Publication Title', 1, 0, 'C');
+        $pdf->Cell($columnWidths['p_date'], 8, 'Date Published', 1, 0, 'C');
+        $pdf->Cell($columnWidths['p_venue'], 8, 'Venue', 1, 1, 'C');
+
+        $publicationData = $speaker->publications ?? [];
+
         if (empty($publicationData)) {
-            // Add empty rows for manual filling - REMOVED the empty Publisher cell
             for ($i = 0; $i < 5; $i++) {
-                $pdf->Cell(100, 8, '', 1, 0, 'L');
-                $pdf->Cell(40, 8, '', 1, 0, 'C');
-                $pdf->Cell(40, 8, '', 1, 1, 'L'); // Changed from 0 to 1 to end the row
+                $pdf->Cell($columnWidths['p_title'], 8, '', 1, 0, 'L');
+                $pdf->Cell($columnWidths['p_date'], 8, '', 1, 0, 'C');
+                $pdf->Cell($columnWidths['p_venue'], 8, '', 1, 1, 'L');
             }
         } else {
             foreach ($publicationData as $publication) {
-                // Data rows - REMOVED the Publisher cell
-                $pdf->Cell(100, 8, $publication->p_title ?? '', 1, 0, 'L');
-                $pdf->Cell(40, 8, $publication->p_date ?? '', 1, 0, 'C');
-                $pdf->Cell(40, 8, $publication->p_venue ?? '', 1, 1, 'L'); // Changed from 0 to 1 to end the row
+                $maxHeight = 8;
+                $cellHeights = [
+                    'p_title' => $pdf->getStringHeight($columnWidths['p_title'], $publication->p_title ?? '', true, true, 1),
+                    'p_date' => $pdf->getStringHeight($columnWidths['p_date'], $publication->p_date ?? '', true, true, 1),
+                    'p_venue' => $pdf->getStringHeight($columnWidths['p_venue'], $publication->p_venue ?? '', true, true, 1),
+                ];
+                $maxHeight = max($maxHeight, ...array_values($cellHeights));
+
+                if ($pdf->GetY() + $maxHeight > $pdf->getPageHeight() - 25) {
+                    $pdf->AddPage();
+                }
+
+                $pdf->MultiCell($columnWidths['p_title'], $maxHeight, $publication->p_title ?? '', 1, 'L', false, 0);
+                $pdf->MultiCell($columnWidths['p_date'], $maxHeight, $publication->p_date ?? '', 1, 'C', false, 0);
+                $pdf->MultiCell($columnWidths['p_venue'], $maxHeight, $publication->p_venue ?? '', 1, 'L', false, 1);
             }
         }
-
         $pdf->Ln(5);
     }
 
-    /**
-     * Generate references section
-     */
     private function generateReferencesSection($pdf, $speaker)
     {
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->Cell(0, 8, 'References for Training:', 0, 1, 'L');
-
-        // Create table
         $pdf->SetFont('helvetica', '', 8);
 
-        // Table headers
-        $pdf->Cell(50, 8, 'Name/Agency', 1, 0, 'C');
-        $pdf->Cell(40, 8, 'Address', 1, 0, 'C');
-        $pdf->Cell(25, 8, 'Contact Person', 1, 0, 'C');
-        $pdf->Cell(25, 8, 'Position', 1, 0, 'C');
-        $pdf->Cell(20, 8, 'Tel No.', 1, 0, 'C');
-        $pdf->Cell(20, 8, 'Cell No.', 1, 1, 'C');
+        $pageWidth = $pdf->getPageWidth() - 30;
+        $borderWidth = 0.5;
+        $totalBorders = 7 * $borderWidth;
+        $availableWidth = $pageWidth - $totalBorders;
 
-        // Get references data from related table (if relationship exists)
-        $referenceData = [];
-        if (method_exists($speaker, 'referencesTrainings') && $speaker->referencesTrainings) {
-            $referenceData = $speaker->referencesTrainings;
+        $columnWidths = [
+            'name_agency' => max(50, min(60, $availableWidth * 0.30)),
+            'address' => max(40, min(50, $availableWidth * 0.25)),
+            'contact_person' => max(25, min(30, $availableWidth * 0.15)),
+            'position' => max(25, min(30, $availableWidth * 0.15)),
+            'tel_no' => max(20, min(25, $availableWidth * 0.10)),
+            'cell_no' => max(20, min(25, $availableWidth * 0.10)),
+        ];
+
+        $totalTableWidth = array_sum($columnWidths) + $totalBorders;
+        if ($totalTableWidth > $pageWidth) {
+            $scaleFactor = $pageWidth / $totalTableWidth;
+            foreach ($columnWidths as $key => $width) {
+                $columnWidths[$key] = max(10, $width * $scaleFactor);
+            }
         }
 
+        $pdf->Cell($columnWidths['name_agency'], 8, 'Name/Agency', 1, 0, 'C');
+        $pdf->Cell($columnWidths['address'], 8, 'Address', 1, 0, 'C');
+        $pdf->Cell($columnWidths['contact_person'], 8, 'Contact Person', 1, 0, 'C');
+        $pdf->Cell($columnWidths['position'], 8, 'Position', 1, 0, 'C');
+        $pdf->Cell($columnWidths['tel_no'], 8, 'Tel No.', 1, 0, 'C');
+        $pdf->Cell($columnWidths['cell_no'], 8, 'Cell No.', 1, 1, 'C');
+
+        $referenceData = $speaker->referencesTrainings ?? [];
+
         if (empty($referenceData)) {
-            // Add empty rows for manual filling
             for ($i = 0; $i < 3; $i++) {
-                $pdf->Cell(50, 10, '', 1, 0, 'L');
-                $pdf->Cell(40, 10, '', 1, 0, 'L');
-                $pdf->Cell(25, 10, '', 1, 0, 'L');
-                $pdf->Cell(25, 10, '', 1, 0, 'L');
-                $pdf->Cell(20, 10, '', 1, 0, 'C');
-                $pdf->Cell(20, 10, '', 1, 1, 'C');
+                $pdf->Cell($columnWidths['name_agency'], 10, '', 1, 0, 'L');
+                $pdf->Cell($columnWidths['address'], 10, '', 1, 0, 'L');
+                $pdf->Cell($columnWidths['contact_person'], 10, '', 1, 0, 'L');
+                $pdf->Cell($columnWidths['position'], 10, '', 1, 0, 'L');
+                $pdf->Cell($columnWidths['tel_no'], 10, '', 1, 0, 'C');
+                $pdf->Cell($columnWidths['cell_no'], 10, '', 1, 1, 'C');
             }
         } else {
             foreach ($referenceData as $reference) {
-                $pdf->Cell(50, 10, $reference->name_agency ?? '', 1, 0, 'L');
-                $pdf->Cell(40, 10, $reference->address ?? '', 1, 0, 'L');
-                $pdf->Cell(25, 10, $reference->contact_person ?? '', 1, 0, 'L');
-                $pdf->Cell(25, 10, $reference->position ?? '', 1, 0, 'L');
-                $pdf->Cell(20, 10, $reference->tel_no ?? '', 1, 0, 'C');
-                $pdf->Cell(20, 10, $reference->cell_no ?? '', 1, 1, 'C');
+                $maxHeight = 10;
+                $cellHeights = [
+                    'name_agency' => $pdf->getStringHeight($columnWidths['name_agency'], $reference->name_agency ?? '', true, true, 1),
+                    'address' => $pdf->getStringHeight($columnWidths['address'], $reference->address ?? '', true, true, 1),
+                    'contact_person' => $pdf->getStringHeight($columnWidths['contact_person'], $reference->contact_person ?? '', true, true, 1),
+                    'position' => $pdf->getStringHeight($columnWidths['position'], $reference->position ?? '', true, true, 1),
+                    'tel_no' => $pdf->getStringHeight($columnWidths['tel_no'], $reference->tel_no ?? '', true, true, 1),
+                    'cell_no' => $pdf->getStringHeight($columnWidths['cell_no'], $reference->cell_no ?? '', true, true, 1),
+                ];
+                $maxHeight = max($maxHeight, ...array_values($cellHeights));
+
+                if ($pdf->GetY() + $maxHeight > $pdf->getPageHeight() - 25) {
+                    $pdf->AddPage();
+                }
+
+                $pdf->MultiCell($columnWidths['name_agency'], $maxHeight, $reference->name_agency ?? '', 1, 'L', false, 0);
+                $pdf->MultiCell($columnWidths['address'], $maxHeight, $reference->address ?? '', 1, 'L', false, 0);
+                $pdf->MultiCell($columnWidths['contact_person'], $maxHeight, $reference->contact_person ?? '', 1, 'L', false, 0);
+                $pdf->MultiCell($columnWidths['position'], $maxHeight, $reference->position ?? '', 1, 'L', false, 0);
+                $pdf->MultiCell($columnWidths['tel_no'], $maxHeight, $reference->tel_no ?? '', 1, 'C', false, 0);
+                $pdf->MultiCell($columnWidths['cell_no'], $maxHeight, $reference->cell_no ?? '', 1, 'C', false, 1);
             }
         }
-
         $pdf->Ln(5);
     }
 
-    /**
-     * Generate expert information section
-     */
-    private function generateExpertSection($pdf, $speaker)
+    public function updateStatus(Request $request, $id)
     {
-        // $pdf->SetFont('helvetica', 'B', 10);
-        // $pdf->Cell(0, 8, 'E-mail Address:', 0, 1, 'L');
 
-        // Get expert data from related table (if relationship exists)
-        $expertData = [];
-        if (method_exists($speaker, 'expertis') && $speaker->expertis) {
-            $expertData = $speaker->expertis;
-        }
+        // Validate the status
+        $request->validate([
+            'status' => 'required|in:Pending,Approved,Accredited'
+        ]);
 
-        if (empty($expertData)) {
-            $pdf->SetFont('helvetica', '', 10);
-            $pdf->Cell(30, 8, 'E-mail Address::', 0, 0, 'L');
-            $pdf->Cell(100, 8, $speaker->email ?? '', 'B', 1, 'L');
-            $pdf->Ln(3);
-        } else {
-            foreach ($expertData as $expert) {
-                $pdf->SetFont('helvetica', '', 10);
-                $pdf->Cell(30, 8, 'Expert Field:', 0, 0, 'L');
-                $pdf->Cell(100, 8, $expert->expertis ?? '', 'B', 1, 'L');
-                $pdf->Ln(3);
+        try {
+            // Update using Query Builder
+            $updated = DB::table('rstbl')
+                ->where('id', $id)
+                ->update(['status' => $request->status]);
+
+            if ($updated) {
+                return redirect()->back()->with('success', 'Status updated successfully to ' . $request->status);
+            } else {
+                return redirect()->back()->with('error', 'Failed to update status');
             }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
         }
     }
 }

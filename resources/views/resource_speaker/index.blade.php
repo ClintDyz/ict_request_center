@@ -101,6 +101,82 @@ window.onload = function() {
         border-radius: 5px; /* Rounded corners */
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional shadow */
     }
+   .status-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-block;
+        min-width: 80px;
+        text-align: center;
+    }
+    .status-pending {
+        background-color: #ffc107;
+        color: #000;
+    }
+    .status-approved {
+        background-color: #17a2b8;
+        color: #fff;
+    }
+    .status-accredited {
+        background-color: #28a745;
+        color: #fff;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    .status-option-btn {
+        min-width: 120px;
+        padding: 10px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+   .pagination {
+        display: flex;
+        padding-left: 0;
+        list-style: none;
+        border-radius: 0.25rem;
+    }
+
+    .page-item {
+        margin: 0 2px;
+    }
+
+    .page-link {
+        position: relative;
+        display: block;
+        padding: 0.5rem 0.75rem;
+        margin-left: -1px;
+        line-height: 1.25;
+        color: #0d6efd;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        text-decoration: none;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+    }
+
+    .page-link:hover {
+        z-index: 2;
+        color: #0a58ca;
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+    }
+
+    .page-item.active .page-link {
+        z-index: 3;
+        color: #fff;
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        pointer-events: none;
+        background-color: #fff;
+        border-color: #dee2e6;
+    }
 </style>
 
 
@@ -110,20 +186,62 @@ window.onload = function() {
         <div class="card-header bg-success d-flex justify-content-between align-items-center">
             <div class="col-md-6" style="color: white">
                 <i class="fas fa-table me-1"></i>
-               List of Resource Speaker
+               SMS for Evaluation
             </div>
             {{-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
                 <i class="fa-solid fa-circle-plus"></i> Create
             </button> --}}
+              @if(auth()->user()->emp_type == '0')
             <a href="{{ route('resource_speaker.create') }}" class="btn btn-primary">
                 <i class="fa-solid fa-circle-plus"></i> Create
             </a>
+            @endif
             {{-- <a href="{{ route('resource_speaker.create') }}" type="button" class="btn btn-primary" >
                 <i class="fa-solid fa-user-plus"></i> Create
             </a> --}}
         </div>
 
-        <div class="card-body">
+<div class="card-body">
+    <!-- Search and Per Page Controls -->
+    {{-- <div class="row mb-3">
+        <div class="col-md-6">
+            <form method="GET" action="{{ route('resource_speaker.index') }}" class="d-flex">
+                <input type="text"
+                       name="search"
+                       class="form-control me-2"
+                       placeholder="Search by name, email, address, gender..."
+                       value="{{ request('search') }}">
+                <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fa fa-search"></i> Search
+                </button>
+                @if(request('search'))
+                    <a href="{{ route('resource_speaker.index', ['per_page' => request('per_page', 10)]) }}"
+                       class="btn btn-secondary">
+                        <i class="fa fa-times"></i> Clear
+                    </a>
+                @endif
+            </form>
+        </div>
+        <div class="col-md-6 text-end">
+            <form method="GET" action="{{ route('resource_speaker.index') }}" class="d-inline-flex align-items-center">
+                <label for="perPageSelect" class="me-2"><strong>Show:</strong></label>
+                <select id="perPageSelect"
+                        name="per_page"
+                        class="form-select form-select-sm w-auto me-2"
+                        onchange="this.form.submit()">
+                    <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
+                    <option value="25" {{ request('per_page', 10) == 25 ? 'selected' : '' }}>25</option>
+                    <option value="50" {{ request('per_page', 10) == 50 ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ request('per_page', 10) == 100 ? 'selected' : '' }}>100</option>
+                </select>
+                <input type="hidden" name="search" value="{{ request('search') }}">
+                <span>entries</span>
+            </form>
+        </div>
+    </div> --}}
+
+    <!-- Table -->
             <table id="datatablesSimple" class="table table-hover table-bordered table-striped">
                     <thead>
                         <tr>
@@ -132,11 +250,11 @@ window.onload = function() {
                             <th>Gender</th>
                             <th>Home Address</th>
                             <th>Expertise</th>
+                            <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if(isset($speakers) && $speakers->isNotEmpty())
                             @foreach ($speakers as $speaker)
                                 <tr>
                                     <td>{{ $speaker->last_name }} {{ $speaker->given_name }}</td>
@@ -146,8 +264,13 @@ window.onload = function() {
                                     <td>
                                         {{ optional($speaker->expertises)->pluck('expertis')->implode(', ') ?? 'N/A' }}
                                     </td>
+                                    <td>
+                                        <span class="status-badge status-{{ strtolower($speaker->status ?? 'pending') }}">
+                                            {{ $speaker->status ?? 'Pending' }}
+                                        </span>
+                                    </td>
 
-                                    <td class="row">
+                                    <td>
                                         <!-- Button trigger modal for Edit -->
                                         {{-- <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editSpeakerModal" onclick="editSpeaker({{ $speaker->id }})">
                                             <i class="fa-solid fa-pen-to-square"></i> Edit
@@ -157,6 +280,15 @@ window.onload = function() {
                                             <i class="fa fa-eye" aria-hidden="true"></i>
                                         </a>
 
+                                      @if(auth()->user()->emp_type == '0')
+                                        <!-- Status Change Button -->
+                                        <button class="btn btn-sm btn-success"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#statusModal-{{ $speaker->id }}"
+                                                title="Change Status">
+                                            <i class="fa-solid fa-circle-check"></i>
+                                <div class="action-buttons" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                        </button>
                                             <!-- Button to redirect to Edit page -->
                                             <a href="{{ route('resource_speaker.edit', $speaker->id) }}" class="btn btn-sm btn-primary">
                                                 <i class="fa-solid fa-pen-to-square"></i>
@@ -174,6 +306,151 @@ window.onload = function() {
                                        <button type="button" class="btn btn-sm btn-info" onclick="loadPDF({{ $speaker->id }})" data-bs-toggle="modal" data-bs-target="#pdfModal-{{ $speaker->id }}">
                                                 <i class="fa-solid fa-print"></i>
                                             </button>
+                                        @endif
+
+
+<!-- Pending Modal -->
+<div class="modal fade" id="pendingModal-{{ $speaker->id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="{{ route('resource_speaker.updateStatus', $speaker->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="status" value="Pending">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">Set as Pending</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to set "<strong>{{ $speaker->given_name }} {{ $speaker->last_name }}</strong>" status to <strong>Pending</strong>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Set as Pending</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Approved Modal -->
+<div class="modal fade" id="approvedModal-{{ $speaker->id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="{{ route('resource_speaker.updateStatus', $speaker->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="status" value="Approved">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Approve Resource Speaker</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to approve "<strong>{{ $speaker->given_name }} {{ $speaker->last_name }}</strong>"?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Approve</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Accredited Modal -->
+<div class="modal fade" id="accreditedModal-{{ $speaker->id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="{{ route('resource_speaker.updateStatus', $speaker->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="status" value="Accredited">
+                <div class="modal-header bg-secondary text-white">
+                    <h5 class="modal-title">Accredit Resource Speaker</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to accredit "<strong>{{ $speaker->given_name }} {{ $speaker->last_name }}</strong>"?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-secondary">Accredit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Main Status Change Modal (shows all 3 options) -->
+<div class="modal fade" id="statusModal-{{ $speaker->id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Change Status</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="mb-3"><strong>{{ $speaker->given_name }} {{ $speaker->last_name }}</strong></p>
+                <p class="text-muted mb-4">
+                    Current Status:
+                    <span class="status-badge status-{{ strtolower($speaker->status ?? 'pending') }}">
+                        {{ $speaker->status ?? 'Pending' }}
+                    </span>
+                </p>
+
+                <div class="d-grid gap-3">
+                    <!-- Pending Button -->
+                    @if($speaker->status != 'Pending')
+                    <button type="button"
+                            class="btn btn-warning btn-lg"
+                            data-bs-dismiss="modal"
+                            data-bs-toggle="modal"
+                            data-bs-target="#pendingModal-{{ $speaker->id }}">
+                        <i class="fa-solid fa-clock me-2"></i>Set as Pending
+                    </button>
+                    @else
+                    <button type="button" class="btn btn-warning btn-lg" disabled>
+                        <i class="fa-solid fa-clock me-2"></i>Currently Pending
+                    </button>
+                    @endif
+
+                    <!-- Approved Button -->
+                    @if($speaker->status != 'Approved')
+                    <button type="button"
+                            class="btn btn-success btn-lg"
+                            data-bs-dismiss="modal"
+                            data-bs-toggle="modal"
+                            data-bs-target="#approvedModal-{{ $speaker->id }}">
+                        <i class="fa-solid fa-check me-2"></i>Approve
+                    </button>
+                    @else
+                    <button type="button" class="btn btn-success btn-lg" disabled>
+                        <i class="fa-solid fa-check me-2"></i>Currently Approved
+                    </button>
+                    @endif
+
+                    <!-- Accredited Button -->
+                    {{-- @if($speaker->status != 'Accredited')
+                    <button type="button"
+                            class="btn btn-secondary btn-lg"
+                            data-bs-dismiss="modal"
+                            data-bs-toggle="modal"
+                            data-bs-target="#accreditedModal-{{ $speaker->id }}">
+                        <i class="fa-solid fa-certificate me-2"></i>Accredit
+                    </button>
+                    @else
+                    <button type="button" class="btn btn-secondary btn-lg" disabled>
+                        <i class="fa-solid fa-certificate me-2"></i>Currently Accredited
+                    </button>
+                    @endif --}}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 
                                                       <!-- Modal for displaying PDF -->
                             <div class="modal fade" id="pdfModal-{{ $speaker->id }}" tabindex="-1" aria-labelledby="pdfModalLabel-{{ $speaker->id }}" aria-hidden="true">
@@ -205,18 +482,69 @@ window.onload = function() {
                                         data-name="{{ $speaker->given_name }} {{ $speaker->last_name }}">
                                     <i class="fa-solid fa-trash"></i>
                                 </button> --}}
+                                </div>
                                      </td>
                                 </tr>
                             @endforeach
-                        @else
-                            <tr>
-                                <td colspan="6">No speakers found.</td>
-                            </tr>
-                        @endif
+
                     </tbody>
                 </table>
         </div>
-        <div class="card-footer bg-success"></div>
+    <!-- Pagination -->
+    <div class="d-flex justify-content-end mt-1">
+        {{-- <div>
+            <small class="text-muted">
+                Showing {{ $speakers->firstItem() ?? 0 }} to {{ $speakers->lastItem() ?? 0 }} of {{ $speakers->total() }} entries
+                @if(request('search'))
+                    <span class="badge bg-info">Filtered by: "{{ request('search') }}"</span>
+                @endif
+            </small>
+        </div> --}}
+        <div>
+            @if ($speakers->hasPages())
+                <nav aria-label="Page navigation">
+                    <ul class="pagination mb-0">
+                        {{-- Previous Page Link --}}
+                        @if ($speakers->onFirstPage())
+                            <li class="page-item disabled">
+                                <span class="page-link">&laquo; Previous</span>
+                            </li>
+                        @else
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $speakers->previousPageUrl() }}" rel="prev">&laquo; Previous</a>
+                            </li>
+                        @endif
+
+                        {{-- Pagination Elements --}}
+                        @foreach ($speakers->links()->elements[0] as $page => $url)
+                            @if ($page == $speakers->currentPage())
+                                <li class="page-item active">
+                                    <span class="page-link">{{ $page }}</span>
+                                </li>
+                            @else
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                                </li>
+                            @endif
+                        @endforeach
+
+                        {{-- Next Page Link --}}
+                        @if ($speakers->hasMorePages())
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $speakers->nextPageUrl() }}" rel="next">Next &raquo;</a>
+                            </li>
+                        @else
+                            <li class="page-item disabled">
+                                <span class="page-link">Next &raquo;</span>
+                            </li>
+                        @endif
+                    </ul>
+                </nav>
+            @endif
+        </div>
+    </div>
+</div>
+
 
     </div>
 </div>
@@ -628,7 +956,7 @@ window.onload = function() {
     </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+{{-- <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-warning">
@@ -648,46 +976,46 @@ window.onload = function() {
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 
-@endsection
 
 @section('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // ===== Delete Modal (Vanilla JS)
+
+    // ===== Delete Modal (Bootstrap 5 Vanilla API)
     const deleteModal = document.getElementById('deleteModal');
     if (deleteModal) {
         deleteModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
-            const speakerId = button.getAttribute('data-id');
-            const speakerName = button.getAttribute('data-name');
+            const speakerId = button.dataset.id;
+            const speakerName = button.dataset.name;
 
             document.getElementById('speakerName').textContent = speakerName;
             document.getElementById('deleteSpeakerForm').action = `/resource_speaker/${speakerId}`;
         });
     }
 
-    // ===== Success alert hide
+    // ===== Success Alert Auto-Hide
     const successAlert = document.getElementById('success-alert');
     if (successAlert) {
-        setTimeout(() => {
-            successAlert.style.display = 'none';
-        }, 5000);
+        setTimeout(() => successAlert.remove(), 5000);
     }
 
-    // ===== Repeater Functions (Generic Clone + Clear)
+    // ===== Repeater Functions (Clone + Clear Inputs)
     function setupRepeater(addBtnId, containerId, entryClass) {
         const addBtn = document.getElementById(addBtnId);
-        if (!addBtn) return;
+        const container = document.getElementById(containerId);
+        if (!addBtn || !container) return;
+
         addBtn.addEventListener('click', function () {
-            const container = document.getElementById(containerId);
             const template = container.querySelector(`.${entryClass}`);
             if (!template) return;
+
             const newEntry = template.cloneNode(true);
-            newEntry.querySelectorAll('input').forEach(input => input.value = '');
+            newEntry.querySelectorAll('input, select, textarea').forEach(el => el.value = '');
             container.appendChild(newEntry);
         });
     }
@@ -695,6 +1023,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function setupRemove(containerId, entryClass, removeClass) {
         const container = document.getElementById(containerId);
         if (!container) return;
+
         container.addEventListener('click', function (e) {
             if (e.target.classList.contains(removeClass)) {
                 e.target.closest(`.${entryClass}`).remove();
@@ -713,48 +1042,139 @@ document.addEventListener("DOMContentLoaded", function () {
     setupRemove("training-container", "training-entry", "remove-training");
     setupRemove("trainer-container", "trainer-entry", "remove-trainer");
     setupRemove("publications-container", "publication-entry", "remove-publication");
-});
 
-// ===== AJAX Submit for Edit Form
-$('#editUserForm').on('submit', function(e) {
-    e.preventDefault();
-    var formData = $(this).serialize();
-    $.ajax({
-        url: $(this).attr('action'),
-        type: 'POST',
-        data: formData,
-        success: function(response) {
-            $('#editUserModal').modal('hide');
-            location.reload();
-        },
-        error: function(xhr) {
-            if (xhr.status === 422) {
-                var errors = xhr.responseJSON.errors;
-                var errorMessage = 'Validation errors: ';
-                for (var field in errors) {
-                    errorMessage += errors[field].join(', ') + ' ';
+    // ===== AJAX Submit (Vanilla Fetch)
+    const editForm = document.getElementById('editUserForm');
+    if (editForm) {
+        editForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(editForm);
+
+            try {
+                const response = await fetch(editForm.action, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                    location.reload();
+                } else if (response.status === 422) {
+                    const errors = await response.json();
+                    alert('Validation errors: ' + JSON.stringify(errors.errors));
+                } else {
+                    alert('Error occurred while updating user.');
                 }
-                alert(errorMessage);
-            } else {
-                console.error('Error updating user:', xhr.responseText);
-                alert('An error occurred while updating the user. Please try again.');
+            } catch (error) {
+                console.error(error);
+                alert('Request failed. Please try again.');
             }
-        }
-    });
+        });
+    }
+
 });
 
 // ===== PDF Load with Spinner
 function loadPDF(trainerId) {
     const loader = document.getElementById('pdfLoader-' + trainerId);
     const iframe = document.getElementById('pdfFrame-' + trainerId);
+    if (!loader || !iframe) return;
+
     loader.style.display = 'block';
     iframe.style.display = 'none';
     iframe.src = "{{ route('resource_speaker.print', '') }}/" + trainerId;
 
-    iframe.onload = function () {
+    iframe.onload = () => {
         loader.style.display = 'none';
         iframe.style.display = 'block';
     };
 }
+
+// Pending, Approved, Accre
+function updateStatusFromModal(speakerId, status) {
+    console.log('Starting update:', {speakerId, status}); // Debug
+
+    // Get the modal element
+    const modal = document.getElementById('statusModal' + speakerId);
+    const modalInstance = bootstrap.Modal.getInstance(modal);
+
+    // Close the modal first
+    if (modalInstance) {
+        modalInstance.hide();
+    }
+
+    // Show confirmation dialog
+    const confirmed = confirm(`Are you sure you want to change status to ${status}?`);
+
+    if (!confirmed) {
+        return;
+    }
+
+    // Show loading indicator
+    const loadingToast = document.createElement('div');
+    loadingToast.className = 'toast-notification';
+    loadingToast.innerHTML = 'Updating status...';
+    loadingToast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #333; color: white; padding: 15px 25px; border-radius: 5px; z-index: 9999;';
+    document.body.appendChild(loadingToast);
+
+    const url = `/resource-speaker/${speakerId}/update-status`;
+    console.log('Fetch URL:', url); // Debug
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => {
+        console.log('Response status:', response.status); // Debug
+        console.log('Response ok:', response.ok); // Debug
+
+        // Clone response to read it twice
+        return response.clone().text().then(text => {
+            console.log('Raw response:', text); // Debug
+            try {
+                return {
+                    status: response.status,
+                    data: JSON.parse(text)
+                };
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                return {
+                    status: response.status,
+                    data: { success: false, message: text }
+                };
+            }
+        });
+    })
+    .then(({status, data}) => {
+        // Remove loading indicator
+        if (document.body.contains(loadingToast)) {
+            document.body.removeChild(loadingToast);
+        }
+
+        console.log('Parsed data:', data); // Debug
+
+        if (status === 200 && data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        // Remove loading indicator
+        if (document.body.contains(loadingToast)) {
+            document.body.removeChild(loadingToast);
+        }
+
+        console.error('Fetch error:', error);
+        alert('Network error: ' + error.message);
+    });
+}
 </script>
+@endsection
 @endsection

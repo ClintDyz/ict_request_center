@@ -26,4 +26,10 @@ class AccreditationAverage extends Model
         return $this->belongsTo(Rstbl::class, 'rstbl_id', 'id');
     }
 
+        public function rawAccreditations()
+    {
+        return $this->hasMany(Accreditation::class, 'rstbl_id', 'rstbl_id');
+    }
+
+
 }

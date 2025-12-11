@@ -1,4 +1,4 @@
-@extends('layouts.admin')http://127.0.0.1:8000/home
+@extends('layouts.admin')
 
 @section('content')
 
@@ -67,15 +67,18 @@
         <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
             <div>
                 <i class="fas fa-user me-1"></i>
-                List of To Be Accredited
+                Get the Average
             </div>
             <div>
-           <button type="button" id="getAverageBtn" class="btn btn-primary">
+              @if(auth()->user()->emp_type == '0')
+
+         <button type="button" id="getAverageBtn" class="btn btn-primary">
                 <i class="fa-solid fa-calculator"></i> Get Average
             </button>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#accreditationModal">
+            @endif
+            {{-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#accreditationModal">
                 <i class="fa-solid fa-circle-plus"></i> Add
-            </button>
+            </button> --}}
         </div>
         </div>
 
@@ -92,6 +95,9 @@
                         <th>Experience</th>
                         <th>Award</th>
                         <th>Total</th>
+                        <th>Status</th>
+                        <th>Evaluated By</th>
+                        <th>Date</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -111,15 +117,55 @@
                                         <td>{{ $trainer->experience }}</td>
                                         <td>{{ $trainer->award }}</td>
                                         <td>{{ $trainer->total }}</td>
+                                        <td>
+                                            @php
+                                                $total = $trainer->total;
+                                            @endphp
+
+                                            @if($total >= 75)
+                                                <span class="badge bg-success">
+                                                    <i class="fa-solid fa-check-circle me-1"></i>Pass
+                                                </span>
+                                            @elseif($total >= 70)
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fa-solid fa-exclamation-triangle me-1"></i>Near Pass
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">{{ $total }} points</small>
+                                            @else
+                                                <span class="badge bg-danger">
+                                                    <i class="fa-solid fa-times-circle me-1"></i>Fail
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">{{ $total }} points</small>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($trainer->createdBy)
+                                                <span class="badge bg-info">
+                                                    {{ $trainer->createdBy->firstname }} {{ $trainer->createdBy->lastname }}
+                                                </span>
+                                            @else
+                                                <span class="text-muted">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ $trainer->created_at->format('M d, Y') }}
+                                            </small>
+                                        </td>
                                 <td>
+
                                     <!-- Actions -->
-                                    <a href="{{ route('accreditation.edit', $trainer->id) }}" class="btn btn-sm btn-primary">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </a>
+
                                 <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#accreditationModal-{{ $trainer->id }}">
                                    <i class="fa-regular fa-eye"></i>
                                 </button>
+                                @if(auth()->user()->emp_type == '0')
 
+                                <a href="{{ route('accreditation.edit', $trainer->id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
                                 <!-- Delete Button -->
                                 <form action="{{ route('accreditation.destroy', $trainer->id) }}" method="POST" class="d-inline delete-form">
                                     @csrf
@@ -129,12 +175,16 @@
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </form>
+                                        @endif
+
+                                {{-- Print Btn --}}
+                                {{-- <a href="{{ route('accreditation.print', $trainer->id) }}" target="_blank" class="btn btn-sm btn-info"> <i class="fa-solid fa-print"></i></a> --}}
+
                                 <!-- Trigger Modal Button -->
                            <!-- Trigger Modal Button -->
                                             {{-- <button type="button" class="btn btn-sm btn-info" onclick="loadPDF({{ $trainer->id }})" data-bs-toggle="modal" data-bs-target="#pdfModal-{{ $trainer->id }}">
                                                 <i class="fa-solid fa-print"></i>
                                             </button> --}}
-<a href="{{ route('accreditation.print', $trainer->id) }}" target="_blank" class="btn btn-sm btn-info"> <i class="fa-solid fa-print"></i></a>
 
                                 {{-- <button type="button" class="btn btn-sm btn-info" onclick="loadPDF({{ $trainer->id }})" data-bs-toggle="modal" data-bs-target="#pdfModal-{{ $trainer->id }}">
                                         <i class="fa-solid fa-print"></i>
@@ -382,18 +432,19 @@
                     <div class="col-sm-9">
                         <select id="speakerDropdown" class="form-select select2" name="rstbl_id" required>
                             <option disabled selected>-- Select Speaker --</option>
-                            @foreach ($speakers as $speaker)
-                                <option value="{{ $speaker->id }}"
-                                    data-given_name="{{ $speaker->given_name }}"
-                                    data-last_name="{{ $speaker->last_name }}"
-                                    data-expertises='@json($speaker->expertises->pluck("expertis"))'>
-                                    {{ $speaker->given_name }} {{ $speaker->last_name }}
-                                </option>
+                            @foreach ($approvedSpeakers as $speaker)
+                                @if($speaker->status === 'Approved')
+                                    <option value="{{ $speaker->id }}"
+                                        data-given_name="{{ $speaker->given_name }}"
+                                        data-last_name="{{ $speaker->last_name }}"
+                                        data-expertises='@json($speaker->expertises->pluck("expertis"))'>
+                                        {{ $speaker->given_name }} {{ $speaker->last_name }} ✓
+                                    </option>
+                                @endif
                             @endforeach
                         </select>
                     </div>
                 </div>
-
 {{--
                     <!-- Training Title Dropdown -->
                     <div class="mb-3 row">
@@ -691,7 +742,7 @@ $(document).ready(function () {
     }
 </script>
 
-
+<!-- Script -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const avgBtn = document.getElementById("getAverageBtn");
@@ -712,12 +763,18 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // Validate: Must select exactly 4 RS
+    if (checked.length !== 4) {
+      alert(`❌ You must select exactly 4 RS (Rating Scores).\n\nCurrently selected: ${checked.length} RS\n\nPlease select exactly 4 rows to proceed.`);
+      return;
+    }
+
     // Get IDs from checked rows
     const ids = Array.from(checked).map(cb => cb.value);
     console.log('Selected IDs:', ids);
 
     // Show confirmation
-    if (!confirm(`You are about to approve ${checked.length} accreditation record(s). Continue?`)) {
+    if (!confirm(`You are about to approve ${checked.length} accreditation record(s) and update speaker status to Accredited. Continue?`)) {
       return;
     }
 
@@ -761,23 +818,36 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Success:", data);
 
         let msg = `✅ ${data.message}\n\n`;
+
+        // Show accredited speakers count
+        if (data.data && data.data.accredited_speakers) {
+          msg += `Speakers Accredited: ${data.data.accredited_speakers.length}\n`;
+          msg += `Speaker IDs: ${data.data.accredited_speakers.join(', ')}\n\n`;
+        }
+
+        // Show overall averages with RS limited to 4 decimal places
         if (data.data && data.data.overall_averages) {
           msg += "Overall Averages:\n";
           const avg = data.data.overall_averages;
-          msg += `Education: ${avg.education}\n`;
-          msg += `Work: ${avg.work}\n`;
-          msg += `Seminar: ${avg.seminar}\n`;
-          msg += `Experience: ${avg.experience}\n`;
-          msg += `Award: ${avg.award}\n`;
-          msg += `Total: ${avg.total}`;
+
+          // Function to limit decimal places to 4
+          const limitDecimal = (value) => {
+            const num = parseFloat(value);
+            return isNaN(num) ? value : num.toFixed(4);
+          };
+
+          msg += `Education: ${limitDecimal(avg.education)}\n`;
+          msg += `Work: ${limitDecimal(avg.work)}\n`;
+          msg += `Seminar: ${limitDecimal(avg.seminar)}\n`;
+          msg += `Experience: ${limitDecimal(avg.experience)}\n`;
+          msg += `Award: ${limitDecimal(avg.award)}\n`;
+          msg += `Total: ${limitDecimal(avg.total)}`;
         }
 
         alert(msg);
 
-        // Ask to reload
-        if (confirm("Reload page to see changes?")) {
-          location.reload();
-        }
+        // Reload page to see changes
+        location.reload();
       } else {
         throw new Error(data.message || "Unknown error");
       }
@@ -788,7 +858,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } finally {
       // Re-enable button
       avgBtn.disabled = false;
-      avgBtn.innerHTML = '<i class="fa-solid fa-circle-plus"></i> Get Average';
+      avgBtn.innerHTML = '<i class="fa-solid fa-calculator"></i> Get Average';
     }
   });
 });

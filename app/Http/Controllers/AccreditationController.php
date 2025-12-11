@@ -21,13 +21,22 @@ class AccreditationController extends Controller
         {
             $requests = RequestResourceSpeaker::with('speaker')->get();
 
-            // Load speakers with both office and expertis relationships
-            $speakers = Rstbl::with(['office', 'expertises'])->get();
+            // Load only APPROVED speakers for accreditation form
+            $approvedSpeakers = Rstbl::with(['office', 'expertises'])
+                                    ->where('status', 'Approved')
+                                    ->get();
+
+            // Load all speakers if needed elsewhere
+            $allSpeakers = Rstbl::with(['office', 'expertises'])->get();
 
             // Load accreditations with speaker relationship
-            $trainers = Accreditation::with('speaker')->where('status', 0)->get();
+            $trainers = Accreditation::with('speaker', 'createdBy')->where('status', 0)->get();
 
-            return view('accreditation.index', compact('trainers', 'requests', 'speakers'));
+            $grouped = $trainers->groupBy(function ($t) {
+                return $t->speaker->given_name . '|' . $t->speaker->last_name . '|' . $t->field_of_expertise;
+            });
+
+            return view('accreditation.index', compact('trainers', 'requests', 'approvedSpeakers', 'allSpeakers', 'grouped'));
         }
 
         public function showAccredited()
@@ -79,9 +88,33 @@ class AccreditationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+  public function show(Request $request)
     {
+        $search = $request->get('search', '');
 
+        $query = Rstbl::with(['expertises', 'office'])
+                     ->where('status', 'Approved');
+
+        // Search functionality
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('given_name', 'LIKE', "%{$search}%")
+                  ->orWhere('last_name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('home_municipality', 'LIKE', "%{$search}%")
+                  ->orWhere('home_province', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $speakers = $query->orderBy('created_at', 'desc')->get();
+
+        $stats = [
+            'total_approved' => Rstbl::where('status', 'Approved')->count(),
+            'male' => Rstbl::where('status', 'Approved')->where('gender', 'Male')->count(),
+            'female' => Rstbl::where('status', 'Approved')->where('gender', 'Female')->count(),
+        ];
+
+        return view('accreditation.approved', compact('speakers', 'stats', 'search'));
     }
 
     /**
@@ -358,167 +391,180 @@ class AccreditationController extends Controller
         $pdf->Cell(60, 6, '', 1, 1, 'C');
     }
 
+public function approve(Request $request)
+{
+    try {
+        // Log the incoming request
+        Log::info('Approve method called', $request->all());
 
+        $ids = $request->input('ids', []);
 
-    public function approve(Request $request)
-    {
-        try {
-            // Log the incoming request
-            Log::info('Approve method called', $request->all());
+        if (!is_array($ids) || empty($ids)) {
+            return response()->json(['message' => 'No rows selected'], 422);
+        }
 
-            $ids = $request->input('ids', []);
+        return DB::transaction(function () use ($ids) {
 
-            if (!is_array($ids) || empty($ids)) {
-                return response()->json(['message' => 'No rows selected'], 422);
+            // Step 1: Check if records exist
+            $records = DB::table('accreditations')
+                ->whereIn('id', $ids)
+                ->get();
+
+            if ($records->isEmpty()) {
+                return response()->json(['message' => 'No matching records found'], 404);
             }
 
-            return DB::transaction(function () use ($ids) {
+            Log::info('Found records', ['count' => $records->count()]);
 
-                // Step 1: Check if records exist
-                $records = DB::table('accreditations')
-                    ->whereIn('id', $ids)
-                    ->get();
+            // Step 2: Update status to 1
+            $updated = DB::table('accreditations')
+                ->whereIn('id', $ids)
+                ->update(['status' => 1]);
 
-                if ($records->isEmpty()) {
-                    return response()->json(['message' => 'No matching records found'], 404);
-                }
+            Log::info('Updated status', ['updated_count' => $updated]);
 
-                Log::info('Found records', ['count' => $records->count()]);
+            // Step 3: Group by rstbl_id and calculate averages
+            $averages = DB::table('accreditations')
+                ->whereIn('id', $ids)
+                ->select('rstbl_id')
+                ->selectRaw('
+                    ROUND(AVG(education), 2) as avg_education,
+                    ROUND(AVG(work), 2) as avg_work,
+                    ROUND(AVG(seminar), 2) as avg_seminar,
+                    ROUND(AVG(experience), 2) as avg_experience,
+                    ROUND(AVG(award), 2) as avg_award,
+                    ROUND(AVG(total), 2) as avg_total,
+                    COUNT(*) as record_count
+                ')
+                ->groupBy('rstbl_id')
+                ->get();
 
-                // Step 2: Update status to 1
-                $updated = DB::table('accreditations')
-                    ->whereIn('id', $ids)
-                    ->update(['status' => 1]);
+            Log::info('Calculated averages', ['averages' => $averages]);
 
-                Log::info('Updated status', ['updated_count' => $updated]);
+            // Step 4: Try to create accreditation_averages table if it doesn't exist
+            $this->ensureAveragesTableExists();
 
-                // Step 3: Group by rstbl_id and calculate averages
-                $averages = DB::table('accreditations')
-                    ->whereIn('id', $ids)
-                    ->select('rstbl_id')
-                    ->selectRaw('
-                        ROUND(AVG(education), 2) as avg_education,
-                        ROUND(AVG(work), 2) as avg_work,
-                        ROUND(AVG(seminar), 2) as avg_seminar,
-                        ROUND(AVG(experience), 2) as avg_experience,
-                        ROUND(AVG(award), 2) as avg_award,
-                        ROUND(AVG(total), 2) as avg_total,
-                        COUNT(*) as record_count
-                    ')
-                    ->groupBy('rstbl_id')
-                    ->get();
+            // Step 5: Save averages and update speaker status to Accredited
+            $savedCount = 0;
+            $accreditedSpeakers = [];
 
-                Log::info('Calculated averages', ['averages' => $averages]);
+            foreach ($averages as $avg) {
+                try {
+                    // Check if record already exists
+                    $exists = DB::table('accreditation_averages')
+                        ->where('rstbl_id', $avg->rstbl_id)
+                        ->exists();
 
-                // Step 4: Try to create accreditation_averages table if it doesn't exist
-                $this->ensureAveragesTableExists();
+                    if (!$exists) {
+                        DB::table('accreditation_averages')->insert([
+                            'rstbl_id' => $avg->rstbl_id,
+                            'field_of_expertise' => $avg->rstbl_id,
+                            'avg_education' => $avg->avg_education,
+                            'avg_work' => $avg->avg_work,
+                            'avg_seminar' => $avg->avg_seminar,
+                            'avg_experience' => $avg->avg_experience,
+                            'avg_award' => $avg->avg_award,
+                            'avg_total' => $avg->avg_total,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                        $savedCount++;
 
-                // Step 5: Save averages (with duplicate prevention)
-                $savedCount = 0;
-                foreach ($averages as $avg) {
-                    try {
-                        // Check if record already exists
-                        $exists = DB::table('accreditation_averages')
-                            ->where('rstbl_id', $avg->rstbl_id)
-                            ->exists();
-
-                        if (!$exists) {
-                            DB::table('accreditation_averages')->insert([
-                                'rstbl_id' => $avg->rstbl_id,
-                                'field_of_expertise' => $avg->rstbl_id,
-                                'avg_education' => $avg->avg_education,
-                                'avg_work' => $avg->avg_work,
-                                'avg_seminar' => $avg->avg_seminar,
-                                'avg_experience' => $avg->avg_experience,
-                                'avg_award' => $avg->avg_award,
-                                'avg_total' => $avg->avg_total,
-                                'created_at' => now(),
-                                'updated_at' => now(),
+                        // **NEW: Update speaker status to Accredited**
+                        DB::table('rstbl')
+                            ->where('id', $avg->rstbl_id)
+                            ->update([
+                                'status' => 'Accredited',
+                                'updated_at' => now()
                             ]);
-                            $savedCount++;
-                        } else {
-                            Log::info("Skipped rstbl_id {$avg->rstbl_id} - already exists");
-                        }
-                    } catch (\Exception $e) {
-                        Log::error("Error saving average for rstbl_id {$avg->rstbl_id}: " . $e->getMessage());
+
+                        $accreditedSpeakers[] = $avg->rstbl_id;
+
+                        Log::info("Speaker {$avg->rstbl_id} status updated to Accredited");
+                    } else {
+                        Log::info("Skipped rstbl_id {$avg->rstbl_id} - already exists");
                     }
+                } catch (\Exception $e) {
+                    Log::error("Error saving average for rstbl_id {$avg->rstbl_id}: " . $e->getMessage());
                 }
+            }
 
-                // Step 6: Calculate overall averages for response
-                $overallAvg = [
-                    'education' => round($averages->avg('avg_education'), 2),
-                    'work' => round($averages->avg('avg_work'), 2),
-                    'seminar' => round($averages->avg('avg_seminar'), 2),
-                    'experience' => round($averages->avg('avg_experience'), 2),
-                    'award' => round($averages->avg('avg_award'), 2),
-                    'total' => round($averages->avg('avg_total'), 2),
-                ];
-
-                return response()->json([
-                    'success' => true,
-                    'message' => "Successfully processed {$updated} records and saved {$savedCount} averages.",
-                    'data' => [
-                        'updated_count' => $updated,
-                        'unique_speakers' => $savedCount,
-                        'overall_averages' => $overallAvg,
-                        'speaker_details' => $averages->map(function($avg) {
-                            return [
-                                'rstbl_id' => $avg->rstbl_id,
-                                'averages' => [
-                                    'education' => $avg->avg_education,
-                                    'work' => $avg->avg_work,
-                                    'seminar' => $avg->avg_seminar,
-                                    'experience' => $avg->avg_experience,
-                                    'award' => $avg->avg_award,
-                                    'total' => $avg->avg_total,
-                                ],
-                                'record_count' => $avg->record_count
-                            ];
-                        })
-                    ]
-                ]);
-            });
-
-        } catch (\Exception $e) {
-            Log::error('Error in approve method', [
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            // Step 6: Calculate overall averages for response
+            $overallAvg = [
+                'education' => round($averages->avg('avg_education'), 2),
+                'work' => round($averages->avg('avg_work'), 2),
+                'seminar' => round($averages->avg('avg_seminar'), 2),
+                'experience' => round($averages->avg('avg_experience'), 2),
+                'award' => round($averages->avg('avg_award'), 2),
+                'total' => round($averages->avg('avg_total'), 2),
+            ];
 
             return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while processing the request.',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error',
-                'debug_info' => config('app.debug') ? [
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine()
-                ] : null
-            ], 500);
-        }
-    }
+                'success' => true,
+                'message' => "Successfully processed {$updated} records, saved {$savedCount} averages, and accredited " . count($accreditedSpeakers) . " speaker(s).",
+                'data' => [
+                    'updated_count' => $updated,
+                    'unique_speakers' => $savedCount,
+                    'accredited_speakers' => $accreditedSpeakers,
+                    'overall_averages' => $overallAvg,
+                    'speaker_details' => $averages->map(function($avg) {
+                        return [
+                            'rstbl_id' => $avg->rstbl_id,
+                            'averages' => [
+                                'education' => $avg->avg_education,
+                                'work' => $avg->avg_work,
+                                'seminar' => $avg->avg_seminar,
+                                'experience' => $avg->avg_experience,
+                                'award' => $avg->avg_award,
+                                'total' => $avg->avg_total,
+                            ],
+                            'record_count' => $avg->record_count
+                        ];
+                    })
+                ]
+            ]);
+        });
 
-    private function ensureAveragesTableExists()
-    {
-        try {
-            if (!Schema::hasTable('accreditation_averages')) {
-                Schema::create('accreditation_averages', function ($table) {
-                    $table->id();
-                    $table->unsignedBigInteger('rstbl_id');
-                    $table->decimal('avg_education', 8, 2)->default(0);
-                    $table->decimal('avg_work', 8, 2)->default(0);
-                    $table->decimal('avg_seminar', 8, 2)->default(0);
-                    $table->decimal('avg_experience', 8, 2)->default(0);
-                    $table->decimal('avg_award', 8, 2)->default(0);
-                    $table->decimal('avg_total', 8, 2)->default(0);
-                    $table->timestamps();
-                });
-                Log::info('Created accreditation_averages table');
-            }
-        } catch (\Exception $e) {
-            Log::error('Error creating table: ' . $e->getMessage());
-        }
+    } catch (\Exception $e) {
+        Log::error('Error in approve method', [
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while processing the request.',
+            'error' => config('app.debug') ? $e->getMessage() : 'Internal server error',
+            'debug_info' => config('app.debug') ? [
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ] : null
+        ], 500);
     }
+}
+
+private function ensureAveragesTableExists()
+{
+    try {
+        if (!Schema::hasTable('accreditation_averages')) {
+            Schema::create('accreditation_averages', function ($table) {
+                $table->id();
+                $table->unsignedBigInteger('rstbl_id');
+                $table->decimal('avg_education', 8, 2)->default(0);
+                $table->decimal('avg_work', 8, 2)->default(0);
+                $table->decimal('avg_seminar', 8, 2)->default(0);
+                $table->decimal('avg_experience', 8, 2)->default(0);
+                $table->decimal('avg_award', 8, 2)->default(0);
+                $table->decimal('avg_total', 8, 2)->default(0);
+                $table->timestamps();
+            });
+            Log::info('Created accreditation_averages table');
+        }
+    } catch (\Exception $e) {
+        Log::error('Error creating table: ' . $e->getMessage());
+    }
+}
 
 }

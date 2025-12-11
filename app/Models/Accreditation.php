@@ -28,8 +28,12 @@ class Accreditation extends Model
     {
         return $this->belongsTo(Rstbl::class, 'rstbl_id');
     }
+        // Relationship to user who created/scored
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
     // app/Models/Rstbl.php
-
         public function expertis()
         {
             return $this->hasMany(Expertis::class, 'rs_id');

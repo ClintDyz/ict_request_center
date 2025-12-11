@@ -1,6 +1,6 @@
 <nav class="sb-topnav navbar navbar-expand fixed-top" style="background-color: #3490dc">
     <!-- Navbar Brand-->
-    <a class="navbar-brand ps-3" href="{{url('/home')}}">Resource System</a>
+    <a class="navbar-brand ps-3" href="{{url('/home')}}">SMSAS</a>
     <!-- Sidebar Toggle-->
     <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars" style="color: white"></i></button>
     <!-- Navbar Search-->
@@ -17,12 +17,19 @@
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 {{-- <li><a class="dropdown-item" href="#!">Settings</a></li>
                 <li><a class="dropdown-item" href="#!">Activity Log</a></li>
-                <li><hr class="dropdown-divider" /></li> --}}
+ --}}
+                                            <li>
+                                <a class="dropdown-item" href="{{ route('accounts.profile') }}">
+                                    <i class="fa fa-user me-2"></i> Profile
+                                </a>
+                            </li>
+
+                <li><hr class="dropdown-divider" /></li>
                 <li>
                         <a class="dropdown-item" href="{{ route('logout') }}"
                            onclick="event.preventDefault();
                                          document.getElementById('logout-form').submit();">
-                            {{ __('Logout') }}
+                           <i class="fa fa-sign-out-alt me-2"></i> {{ __('Logout') }}
                         </a>
 
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
