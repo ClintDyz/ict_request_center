@@ -72,6 +72,12 @@ class Rstbl extends Model
                     return $this->belongsTo(User::class, 'updated_by');
                 }
 
+                public function letter()
+                {
+                    return $this->hasOne(RsLetter::class, 'rstbl_id');
+                }
+
+
 
 
         protected static function boot()

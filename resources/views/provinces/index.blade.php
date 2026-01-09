@@ -117,14 +117,14 @@
             <form method="POST" id="deleteProvinceForm">
                 @csrf
                 @method('DELETE')
-                <div class="modal-header bg-warning">
+                <div class="modal-header bg-danger">
                     <h5 class="modal-title" id="deleteProvinceModalLabel">Delete Province</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     Are you sure you want to delete this province?
                 </div>
-                <div class="modal-footer bg-danger">
+                <div class="modal-footer bg-warning">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </div>
@@ -152,24 +152,43 @@
 </div>
 
 @endsection
-
 @section('scripts')
 <script>
-    // Set values in the edit modal
+    // Set values in the edit modal and set the form action dynamically
     function editProvince(id, name) {
+        // 1. Set the form fields
         $('#editProvinceId').val(id);
         $('#editProvinceName').val(name);
-        $('#editProvinceForm').attr('action', '/provinces/' + id); // Dynamically set the form action
+
+        // 2. Embed the 'provinces.update' route URL with a placeholder ':id'
+        let updateUrl = '{{ route('provinces.update', ':id') }}';
+
+        // 3. Replace the placeholder with the actual ID
+        updateUrl = updateUrl.replace(':id', id);
+
+        // 4. Set the form action
+        $('#editProvinceForm').attr('action', updateUrl);
+
+        // 5. Show the modal
         $('#editProvinceModal').modal('show');
     }
 
     // Set the delete form action and open the modal
     function deleteProvince(id) {
-        $('#deleteProvinceForm').attr('action', '/provinces/' + id); // Dynamically set the form action
+        // 1. Embed the 'provinces.destroy' route URL with a placeholder ':id'
+        let deleteUrl = '{{ route('provinces.destroy', ':id') }}';
+
+        // 2. Replace the placeholder with the actual ID
+        deleteUrl = deleteUrl.replace(':id', id);
+
+        // 3. Set the form action
+        $('#deleteProvinceForm').attr('action', deleteUrl);
+
+        // 4. Show the modal
         $('#deleteProvinceModal').modal('show');
     }
 
-    // Set show modal details
+    // Set show modal details (No change needed here)
     function showProvince(name) {
         $('#showProvinceName').text(name);
         $('#showProvinceModal').modal('show');
@@ -177,7 +196,10 @@
 
     // Automatically hide the success message after 5 seconds (5000 milliseconds)
     setTimeout(function() {
-        document.getElementById('success-alert').style.display = 'none';
+        var alert = document.getElementById('success-alert');
+        if (alert) {
+            alert.style.display = 'none';
+        }
     }, 5000); // 5000ms = 5 seconds
 </script>
 @endsection

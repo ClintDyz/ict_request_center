@@ -8,27 +8,56 @@ use Illuminate\Support\Facades\Response;
 
 class ResourceSpeakerMasterListController extends Controller
 {
-    public function index(Request $request)
-    {
-        $status = $request->get('status', 'all');
+public function index(Request $request)
+{
+    $status = $request->get('status', 'all');
 
-        $query = Rstbl::with(['expertises', 'office']);
+    // Check if user is admin
+    $isAdmin = auth()->user()->emp_type == '0';
 
+    // Join with accreditation_averages table to get avg_total
+    $query = Rstbl::with(['expertises', 'office'])
+                  ->leftJoin('accreditation_averages', 'rstbl.id', '=', 'accreditation_averages.rstbl_id')
+                  ->select('rstbl.*', 'accreditation_averages.avg_total');
+
+    if ($isAdmin) {
+        // Admin can see all speakers based on status filter
         if ($status !== 'all') {
-            $query->where('status', $status);
+            $query->where('rstbl.status', $status);
         }
+    } else {
+        // Non-admin: Only show Accredited speakers with score >= 75
+        $query->where('rstbl.status', 'Accredited')
+              ->where('accreditation_averages.avg_total', '>=', 75);
+    }
 
-        $speakers = $query->orderBy('created_at', 'desc')->get();
+    $speakers = $query->orderBy('rstbl.created_at', 'desc')->get();
 
+    // Calculate stats based on user role
+    if ($isAdmin) {
         $stats = [
             'total' => Rstbl::count(),
             'pending' => Rstbl::where('status', 'Pending')->count(),
             'approved' => Rstbl::where('status', 'Approved')->count(),
             'accredited' => Rstbl::where('status', 'Accredited')->count(),
         ];
+    } else {
+        // Non-admin: Only count Accredited with score >= 75
+        $accreditedCount = Rstbl::join('accreditation_averages', 'rstbl.id', '=', 'accreditation_averages.rstbl_id')
+                                ->where('rstbl.status', 'Accredited')
+                                ->where('accreditation_averages.avg_total', '>=', 75)
+                                ->count();
 
-        return view('resource_speaker.masterlist', compact('speakers', 'status', 'stats'));
+        $stats = [
+            'total' => $accreditedCount,
+            'pending' => 0,
+            'approved' => 0,
+            'accredited' => $accreditedCount,
+        ];
     }
+
+    return view('resource_speaker.masterlist', compact('speakers', 'status', 'stats', 'isAdmin'));
+}
 
     public function export(Request $request)
     {
@@ -45,6 +74,7 @@ class ResourceSpeakerMasterListController extends Controller
         // Create CSV content
         $headers = [
             'Content-Type' => 'text/csv',
+            
             'Content-Disposition' => 'attachment; filename="resource_speakers_' . date('Y-m-d') . '.csv"',
         ];
 

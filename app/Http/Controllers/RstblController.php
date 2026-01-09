@@ -243,7 +243,7 @@ public function index(Request $request)
 // If user is NOT logged in (guest)
 if (!Auth::check()) {
     return redirect()->route('resource_speaker.create')
-        ->with('success', 'Thank you! Your Resource Speaker application has been submitted.');
+        ->with('success', 'Thank you. Your application has been successfully submitted for processing.');
 }
 
 // If admin/user is logged in

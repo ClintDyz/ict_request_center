@@ -3,6 +3,7 @@
 @section('content')
 
 <style>
+/* ... (Keep your existing styles here) ... */
     .stat-card {
         transition: transform 0.2s;
         cursor: pointer;
@@ -46,7 +47,8 @@
         </div>
     @endif
 
-    <!-- Statistics Cards -->
+    @if(auth()->user()->emp_type == '0')
+    {{-- (Keep your existing statistics cards here) --}}
     <div class="row mt-4 mb-4">
         <div class="col-xl-3 col-md-6">
             <a href="{{ route('resource_speaker.masterlist', ['status' => 'all']) }}" class="text-decoration-none">
@@ -54,7 +56,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="text-xs font-weight-bold text-uppercase mb-1">Total Speakers</div>
+                                <div class="text-xs font-weight-bold text-uppercase mb-1">Total Specialist</div>
                                 <div class="h5 mb-0 font-weight-bold">{{ $stats['total'] }}</div>
                             </div>
                             <div class="text-white-50">
@@ -120,39 +122,37 @@
             </a>
         </div>
     </div>
+    @endif
 
-    <!-- Main Card -->
-    <div class="card mb-4">
+    <div class="card mb-4 mt-2">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <div>
                 <i class="fas fa-list me-2"></i>
-                Resource Speakers Master List
+                Specialist Master List
                 @if($status !== 'all')
                     <span class="badge bg-light text-dark ms-2">{{ $status }}</span>
                 @endif
             </div>
-           <!-- Replace the export button with this -->
-                <div>
-                    <!-- CSV Export -->
-                    {{-- <form action="{{ route('resource_speaker.export') }}" method="GET" class="d-inline">
-                        <input type="hidden" name="status" value="{{ $status }}">
-                        <button type="submit" class="btn btn-success btn-sm me-2">
-                            <i class="fas fa-file-csv me-1"></i>Export to CSV
-                        </button>
-                    </form> --}}
+            <div>
+                @if(auth()->user()->emp_type == '0')
+                <form action="{{ route('resource_speaker.export_excel') }}" method="GET" class="d-inline">
+                    <input type="hidden" name="status" value="{{ $status }}">
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="fas fa-file-excel me-1"></i>Export to Excel
+                    </button>
+                </form>
+                @endif
+                @if(auth()->user()->emp_type == '2')
+                <a href="{{ route('resource_speaker.create') }}" class="btn btn-success">
+                    <i class="fa-solid fa-circle-plus"></i> Create
+                </a>
+                @endif
 
-                    <!-- Excel Export (Alternative) -->
-                    <form action="{{ route('resource_speaker.export_excel') }}" method="GET" class="d-inline">
-                        <input type="hidden" name="status" value="{{ $status }}">
-                        <button type="submit" class="btn btn-success btn-sm">
-                            <i class="fas fa-file-excel me-1"></i>Export to Excel
-                        </button>
-                    </form>
-                </div>
+            </div>
         </div>
 
         <div class="card-body">
-            <!-- Filter Buttons -->
+            @if(auth()->user()->emp_type == '0')
             <div class="mb-3">
                 <strong>Filter by Status:</strong>
                 <div class="btn-group ms-2" role="group">
@@ -174,10 +174,11 @@
                     </a>
                 </div>
             </div>
+            @endif
+
 
             <hr>
 
-            <!-- Table -->
             <table id="datatablesSimple" class="table table-striped table-bordered table-hover">
                 <thead class="table-dark">
                     <tr>
@@ -189,7 +190,7 @@
                         <th>Expertise</th>
                         <th>Office/Agency</th>
                         <th>Address</th>
-                        <th>Contact</th>
+                        <th>Tota Avg.</th>
                         <th>Status</th>
                         <th>Date Registered</th>
                         <th>Actions</th>
@@ -216,24 +217,55 @@
                             <td>
                                 {{ $speaker->home_address }}, {{ $speaker->home_municipality }}, {{ $speaker->home_province }}
                             </td>
-                            <td>{{ $speaker->home_cell_no }}</td>
+                            <td>
+                                @if($speaker->avg_total)
+                                    <span class="badge {{ $speaker->avg_total >= 75 ? 'bg-success' : 'bg-warning' }}">
+                                        {{ number_format($speaker->avg_total, 2) }}
+                                    </span>
+                                @else
+                                    <span class="text-muted">N/A</span>
+                                @endif
+                            </td>
                             <td>
                                 <span class="badge status-{{ strtolower($speaker->status ?? 'pending') }}">
                                     {{ $speaker->status ?? 'Pending' }}
                                 </span>
                             </td>
                             <td>{{ $speaker->created_at->format('M d, Y') }}</td>
-                            <td>
+                            <td class="d-flex gap-1">
                                 <a href="{{ route('resource_speaker.view', $speaker->id) }}"
                                    class="btn btn-sm btn-info"
-                                   title="View">
+                                   title="View Details">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                {{-- <a href="{{ route('resource_speaker.edit', $speaker->id) }}"
-                                   class="btn btn-sm btn-primary"
-                                   title="Edit">
+
+                                {{-- NEW BUTTON TO VIEW THE LETTER LINK --}}
+                                @if($speaker->letter->rs_letter ?? false)
+                                <button type="button"
+                                        class="btn btn-sm btn-success viewLetterModal"
+                                        data-letter-link="{{ $speaker->letter->rs_letter }}"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#viewLetterModal"
+                                        title="View Letter">
+                                    <i class="fas fa-file-pdf"></i>
+                                </button>
+                                @endif
+
+                                {{-- EXISTING BUTTON TO EDIT/CREATE THE LETTER LINK --}}
+                                @if(auth()->user()->emp_type == '0')
+
+                                <button type="button"
+                                        class="btn btn-sm btn-primary openLetterModal"
+                                        data-id="{{ $speaker->id }}"
+                                        data-letter="{{ $speaker->letter->rs_letter ?? '' }}"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#createUnitModal"
+                                        title="Edit Link">
                                     <i class="fas fa-edit"></i>
-                                </a> --}}
+                                </button>
+
+                                @endif
+
                             </td>
                         </tr>
                     @empty
@@ -257,6 +289,101 @@
     </div>
 </div>
 
+
+
+{{-- NEW MODAL FOR VIEWING THE LINK --}}
+<div class="modal fade" id="viewLetterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">View Specialist Letter Link</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Click the link below to view the Specialist Letter:</p>
+                <div class="input-group">
+                    <a href="#" id="view_rs_letter_link" target="_blank" class="form-control btn btn-link text-break text-start p-0">
+                        <i class="fas fa-external-link-alt me-2"></i>
+                        <span id="view_rs_letter_text"></span>
+                    </a>
+                </div>
+                <small class="text-muted mt-2 d-block">The link will open in a new tab.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL FOR ADDING/EDITING LETTER LINK --}}
+<div class="modal fade" id="createUnitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="letterForm" method="POST">
+                @csrf
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-link me-2"></i>
+                        Accreditation Letter Link
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> Please enter the complete URL of the accreditation letter (e.g., Google Drive link, Dropbox link, etc.)
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-external-link-alt me-1"></i>
+                            Accreditation Letter URL
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-link"></i>
+                            </span>
+                            <input type="url"
+                                   class="form-control"
+                                   name="rs_letter"
+                                   id="rs_letter"
+                                   placeholder="https://drive.google.com/file/d/..."
+                                   >
+                        </div>
+                        <small class="text-muted">
+                            Make sure the link is accessible to anyone with the link
+                        </small>
+                    </div>
+
+                    <div id="preview-section" class="d-none">
+                        <label class="form-label fw-bold">Preview:</label>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <a href="#" id="preview-link" target="_blank" class="text-break">
+                                    <i class="fas fa-external-link-alt me-2"></i>
+                                    <span id="preview-text"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Save Letter Link
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 @endsection
 
 @section('scripts')
@@ -279,6 +406,31 @@
             },
             "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip'
         });
+    });
+
+    // JavaScript for EDITING/CREATING the Letter Link
+    $(document).on('click', '.openLetterModal', function() {
+        var id = $(this).data('id');
+        var letter = $(this).data('letter');
+
+        $('#rs_letter').val(letter);
+
+        // This is the fix for the previous issue: set the form action dynamically
+        var route = '{{ route("resource_speaker.letter.store", ["id" => ":id"]) }}';
+        route = route.replace(':id', id);
+        $('#letterForm').attr('action', route);
+    });
+
+    // JavaScript for VIEWING the Letter Link
+    $(document).on('click', '.viewLetterModal', function() {
+        var letterLink = $(this).data('letter-link');
+
+        // Set the href attribute and the text content of the link inside the view modal
+        $('#view_rs_letter_link').attr('href', letterLink);
+
+        // Use the link itself as the displayed text, or a shortened version
+        // This example displays the whole link
+        $('#view_rs_letter_text').text(letterLink);
     });
 </script>
 @endsection

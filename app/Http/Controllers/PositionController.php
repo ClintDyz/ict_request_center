@@ -48,30 +48,33 @@ class PositionController extends Controller
         return view('positions.edit', compact('positions')); // Pass to edit view
     }
 
+  // app/Http/Controllers/PositionController.php
+
+// ...
+
+// app/Http/Controllers/PositionController.php
+
     public function update(Request $request, $id)
     {
-        // Validate the updated data
-        $request->validate(['position' => 'required']);
+        // 1. Validation check
+        $request->validate(['position' => 'required|string|max:255']); // Ensure 'position' is used here
 
-        // Find position by ID and update
+        // 2. Find and update the model
         $position = Position::findOrFail($id);
-        $position->update($request->only('position')); // Only update 'name' field
 
-        // Redirect back with success message
+        // Ensure 'position' is the key being updated
+        $position->update($request->only('position'));
+
         return redirect()->route('positions.index')->with('success', 'Position updated successfully');
     }
 
-    public function destroy($id)
-    {
-        // Find position by ID
-        $position = Position::find($id);
-
-        // Check if position exists, then delete
-        if ($position) {
+        public function destroy($id)
+        {
+            // Use findOrFail for consistent error handling and automatic check.
+            $position = Position::findOrFail($id);
             $position->delete();
-        }
 
-        // Redirect to the index with success message
-        return redirect()->route('positions.index')->with('success', 'Position deleted successfully');
-    }
+            // Redirect to the index with success message
+            return redirect()->route('positions.index')->with('success', 'Position deleted successfully');
+        }
 }

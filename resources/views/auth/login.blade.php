@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ICT Request Center – Login</title>
+    <title>Resource Speaker's Management Information System</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -191,7 +191,7 @@
 
         <div class="ms-auto">
             <a href="{{ route('resource_speaker.create') }}" class="btn btn-create text-white">
-                <i class="fa-solid fa-user me-1"></i> RS
+                <i class="fa-solid fa-user me-1"></i> Application for Speaker
             </a>
         </div>
 
@@ -211,7 +211,7 @@
     <!-- LEFT PANEL -->
     <div class="left-panel">
         <img src="{{ asset('img/DOST-CAR.png') }}" alt="Logo">
-        <h2>Subject Matter Specialist<br>Accreditation System</h2>
+        <h2>Resource Speaker's <br>Management Information System</h2>
     </div>
 
     <!-- RIGHT PANEL -->

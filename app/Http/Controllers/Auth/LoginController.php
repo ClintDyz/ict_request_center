@@ -51,4 +51,19 @@ class LoginController extends Controller
             'password' => $request->get('password'),
         ];
     }
+
+    protected function redirectTo()
+{
+    $userType = auth()->user()->emp_type;
+
+    if ($userType == '0') {
+        return '/'; // Admin dashboard
+    } elseif ($userType == '1') {
+        return '/approved-speakers'; // Evaluator/Specific User dashboard
+    } elseif ($userType == '2') {
+        return '/masterlist';
+    } else {
+        return '/'; // Default redirect
+    }
+}
 }

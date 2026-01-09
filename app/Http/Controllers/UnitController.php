@@ -62,27 +62,30 @@ class UnitController extends Controller
      */
     public function edit($id)
     {
-        $unit = Unit::findOrFail($id); // Fetch the unit by ID
-        return view('units.edit', compact('unit')); // Update view path to 'units.edit'
+        $unit = Unit::findOrFail($id);
+        return view('units.edit', compact('unit'));
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
-        // Validate the input
-        $request->validate(['unit' => 'required']); // Change 'province' to 'unit'
+        // 1. Validate the input
+        $request->validate([
+            'unit' => 'required|string|max:255', // Added string and max length for better security
+        ]);
 
-        // Find the unit and update its name
+        // 2. Find the unit and update its name
         $unit = Unit::findOrFail($id);
-        $unit->update($request->only('unit')); // Update only the 'unit' field
 
-        return redirect()->route('units.index')->with('success', 'Unit updated successfully'); // Redirect to unit index
+        // Use the request data directly; no need for request->only('unit')
+        // since 'unit' is the only field you care about here
+        $unit->unit = $request->unit;
+        $unit->save(); // Save the changes to the database
+
+        // 3. Redirect with success message
+        return redirect()->route('units.index')->with('success', 'Unit updated successfully');
     }
 
     /**
@@ -91,16 +94,20 @@ class UnitController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        $unit = Unit::find($id); // Find the unit by ID
 
-        // Check if unit exists
-        if ($unit) {
-            $unit->delete(); // Delete the unit
-        }
+// app/Http/Controllers/UnitController.php
 
-        // Redirect back to the index route
-        return redirect()->route('units.index')->with('success', 'Unit deleted successfully');
-    }
+// ...
+
+public function destroy($id)
+{
+    // Find the record by ID (findOrFail handles 404 if not found)
+    $unit = Unit::findOrFail($id);
+
+    // Delete the record
+    $unit->delete();
+
+    // Redirect back to the previous page (or 'units.index') with a success message
+    return redirect()->back()->with('success', 'Unit deleted successfully.');
+}
 }

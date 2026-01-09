@@ -18,7 +18,7 @@
 
     <div class="card shadow">
         <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Resource Speaker Information</h4>
+            <h4 class="mb-0">Specialist Information</h4>
             <div>
                 <button type="button" class="btn btn-warning btn-sm me-2" onclick="clearSavedData()">
                     Clear Saved Data
@@ -44,22 +44,22 @@
                             <div class="accordion-body">
                                 <div class="row mb-3">
                                     <div class="col-md-3">
-                                        <label for="img" class="form-label text-danger">Image *</label>
+                                        <label for="img" class="form-label">Image</label>
                                         <input type="file" class="form-control" id="img" name="img" accept="image/*">
                                         <small class="text-muted">Note: Image cannot be auto-saved</small>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-md-3">
-                                        <label for="last_name" class="form-label text-danger">Last Name *</label>
+                                        <label for="last_name" class="form-label ">Last Name</label>
                                         <input type="text" class="form-control auto-save" id="last_name" name="last_name" value="{{ old('last_name') }}" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="given_name" class="form-label text-danger">Given Name *</label>
+                                        <label for="given_name" class="form-label ">Given Name</label>
                                         <input type="text" class="form-control auto-save" id="given_name" name="given_name" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="middle_name" class="form-label text-danger">Middle Name *</label>
+                                        <label for="middle_name" class="form-label ">Middle Name</label>
                                         <input type="text" class="form-control auto-save" id="middle_name" name="middle_name" required>
                                     </div>
                                     <div class="col-md-3">
@@ -70,19 +70,19 @@
 
                                 <div class="row mb-3">
                                     <div class="col-md-3">
-                                        <label for="date_of_birth" class="form-label text-danger">Date of Birth *</label>
+                                        <label for="date_of_birth" class="form-label ">Date of Birth</label>
                                         <input type="date" class="form-control auto-save" id="date_of_birth" name="date_of_birth" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="place_of_birth" class="form-label text-danger">Place of Birth *</label>
+                                        <label for="place_of_birth" class="form-label ">Place of Birth</label>
                                         <input type="text" class="form-control auto-save" id="place_of_birth" name="place_of_birth" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="age" class="form-label text-danger">Age *</label>
+                                        <label for="age" class="form-label ">Age</label>
                                         <input type="number" class="form-control auto-save" id="age" name="age" min="1" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="gender" class="form-label text-danger">Gender *</label>
+                                        <label for="gender" class="form-label ">Gender</label>
                                         <select class="form-select auto-save" id="gender" name="gender" required>
                                             <option value="">Select Gender</option>
                                             <option value="Male">Male</option>
@@ -93,34 +93,34 @@
 
                                 <div class="row mb-3">
                                     <div class="col-md-3">
-                                        <label for="email" class="form-label text-danger">Email *</label>
+                                        <label for="email" class="form-label ">Email</label>
                                         <input type="email" class="form-control auto-save" id="email" name="email" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="home_zip_code" class="form-label text-danger">Zip Code *</label>
+                                        <label for="home_zip_code" class="form-label ">Zip Code </label>
                                         <input type="text" class="form-control auto-save" id="home_zip_code" name="home_zip_code" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="home_address" class="form-label text-danger">Home Address *</label>
+                                        <label for="home_address" class="form-label ">Home Address </label>
                                         <input type="text" class="form-control auto-save" id="home_address" name="home_address">
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="home_building_no" class="form-label text-danger">Building No *</label>
+                                        <label for="home_building_no" class="form-label ">Building No </label>
                                         <input type="text" class="form-control auto-save" id="home_building_no" name="home_building_no">
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
                                     <div class="col-md-3">
-                                        <label for="home_barangay" class="form-label text-danger">Barangay </label>
+                                        <label for="home_barangay" class="form-label ">Barangay </label>
                                         <input type="text" class="form-control auto-save" id="home_barangay" name="home_barangay">
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="home_municipality" class="form-label text-danger">Municipality *</label>
+                                        <label for="home_municipality" class="form-label ">Municipality </label>
                                         <input type="text" class="form-control auto-save" id="home_municipality" name="home_municipality" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="home_province" class="form-label text-danger">Province *</label>
+                                        <label for="home_province" class="form-label ">Province </label>
                                         <input type="text" class="form-control auto-save" id="home_province" name="home_province" required>
                                     </div>
                                     <div class="col-md-3">
@@ -508,7 +508,7 @@
 
                 <!-- Submit Button -->
                 <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-success btn-lg px-5">Save Resource Speaker</button>
+                    <button type="submit" class="btn btn-success btn-lg px-5">Submit</button>
                 </div>
             </form>
         </div>
@@ -532,7 +532,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Image
         if (!document.getElementById('img').files[0]) {
-            errors.push("Profile Image is required.");
+            errors.push("Image is required.");
         }
 
         // Personal Info Required Fields
@@ -577,8 +577,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Final confirmation
         Swal.fire({
-            title: 'Save Resource Speaker?',
-            text: "Make sure all information is correct.",
+            title: 'Do you wish to proceed with the submission?',
+            text: "Please ensure that all information is accurate and complete.",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#28a745',

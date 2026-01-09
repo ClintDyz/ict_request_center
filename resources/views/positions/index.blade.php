@@ -186,7 +186,7 @@ window.onload = function() {
                     <input type="hidden" id="editPositionId" name="id">
                     <div class="mb-3">
                         <label for="name" class="form-label">Position Name</label>
-                        <input type="text" class="form-control" id="editPositionName" name="position" required>
+                    <input type="text" class="form-control" id="editPositionName" name="position" required>
                     </div>
                 </div>
                 <div class="modal-footer bg-success">
@@ -244,17 +244,73 @@ window.onload = function() {
 
 @section('scripts')
 <script>
-    // Set values in the edit modal
+    // --- Dynamic Alert Handling (Consolidated) ---
+    // Note: I've consolidated your custom window.onload blocks into a single $(document).ready()
+    // and fixed the potential issue of multiple 'custom-alert' IDs appearing.
+    $(document).ready(function() {
+        let sessionData = [
+            { key: 'create', message: 'Record successfully created!', class: 'alert-success' },
+            { key: 'edit', message: 'Record successfully updated!', class: 'alert-primary' },
+            { key: 'delete', message: 'Record successfully deleted!', class: 'alert-danger' }
+        ];
+
+        sessionData.forEach(function(item) {
+            let sessionValue = @json(session(':key')) ? true : false; // Check for session value
+
+            // This is a common way to check for session flash data if you are just passing true/false,
+            // but relying on the 'success' message is usually cleaner.
+            // Let's use your current flash messages:
+            let flashMessage = '{{ Session::get('success') }}';
+
+            if (flashMessage && !document.getElementById('custom-alert-flash')) {
+                 let alertBox = `
+                    <div id="custom-alert-flash" class="alert alert-success" role="alert">
+                        {{ Session::get('success') }}
+                    </div>`;
+                $('body').append(alertBox);
+
+                setTimeout(function() {
+                    $('#custom-alert-flash').fadeOut('slow', function() {
+                        $(this).remove();
+                    });
+                }, 5000);
+            }
+        });
+    });
+
+    // --- Dynamic Modal Logic ---
+
+    // Set values in the edit modal and set the form action dynamically
     function editPosition(id, name) {
+        // 1. Set the form fields
         $('#editPositionId').val(id);
         $('#editPositionName').val(name);
-        $('#editPositionForm').attr('action', '/positions/' + id); // Dynamically set the form action
+
+        // 2. Embed the 'positions.update' route URL with a placeholder ':id'
+        let updateUrl = '{{ route('positions.update', ':id') }}';
+
+        // 3. Replace the placeholder with the actual ID
+        updateUrl = updateUrl.replace(':id', id);
+
+        // 4. Set the form action
+        $('#editPositionForm').attr('action', updateUrl);
+
+        // 5. Show the modal
         $('#editPositionModal').modal('show');
     }
 
     // Set the delete form action and open the modal
     function deletePosition(id) {
-        $('#deletePositionForm').attr('action', '/positions/' + id); // Dynamically set the form action
+        // 1. Embed the 'positions.destroy' route URL with a placeholder ':id'
+        let deleteUrl = '{{ route('positions.destroy', ':id') }}';
+
+        // 2. Replace the placeholder with the actual ID
+        deleteUrl = deleteUrl.replace(':id', id);
+
+        // 3. Set the form action
+        $('#deletePositionForm').attr('action', deleteUrl);
+
+        // 4. Show the modal
         $('#deletePositionModal').modal('show');
     }
 
@@ -264,9 +320,7 @@ window.onload = function() {
         $('#showPositionModal').modal('show');
     }
 
-           // Automatically hide the success message after 5 seconds (5000 milliseconds)
-           setTimeout(function() {
-        document.getElementById('success-alert').style.display = 'none';
-    }, 5000); // 5000ms = 5 seconds
+    // Note: The original 'success-alert' timeout logic is now replaced by the consolidated
+    // JQuery alert handling above for a cleaner user experience.
 </script>
 @endsection

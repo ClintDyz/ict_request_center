@@ -50,26 +50,23 @@ class DivisionController extends Controller
     }
 
 
+    // DivisionController.php
+
     public function update(Request $request, $id)
     {
         $request->validate(['division' => 'required']);
 
-        $division = Division::findOrFail($id); // findOrFail for better error handling
-        $division->update($request->only('division')); // Only update 'division' field
+        $division = Division::findOrFail($id);
+        $division->update($request->only('division'));
 
         return redirect()->route('divisions.index')->with('success', 'Division updated successfully');
     }
 
     public function destroy($id)
     {
-        $division = Division::find($id);
+        $division = Division::findOrFail($id); // Better practice than find()
+        $division->delete();
 
-        // Check if division exists
-        if ($division) {
-            $division->delete();
-        }
-
-        // Redirect back to the index route
         return redirect()->route('divisions.index')->with('success', 'Division deleted successfully');
     }
 

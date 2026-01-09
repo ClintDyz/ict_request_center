@@ -47,6 +47,12 @@ Route::get('/resource-speaker/export', [App\Http\Controllers\ResourceSpeakerMast
 Route::get('/resource-speaker/export-excel', [App\Http\Controllers\ResourceSpeakerMasterListController::class, 'exportExcel'])
     ->name('resource_speaker.export_excel');
 
+// RS Letter
+// This route expects a POST request to a URL like: /resource-speaker/103/letter
+Route::post('/resource-speaker/{id}/letter', [App\Http\Controllers\RsLetterController::class, 'store'])
+    ->name('resource_speaker.letter.store');
+
+    
     // User routes
 Route::get('user', [App\Http\Controllers\UserController::class, 'index'])->name('accounts.index');
 Route::get('users/create', [App\Http\Controllers\UserController::class, 'create'])->name('users.create');
@@ -141,10 +147,16 @@ Route::get('units', [App\Http\Controllers\UnitController::class, 'index'])->name
 Route::get('units/create', [App\Http\Controllers\UnitController::class, 'create'])->name('units.create');
 Route::post('units', [App\Http\Controllers\UnitController::class, 'store'])->name('units.store');
 Route::get('units/{unit}', [App\Http\Controllers\UnitController::class, 'show'])->name('units.show');
-Route::get('units/{unit}/edit', [App\Http\Controllers\UnitController::class, 'edit'])->name('units.edit');
+// The PUT/PATCH route for updating a unit
 Route::put('units/{unit}', [App\Http\Controllers\UnitController::class, 'update'])->name('units.update');
-Route::delete('units/{unit}', [App\Http\Controllers\UnitController::class, 'destroy'])->name('units.destroy');
 
+// The GET route for the edit page (if you choose to use it, but not needed for modal)
+Route::get('units/{unit}/edit', [App\Http\Controllers\UnitController::class, 'edit'])->name('units.edit');
+
+// Route::get('units/{unit}/edit', [App\Http\Controllers\UnitController::class, 'edit'])->name('units.edit');
+// Route::put('units/{unit}', [App\Http\Controllers\UnitController::class, 'update'])->name('units.update');
+// Route::delete('units/{unit}', [UnitController::class, 'destroy'])->name('units.destroy');
+Route::delete('units/{unit}', [App\Http\Controllers\UnitController::class, 'destroy'])->name('units.destroy');
 });
 
 

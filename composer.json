@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
         "maatwebsite/excel": "^1.1",
+        "phpoffice/phpspreadsheet": "^1.0@beta",
         "tecnickcom/tcpdf": "^6.10"
     },
     "require-dev": {

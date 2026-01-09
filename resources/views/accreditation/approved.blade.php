@@ -144,7 +144,7 @@
                                 <td colspan="11" class="text-center">
                                     <div class="py-5">
                                         <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                                        <p class="text-muted">No approved resource speakers found.</p>
+                                        <p class="text-muted">No Specialist to be Evaluated.</p>
                                     </div>
                                 </td>
                             </tr>

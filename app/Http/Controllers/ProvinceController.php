@@ -52,22 +52,24 @@ class ProvinceController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate(['province' => 'required']);
+        // Ensure you validate the input
+        $request->validate(['province' => 'required|string|max:255']);
 
-        $province = Province::findOrFail($id); // findOrFail for better error handling
-        $province->update($request->only('province')); // Only update 'province' field
+        // Use findOrFail for consistent error handling
+        $province = Province::findOrFail($id);
+
+        // Update the record
+        $province->update($request->only('province'));
 
         return redirect()->route('provinces.index')->with('success', 'Province updated successfully');
     }
 
     public function destroy($id)
     {
-        $province = Province::find($id);
+        // Use findOrFail for consistent error handling; it automatically deletes if found.
+        $province = Province::findOrFail($id);
 
-        // Check if province exists
-        if ($province) {
-            $province->delete();
-        }
+        $province->delete();
 
         // Redirect back to the index route
         return redirect()->route('provinces.index')->with('success', 'Province deleted successfully');
