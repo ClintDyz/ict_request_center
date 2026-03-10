@@ -61,6 +61,16 @@ class HomeController extends Controller
         $approvedCount   = Rstbl::where('status', 'Approved')->count();
         $accreditedCount = Rstbl::where('status', 'Accredited')->count();
 
+        // Get newly added speakers (last 24 hours)
+        $newSpeakers = Rstbl::where('created_at', '>=', Carbon::now()->subDay())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $newSpeakersCount = $newSpeakers->count();
+
+        // Get the latest resource speakers (last 5 for the table)
+        $latestSpeakers = Rstbl::orderBy('created_at', 'desc')->take(5)->get();
+
         return view('home', compact(
             'resourceSpeakerCount',
             'maleCount',
@@ -73,7 +83,11 @@ class HomeController extends Controller
             'age_26_35',
             'age_36_45',
             'age_46_60',
-            'age_60_plus'
+            'age_60_plus',
+            // notification data
+            'newSpeakersCount',
+            'newSpeakers',
+            'latestSpeakers'
         ));
     }
 }

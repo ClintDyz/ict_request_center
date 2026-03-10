@@ -82,7 +82,7 @@
                                         <input type="number" class="form-control auto-save" id="age" name="age" min="1" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="gender" class="form-label ">Gender</label>
+                                        <label for="gender" class="form-label ">Sex</label>
                                         <select class="form-select auto-save" id="gender" name="gender" required>
                                             <option value="">Select Gender</option>
                                             <option value="Male">Male</option>

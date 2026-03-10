@@ -121,7 +121,7 @@
                             <td class="font-weight-bold">{{ $user->firstname }} {{ $user->middlename }} {{ $user->lastname }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">Gender</td>
+                            <td class="text-muted">Sex</td>
                             <td class="font-weight-bold">{{ $user->gender ?? 'N/A' }}</td>
                         </tr>
                         <tr>

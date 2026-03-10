@@ -98,9 +98,9 @@
                                 <input type="text" class="form-control" id="lastname" name="lastname" required>
                             </div>
                             <div class="mb-3">
-                                <label for="gender" class="form-label">Gender</label>
+                                <label for="gender" class="form-label">Sex</label>
                                 <select class="form-control" id="gender" name="gender" required>
-                                    <option value="">--Select Gender--</option>
+                                    <option value="">--Select Sex--</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
                                 </select>
@@ -237,9 +237,9 @@
                                 <input type="text" class="form-control" id="editLastname" name="lastname" required>
                             </div>
                             <div class="mb-3">
-                                <label for="editGender" class="form-label">Gender</label>
+                                <label for="editGender" class="form-label">Sex</label>
                                 <select class="form-control" id="editGender" name="gender" required>
-                                    <option value="">--Select Gender--</option>
+                                    <option value="">--Select Sex--</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
                                 </select>

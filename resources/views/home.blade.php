@@ -6,6 +6,43 @@
     <li class="breadcrumb-item active">Dashboard</li>
 </ol>
 
+{{-- Notification Alert for New Speakers --}}
+@if($newSpeakersCount > 0)
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <i class="fas fa-bell me-2"></i>
+            <strong>{{ $newSpeakersCount }} New Resource Speaker{{ $newSpeakersCount > 1 ? 's' : '' }}!</strong>
+            <span class="ms-2">Added in the last 24 hours</span>
+        </div>
+        <button type="button" class="btn btn-sm btn-light" data-bs-toggle="collapse" data-bs-target="#newSpeakersList">
+            <i class="fas fa-eye me-1"></i> View Names
+        </button>
+    </div>
+
+    {{-- Collapsible list of new speakers --}}
+    <div class="collapse mt-3" id="newSpeakersList">
+        <hr>
+        <h6 class="fw-bold mb-2">Newly Added Speakers:</h6>
+        <ul class="mb-0">
+            @foreach($newSpeakers as $speaker)
+            <li>
+                <strong>{{ $speaker->first_name }} {{ $speaker->last_name }}</strong>
+                <span class="badge bg-{{ $speaker->status == 'Pending' ? 'warning' : ($speaker->status == 'Approved' ? 'info' : 'success') }} ms-2">
+                    {{ $speaker->status }}
+                </span>
+                <small class="text-muted ms-2">
+                    ({{ $speaker->created_at->diffForHumans() }})
+                </small>
+            </li>
+            @endforeach
+        </ul>
+    </div>
+
+    <button type="button" class="btn-close position-absolute top-0 end-0 mt-2 me-2" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
 <style>
     .dashboard-card {
         border-radius: 12px;
@@ -24,6 +61,28 @@
     .stat-value {
         font-size: 32px;
         font-weight: 900;
+    }
+    .notification-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: bold;
+        animation: pulse 2s infinite;
+        z-index: 10;
+    }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
     }
 </style>
 
@@ -74,9 +133,14 @@
         </div>
     </div>
 
-    {{-- Resource Speakers --}}
+    {{-- Resource Speakers with Notification Badge --}}
     <div class="col-md-3 mb-3">
-        <div class="card bg-primary text-white dashboard-card">
+        <div class="card bg-primary text-white dashboard-card position-relative">
+            {{-- Notification Badge --}}
+            @if($newSpeakersCount > 0)
+            <span class="notification-badge">{{ $newSpeakersCount }}</span>
+            @endif
+
             <div class="card-body">
                 <div class="card-title">Specialist</div>
                 <div class="stat-value">{{ $resourceSpeakerCount }}</div>
@@ -89,21 +153,58 @@
         </div>
     </div>
 
+</div>
 
-    {{-- <div class="col-xl-4 col-md-6 mb-4">
-    <div class="card bg-dark text-white dashboard-card">
-        <div class="card-body">
-            <div class="card-title">Age Profile</div>
-            <div class="stat-value">{{ $age_18_25 + $age_26_35 + $age_36_45 + $age_46_60 + $age_60_plus }}</div>
-            <i class="fas fa-user-clock fa-3x float-end opacity-75"></i>
-        </div>
-        <div class="card-footer text-white d-flex justify-content-between">
-            <span>Total Profiles Analyzed</span>
+{{-- Latest Resource Speakers Section --}}
+@if($latestSpeakers->count() > 0)
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card dashboard-card">
+            <div class="card-header bg-light fw-bold">
+                <i class="fas fa-clock me-1"></i> Recently Added Resource Speakers
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Gender</th>
+                                <th>Status</th>
+                                <th>Added Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($latestSpeakers as $speaker)
+                            <tr>
+                                <td>
+                                    <i class="fas fa-user-circle me-2 text-primary"></i>
+                                    {{ $speaker->first_name }} {{ $speaker->last_name }}
+                                    @if($speaker->created_at >= Carbon\Carbon::now()->subDay())
+                                        <span class="badge bg-danger ms-2">New</span>
+                                    @endif
+                                </td>
+                                <td>{{ $speaker->gender }}</td>
+                                <td>
+                                    @if($speaker->status == 'Pending')
+                                        <span class="badge bg-warning">Pending</span>
+                                    @elseif($speaker->status == 'Approved')
+                                        <span class="badge bg-info">Approved</span>
+                                    @else
+                                        <span class="badge bg-success">Accredited</span>
+                                    @endif
+                                </td>
+                                <td>{{ $speaker->created_at->diffForHumans() }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-</div> --}}
-
 </div>
+@endif
 
 {{-- Charts --}}
 <div class="row mt-4">
@@ -131,18 +232,6 @@
             </div>
         </div>
     </div>
-
-    {{-- <div class="col-xl-4 col-md-12 mb-4">
-    <div class="card dashboard-card">
-        <div class="card-header bg-light fw-bold">
-            <i class="fas fa-chart-bar me-1"></i> Age Profile Distribution
-        </div>
-        <div class="card-body">
-            <canvas id="ageChart"></canvas>
-        </div>
-    </div>
-</div> --}}
-
 
 </div>
 
@@ -189,47 +278,6 @@
             responsive: true,
             plugins: {
                 legend: { position: 'bottom' }
-            }
-        }
-    });
-        new Chart(document.getElementById('ageChart'), {
-        type: 'bar',
-        data: {
-            labels: [
-                '18–25',
-                '26–35',
-                '36–45',
-                '46–60',
-                '60+'
-            ],
-            datasets: [{
-                label: 'Age Count',
-                data: [
-                    {{ $age_18_25 }},
-                    {{ $age_26_35 }},
-                    {{ $age_36_45 }},
-                    {{ $age_46_60 }},
-                    {{ $age_60_plus }}
-                ],
-                backgroundColor: [
-                    '#007bff',
-                    '#17a2b8',
-                    '#28a745',
-                    '#ffc107',
-                    '#dc3545'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1 }
-                }
             }
         }
     });
