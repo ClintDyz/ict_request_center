@@ -16,7 +16,9 @@ use App\Models\Expertis; // Model for Expertis details
 use Illuminate\Support\Facades\Auth;
 use TCPDF;
 use Illuminate\Support\Facades\Log;
-
+use App\Mail\ApplicationSubmittedMail;
+use Illuminate\Support\Facades\Mail;
+use App\Models\User;
 
 class RstblController extends Controller
 {
@@ -58,198 +60,205 @@ public function index(Request $request)
         return view('resource_speaker.create');
     }
 
-    public function store(Request $request)
-    {
-        // Validate if email exists before starting the transaction
-        if (Rstbl::where('email', $request->email)->exists()) {
-            return redirect()->back()->with('error', 'The email address is already in use.');
-        }
-
-        $imagePath = null;
-
-        if ($request->hasFile('img')) {
-            $image = $request->file('img');
-            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-
-            // Define custom destination path
-            $destinationPath = public_path('uploads/images');
-
-            // Ensure the directory exists
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-
-            // Move the file
-            $image->move($destinationPath, $imageName);
-
-            // Save relative path to DB
-            $imagePath = 'uploads/images/' . $imageName;
-        }
-
-
-        // Use a transaction to ensure atomicity
-        DB::transaction(function () use ($request, $imagePath) {
-
-            // Create Personal Info (Rstbl)
-            $rstbl = Rstbl::create([
-                'last_name' => $request->last_name,
-                'given_name' => $request->given_name,
-                'middle_name' => $request->middle_name,
-                'ext_name' => $request->ext_name,
-                'date_of_birth' => $request->date_of_birth,
-                'place_of_birth' => $request->place_of_birth,
-                'age' => $request->age,
-                'gender' => $request->gender,
-                'email' => $request->email,
-                'expertise' => $request->expertise,
-                'home_address' => $request->home_address,
-                'home_building_no' => $request->home_building_no,
-                'home_barangay' => $request->home_barangay,
-                'home_municipality' => $request->home_municipality,
-                'home_province' => $request->home_province,
-                'home_zip_code' => $request->home_zip_code,
-                'home_tel_no' => $request->home_tel_no,
-                'home_cell_no' => $request->home_cell_no,
-                'home_fax_no' => $request->home_fax_no,
-                'img' => $imagePath, // Save the correct relative path
-
-                    'created_by' => Auth::check() ? Auth::id() : null,
-
-            ]);
-
-            // Create Office Info
-            $rstbl->office()->create([
-                'office_organization' => $request->office_organization,
-                'position' => $request->off_position,
-                'address' => $request->off_address,
-                'building_no' => $request->off_building_no,
-                'barangay' => $request->barangay,
-                'municipality' => $request->municipality,
-                'province' => $request->province,
-                'zip_code' => $request->zip_code,
-                'tel_no' => $request->off_tel_no,
-                'cell_no' => $request->off_cell_no,
-                'fax_no' => $request->off_fax_no,
-            ]);
-
-                // Create Expertises
-                if (!empty($request->expertis) && is_array($request->expertis)) {
-                    foreach ($request->expertis as $index => $expertis) {
-                        if (!empty($expertis)) {
-                            $rstbl->expertises()->create([
-                                'expertis' => $expertis,
-                            ]);
-                        }
-                    }
-                }
-
-            // Create Educational Background
-            if (!empty($request->level) && is_array($request->level)) {
-                foreach ($request->level as $index => $level) {
-                    $rstbl->educationalBackground()->create([
-                        'level' => $level,
-                        'school' => $request->school[$index] ?? null,
-                        'from_year' => $request->from_year[$index] ?? null,
-                        'to_year' => $request->to_year[$index] ?? null,
-                        'year_graduated' => $request->year_graduated[$index] ?? null,
-                        'awards' => $request->awards[$index] ?? null,
-                    ]);
-                }
-            }
-
-            // Create Work Experience
-            if (!empty($request->work_name_company) && is_array($request->work_name_company)) {
-                foreach ($request->work_name_company as $key => $company) {
-                    $rstbl->workExperiences()->create([
-                        'name_company' => $company,
-                        'date_started' => $request->work_date_started[$key] ?? null,
-                        'date_ended' => $request->work_date_ended[$key] ?? null,
-                        'position' => $request->work_position[$key] ?? null,
-                        'address' => $request->work_address[$key] ?? null,
-                        'division' => $request->work_division[$key] ?? null,
-                    ]);
-                }
-            }
-
-
-            // Create Experience Trainer
-            if (!empty($request->trainer_title) && is_array($request->trainer_title)) {
-                foreach ($request->trainer_title as $key => $title) {
-                    $rstbl->experienceTrainer()->create([
-                        'rst_title' => $title,
-                        'rst_venue' => $request->trainer_venue[$key] ?? null,
-                        'rst_date' => $request->trainer_date[$key] ?? null,
-                        'rst_no_hours' => $request->trainer_no_hours[$key] ?? null,
-                    ]);
-                }
-            }
-
-            // Create References Training
-            if (!empty($request->rst_title) && is_array($request->rst_title)) {
-                foreach ($request->rst_title as $key => $title) {
-                    $rstbl->experienceTrainer()->create([
-                        'rst_title' => $title,
-                        'rst_date' => $request->rst_date[$key] ?? null,
-                        'rst_venue' => $request->rst_venue[$key] ?? null,
-                        'rst_no_hours' => $request->rst_no_hours[$key] ?? null,
-                    ]);
-                }
-            }
-
-            if ($request->has('rt_title')) {
-                foreach ($request->rt_title as $index => $rt_title) {
-                    $rstbl->trainings()->create([
-                        'rt_title' => $rt_title,
-                        'rt_date' => $request->rt_date[$index] ?? null,
-                        'rt_venue' => $request->rt_venue[$index] ?? null,
-                        'rt_no_hours' => $request->rt_no_hours[$index] ?? null,
-                    ]);
-                }
-            }
-
-            // Create Publications (Fixed)
-            if (!empty($request->publication_title) && is_array($request->publication_title)) {
-                foreach ($request->publication_title as $key => $title) {
-                    $rstbl->publications()->create([
-                        'p_title' => $title,
-                        'p_nature' => $request->p_nature[$key] ?? null,
-                        'p_date' => $request->p_date[$key] ?? null,
-                        'p_venue' => $request->p_venue[$key] ?? null,
-                    ]);
-                }
-            }
-
-            // Create References
-                if (!empty($request->name_agency) && is_array($request->name_agency)) {
-                    foreach ($request->name_agency as $index => $agency) {
-                        if (!empty($agency)) {
-                            $rstbl->referencesTrainings()->create([
-                                'name_agency'     => $agency,
-                                'address'         => $request->ref_address[$index] ?? null,
-                                'contact_person'  => $request->contact_person[$index] ?? null,
-                                'position'        => $request->ref_position[$index] ?? null,
-                                'tel_no'          => $request->ref_tel_no[$index] ?? null,
-                                'cell_no'         => $request->ref_cell_no[$index] ?? null,
-                                'fax_no'          => $request->ref_fax_no[$index] ?? null,
-                            ]);
-                        }
-                    }
-                }
-
-
-        });
-// After transaction...
-
-// If user is NOT logged in (guest)
-if (!Auth::check()) {
-    return redirect()->route('resource_speaker.create')
-        ->with('success', 'Thank you. Your application has been successfully submitted for processing.');
-}
-
-// If admin/user is logged in
-return redirect()->route('resource_speaker.index')->with('create', 'med_form');
-
+public function store(Request $request)
+{
+    // Validate if email exists before starting the transaction
+    if (Rstbl::where('email', $request->email)->exists()) {
+        return redirect()->back()->with('error', 'The email address is already in use.');
     }
+
+    $imagePath = null;
+
+    if ($request->hasFile('img')) {
+        $image = $request->file('img');
+        $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+        // Define custom destination path
+        $destinationPath = public_path('uploads/images');
+
+        // Ensure the directory exists
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
+
+        // Move the file
+        $image->move($destinationPath, $imageName);
+
+        // Save relative path to DB
+        $imagePath = 'uploads/images/' . $imageName;
+    }
+
+    // ✅ Declare $rstbl outside so it's accessible after the transaction
+    $rstbl = null;
+
+    // Use a transaction to ensure atomicity
+    DB::transaction(function () use ($request, $imagePath, &$rstbl) {
+
+        // Create Personal Info (Rstbl)
+        $rstbl = Rstbl::create([
+            'last_name'          => $request->last_name,
+            'given_name'         => $request->given_name,
+            'middle_name'        => $request->middle_name,
+            'ext_name'           => $request->ext_name,
+            'date_of_birth'      => $request->date_of_birth,
+            'place_of_birth'     => $request->place_of_birth,
+            'age'                => $request->age,
+            'gender'             => $request->gender,
+            'email'              => $request->email,
+            'expertise'          => $request->expertise,
+            'home_address'       => $request->home_address,
+            'home_building_no'   => $request->home_building_no,
+            'home_barangay'      => $request->home_barangay,
+            'home_municipality'  => $request->home_municipality,
+            'home_province'      => $request->home_province,
+            'home_zip_code'      => $request->home_zip_code,
+            'home_tel_no'        => $request->home_tel_no,
+            'home_cell_no'       => $request->home_cell_no,
+            'home_fax_no'        => $request->home_fax_no,
+            'img'                => $imagePath,
+            'created_by'         => Auth::check() ? Auth::id() : null,
+        ]);
+
+        // Create Office Info
+        $rstbl->office()->create([
+            'office_organization' => $request->office_organization,
+            'position'            => $request->off_position,
+            'address'             => $request->off_address,
+            'building_no'         => $request->off_building_no,
+            'barangay'            => $request->barangay,
+            'municipality'        => $request->municipality,
+            'province'            => $request->province,
+            'zip_code'            => $request->zip_code,
+            'tel_no'              => $request->off_tel_no,
+            'cell_no'             => $request->off_cell_no,
+            'fax_no'              => $request->off_fax_no,
+        ]);
+
+        // Create Expertises
+        if (!empty($request->expertis) && is_array($request->expertis)) {
+            foreach ($request->expertis as $index => $expertis) {
+                if (!empty($expertis)) {
+                    $rstbl->expertises()->create([
+                        'expertis' => $expertis,
+                    ]);
+                }
+            }
+        }
+
+        // Create Educational Background
+        if (!empty($request->level) && is_array($request->level)) {
+            foreach ($request->level as $index => $level) {
+                $rstbl->educationalBackground()->create([
+                    'level'          => $level,
+                    'school'         => $request->school[$index] ?? null,
+                    'from_year'      => $request->from_year[$index] ?? null,
+                    'to_year'        => $request->to_year[$index] ?? null,
+                    'year_graduated' => $request->year_graduated[$index] ?? null,
+                    'awards'         => $request->awards[$index] ?? null,
+                ]);
+            }
+        }
+
+        // Create Work Experience
+        if (!empty($request->work_name_company) && is_array($request->work_name_company)) {
+            foreach ($request->work_name_company as $key => $company) {
+                $rstbl->workExperiences()->create([
+                    'name_company' => $company,
+                    'date_started' => $request->work_date_started[$key] ?? null,
+                    'date_ended'   => $request->work_date_ended[$key] ?? null,
+                    'position'     => $request->work_position[$key] ?? null,
+                    'address'      => $request->work_address[$key] ?? null,
+                    'division'     => $request->work_division[$key] ?? null,
+                ]);
+            }
+        }
+
+        // Create Experience Trainer
+        if (!empty($request->trainer_title) && is_array($request->trainer_title)) {
+            foreach ($request->trainer_title as $key => $title) {
+                $rstbl->experienceTrainer()->create([
+                    'rst_title'    => $title,
+                    'rst_venue'    => $request->trainer_venue[$key] ?? null,
+                    'rst_date'     => $request->trainer_date[$key] ?? null,
+                    'rst_no_hours' => $request->trainer_no_hours[$key] ?? null,
+                ]);
+            }
+        }
+
+        // Create References Training
+        if (!empty($request->rst_title) && is_array($request->rst_title)) {
+            foreach ($request->rst_title as $key => $title) {
+                $rstbl->experienceTrainer()->create([
+                    'rst_title'    => $title,
+                    'rst_date'     => $request->rst_date[$key] ?? null,
+                    'rst_venue'    => $request->rst_venue[$key] ?? null,
+                    'rst_no_hours' => $request->rst_no_hours[$key] ?? null,
+                ]);
+            }
+        }
+
+        // Create Trainings
+        if ($request->has('rt_title')) {
+            foreach ($request->rt_title as $index => $rt_title) {
+                $rstbl->trainings()->create([
+                    'rt_title'    => $rt_title,
+                    'rt_date'     => $request->rt_date[$index] ?? null,
+                    'rt_venue'    => $request->rt_venue[$index] ?? null,
+                    'rt_no_hours' => $request->rt_no_hours[$index] ?? null,
+                ]);
+            }
+        }
+
+        // Create Publications
+        if (!empty($request->publication_title) && is_array($request->publication_title)) {
+            foreach ($request->publication_title as $key => $title) {
+                $rstbl->publications()->create([
+                    'p_title'  => $title,
+                    'p_nature' => $request->p_nature[$key] ?? null,
+                    'p_date'   => $request->p_date[$key] ?? null,
+                    'p_venue'  => $request->p_venue[$key] ?? null,
+                ]);
+            }
+        }
+
+        // Create References
+        if (!empty($request->name_agency) && is_array($request->name_agency)) {
+            foreach ($request->name_agency as $index => $agency) {
+                if (!empty($agency)) {
+                    $rstbl->referencesTrainings()->create([
+                        'name_agency'    => $agency,
+                        'address'        => $request->ref_address[$index] ?? null,
+                        'contact_person' => $request->contact_person[$index] ?? null,
+                        'position'       => $request->ref_position[$index] ?? null,
+                        'tel_no'         => $request->ref_tel_no[$index] ?? null,
+                        'cell_no'        => $request->ref_cell_no[$index] ?? null,
+                        'fax_no'         => $request->ref_fax_no[$index] ?? null,
+                    ]);
+                }
+            }
+        }
+
+    }); // ← End of DB::transaction
+
+
+    // ✅ Send email notification to all users where emp_type = 0
+    $usersToNotify = User::where('emp_type', 0)
+        ->whereNotNull('email')
+        ->get();
+
+    foreach ($usersToNotify as $user) {
+        Mail::to($user->email)->send(new ApplicationSubmittedMail($rstbl));
+    }
+
+
+    // Redirect based on login status
+    if (!Auth::check()) {
+        return redirect()->route('resource_speaker.create')
+            ->with('success', 'Thank you. Your application has been successfully submitted for processing.');
+    }
+
+    return redirect()->route('resource_speaker.index')->with('create', 'med_form');
+}
 
 
 

@@ -17,15 +17,24 @@
     </div>
 
     <div class="card shadow">
-        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Specialist Information</h4>
-            <div>
-                <button type="button" class="btn btn-warning btn-sm me-2" onclick="clearSavedData()">
-                    Clear Saved Data
-                </button>
-                <span class="badge bg-light text-dark ms-2" id="lastSavedTime"></span>
-            </div>
-        </div>
+<div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+
+    <div>
+        <h4 class="mb-0">Specialist Information</h4>
+        <small class="text-light">
+            <i class="bi bi-info-circle" style="color: red"> Note: Please fill out all the fields before proceeding.</i>
+        </small>
+    </div>
+
+    <div class="d-flex align-items-center">
+        <button type="button" class="btn btn-warning btn-sm me-2" onclick="clearSavedData()">
+            Clear Saved Data
+        </button>
+
+        <span class="badge bg-light text-dark" id="lastSavedTime"></span>
+    </div>
+
+</div>
 
         <div class="card-body">
             <form id="resourceSpeakerForm" action="{{ route('resource_speaker.store') }}" method="POST" enctype="multipart/form-data" novalidate>
