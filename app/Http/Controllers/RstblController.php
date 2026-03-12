@@ -239,17 +239,18 @@ public function store(Request $request)
         }
 
     }); // ← End of DB::transaction
+// ✅ Send email notification to all users where roles = 0
+$adminEmails = \App\Models\User::where('emp_type', 0)
+    ->whereNotNull('email')
+    ->where('email', '!=', '')
+    ->pluck('email')
+    ->toArray();
 
-
-    // ✅ Send email notification to all users where emp_type = 0
-    $usersToNotify = User::where('emp_type', 0)
-        ->whereNotNull('email')
-        ->get();
-
-    foreach ($usersToNotify as $user) {
-        Mail::to($user->email)->send(new ApplicationSubmittedMail($rstbl));
+if (!empty($adminEmails)) {
+    foreach ($adminEmails as $email) {
+        Mail::to($email)->send(new ApplicationSubmittedMail($rstbl));
     }
-
+}
 
     // Redirect based on login status
     if (!Auth::check()) {
