@@ -22,7 +22,7 @@
     <div>
         <h4 class="mb-0">Specialist Information</h4>
         <small class="text-light">
-            <i class="bi bi-info-circle" style="color: red"> Note: Please fill out all the fields before proceeding.</i>
+            <i class="bi bi-info-circle" style="color: red">( Note: Please fill out all the fields before proceeding.)</i>
         </small>
     </div>
 
