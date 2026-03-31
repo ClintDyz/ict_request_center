@@ -216,7 +216,7 @@ body{background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--navy);
                 <span class="live-dot"></span>
                 <span id="lastSavedTime">Auto-save on</span>
             </div>
-            <button type="button" class="btn-clear-hero" onclick="clearSavedData()">
+            <button type="button" class="btn-clear-hero" onclick="clearSavedData()"> 
                 <i class="bi bi-trash3"></i> Clear Draft
             </button>
         </div>
