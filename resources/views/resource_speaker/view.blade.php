@@ -18,10 +18,12 @@
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     table, th, td { border: 1px solid #000; }
     th, td { padding: 5px; text-align: left; }
+    th[colspan="2"] { text-align: center; }
 
             .form-container {
-                max-width: 800px;
-                margin: 40px auto;         /* space from top/bottom */
+                max-width: 100%;
+                width: 100%;
+                margin: 40px 20px;         /* space from top/bottom */
                 background-color: #fff;    /* clean white background */
                 border: 1px solid #ccc;    /* softer border */
                 border-radius: 8px;        /* rounded corners */
@@ -400,15 +402,22 @@
 
   {{-- Educational Background --}}
   <div class="section">
-    <div class="label">Educational Background</div>
+    <div class="label">Educational Background:</div>
     <table>
       <tr>
         <th>Level/Degree</th>
-        <th>Year From</th>
-        <th>Year To</th>
-        <th>School/Institution</th>
+        <th colspan="2">Year Taken</th>
+        <th>Name of School and Address</th>
         <th>Year Graduated</th>
-        <th>Awards</th>
+        <th>Awards Received</th>
+      </tr>
+      <tr>
+        <th></th>
+        <th>From</th>
+        <th>To</th>
+        <th></th>
+        <th></th>
+        <th></th>
       </tr>
       @foreach($speaker->educationalBackground as $edu)
         <tr>
@@ -424,65 +433,90 @@
   </div>
 
 
-  {{-- Work Experience --}}
+  {{-- Professional Work Experience/s --}}
   <div class="section">
-    <div class="label">Work Experience</div>
+    <div class="label">Professional Work Experience/s: (use additional sheet if necessary)</div>
     <table>
-      <tr><th>Start Date</th><th>End Date</th><th>Company</th><th>Position</th><th>Division</th></tr>
+      <tr>
+        <th colspan="2">Duration</th>
+        <th>Name of Institution/Company/Business/Firm</th>
+        <th>Address of Institution/Company/Business/Firm</th>
+        <th>Division/Section/Unit</th>
+        <th>Position</th>
+      </tr>
+      <tr>
+        <th>Date Started</th>
+        <th>Date Ended</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
       @foreach($speaker->workExperiences as $w)
         <tr>
           <td>{{ $w->date_started }}</td>
           <td>{{ $w->date_ended }}</td>
           <td>{{ $w->name_company }}</td>
-          <td>{{ $w->position }}</td>
+          <td>{{ $w->address }}</td>
           <td>{{ $w->division }}</td>
+          <td>{{ $w->position }}</td>
         </tr>
       @endforeach
     </table>
   </div>
 
-  {{-- Training / Seminar Experience --}}
+  {{-- Relevant Trainings/Seminars Attended --}}
   <div class="section">
-    <div class="label">Training Experience as Trainer</div>
+    <div class="label">Relevant Experience as Trainer/Resource Person: (use additional sheets if necessary)</div>
     <table>
-      <tr><th>Title</th><th>Venue</th><th>Date</th><th>Hours</th></tr>
+      <tr>
+        <th>Title</th>
+        <th>Date/Venue</th>
+        <th>No. of Hours</th>
+      </tr>
       @foreach($speaker->trainings as $t)
         <tr>
           <td>{{ $t->rt_title }}</td>
-          <td>{{ $t->rt_venue }}</td>
-          <td>{{ $t->rt_date }}</td>
+          <td>{{ $t->rt_venue }} - {{ $t->rt_date }}</td>
           <td>{{ $t->rt_no_hours }}</td>
         </tr>
       @endforeach
     </table>
   </div>
 
-  {{-- Training as Trainer --}}
+  {{-- Relevant Experience as Trainer/Resource Person --}}
   <div class="section">
-    <div class="label">Training/Seminar Experience</div>
+    <div class="label">Relevant Trainings/Seminars Attended: (use additional sheet if necessary)</div>
     <table>
-      <tr><th>Title</th><th>Venue</th><th>Date</th><th>Hours</th></tr>
+      <tr>
+        <th>Title</th>
+        <th>Date/Venue</th>
+        <th>No. of Hours</th>
+      </tr>
       @foreach($speaker->experienceTrainer as $et)
         <tr>
           <td>{{ $et->rst_title }}</td>
-          <td>{{ $et->rst_venue }}</td>
-          <td>{{ $et->rst_date }}</td>
-          <td>{{$et->rst_no_hours}}</td>
+          <td>{{ $et->rst_venue }} - {{ $et->rst_date }}</td>
+          <td>{{ $et->rst_no_hours }}</td>
         </tr>
       @endforeach
     </table>
   </div>
 
-  {{-- Publications --}}
+  {{-- Publications, Recognitions and Awards Received --}}
   <div class="section">
-    <div class="label">Publications</div>
+    <div class="label">Publications, Recognitions and Awards Received</div>
     <table>
-      <tr><th>Title</th><th>Date</th><th>Venue</th></tr>
+      <tr>
+        <th>Title</th>
+        <th>Nature</th>
+        <th>Date/Venue</th>
+      </tr>
       @foreach($speaker->publications as $p)
         <tr>
           <td>{{ $p->p_title }}</td>
-          <td>{{ $p->p_date }}</td>
-          <td>{{ $p->p_venue }}</td>
+          <td>{{ $p->p_nature ?? 'N/A' }}</td>
+          <td>{{ $p->p_venue }} - {{ $p->p_date }}</td>
         </tr>
       @endforeach
     </table>

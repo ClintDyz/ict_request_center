@@ -76,7 +76,7 @@
     @endif
 
     <div class="card mb-4 mt-4">
-        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
             <div><i class="fas fa-check-circle me-2"></i> List of To Be Evaluated</div>
         </div>
 
@@ -97,10 +97,10 @@
                             <th>Location</th>
                             <th>Contact</th>
                             <th>Status</th>
-                                @if(auth()->user()->emp_type == '1')
+                                {{-- @if(auth()->user()->emp_type == '1') --}}
 
                             <th>Actions</th>
-                                        @endif
+                                        {{-- @endif --}}
 
                         </tr>
                     </thead>
@@ -131,13 +131,13 @@
                                 <td><small>{{ $speaker->home_municipality }}, {{ $speaker->home_province }}</small></td>
                                 <td>{{ $speaker->home_cell_no }}</td>
                                 <td><span class="badge status-approved"><i class="fas fa-check-circle me-1"></i>Approved</span></td>
-                                @if(auth()->user()->emp_type == '1')
+                                {{-- @if(auth()->user()->emp_type == '1') --}}
                                 <td>
                                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#accreditationModal-{{ $speaker->id }}">
                                         <i class="fa-solid fa-circle-plus"></i> Evaluate
                                     </button>
                                 </td>
-                                @endif
+                                {{-- @endif --}}
                             </tr>
                         @empty
                             <tr>
@@ -447,8 +447,8 @@
                                 @endif
 
                                 @if($speaker->trainings && $speaker->trainings->count() > 0)
-                                    <div class="section-header">TRAINING/SEMINAR EXPERIENCE</div>
-                                    <div class="table-responsive">
+                                <div class="section-header">TRAINING EXPERIENCE AS TRAINER</div>
+                                <div class="table-responsive">
                                         <table class="table table-sm table-bordered">
                                             <thead class="table-light">
                                                 <tr>
@@ -473,7 +473,7 @@
                                 @endif
 
                                 @if($speaker->experienceTrainer && $speaker->experienceTrainer->count() > 0)
-                                    <div class="section-header">TRAINING EXPERIENCE AS TRAINER</div>
+                                    <div class="section-header">TRAINING/SEMINAR EXPERIENCE</div>
                                     <div class="table-responsive">
                                         <table class="table table-sm table-bordered">
                                             <thead class="table-light">

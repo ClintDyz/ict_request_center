@@ -460,7 +460,9 @@ window.onload = function() {
                                             <h5 class="modal-title" id="pdfModalLabel-{{ $speaker->id }}">
                                                  PDF - {{ $speaker->last_name }} {{ $speaker->given_name }}
                                             </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
                                         </div>
                                         <div class="modal-body p-0">
                                             <div id="pdfLoader-{{ $speaker->id }}" class="text-center p-4">

@@ -2,836 +2,675 @@
 
 @section('content')
 
-{{-- <style>
-    #sidebarToggle, #sidenavAccordion {
-        display: none !important;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    #sidenavAccordion, .sibedar {
-        margin: 0 !important;
-    }
+<style>
+:root {
+    --navy:#0f1e3c; --navy-mid:#1a2f5a; --navy-light:#243a6e;
+    --gold:#c9a84c; --gold-light:#e8c97a; --gold-pale:rgba(201,168,76,.08);
+    --cream:#f7f4ee; --cream-dark:#ede9e0;
+    --slate:#4a5568; --muted:#8a95a3; --white:#ffffff; --border:#e0dbd0;
+    --success:#2d7a4f; --danger:#c0392b; --warning:#d97706;
+    --sh-sm:0 2px 8px rgba(15,30,60,.07); --sh-md:0 8px 32px rgba(15,30,60,.11); --sh-lg:0 20px 60px rgba(15,30,60,.17);
+    --r:12px; --r-lg:20px;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--navy);margin:0;}
 
-    .lumawa{
-        margin-left: 0 !important;
-    }
+.page-hero{
+    background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 55%,var(--navy-light) 100%);
+    padding:44px 40px 32px;position:relative;overflow:hidden;
+    border-radius:0 0 var(--r-lg) var(--r-lg);margin-bottom:28px;box-shadow:var(--sh-lg);
+}
+.page-hero::before{content:'';position:absolute;top:-80px;right:-80px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.15) 0%,transparent 70%);}
+.page-hero::after{content:'';position:absolute;bottom:-50px;left:8%;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.08) 0%,transparent 70%);}
+.hero-inner{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold-light);font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;padding:5px 14px;border-radius:50px;margin-bottom:14px;}
+.hero-title{font-family:'Playfair Display',serif;font-size:2.1rem;color:var(--white);margin:0 0 6px;line-height:1.2;}
+.hero-title span{color:var(--gold-light);}
+.hero-sub{color:rgba(255,255,255,.5);font-size:13px;font-weight:300;margin:0;}
+.hero-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 
-</style> --}}
+.form-wrap{padding:0 40px 120px;max-width:1200px;margin:0 auto;}
 
+.form-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding:12px 18px;background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh-sm);}
+.toolbar-left{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.toolbar-right{display:flex;gap:8px;}
+.btn-toolbar{font-size:11px;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;border:1px solid var(--border);background:var(--white);color:var(--slate);}
+.btn-toolbar:hover{background:var(--navy);color:var(--white);border-color:var(--navy);}
 
-<div class="container-fluid mt-2">
-    <div class="card">
-        <div class="card-header bg-info text-white">
-            <h5 class="modal-title" id="addDataModalLabel">Update Information</h5>
+.section-search-wrap{margin-bottom:14px;position:relative;}
+.section-search-wrap .bi{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);}
+#sectionSearch{width:100%;padding:10px 14px 10px 36px;border:1.5px solid var(--border);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--white);color:var(--navy);outline:none;transition:all .2s;}
+#sectionSearch:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.12);}
+
+.section-card{background:var(--white);border-radius:var(--r-lg);border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:var(--sh-sm);transition:box-shadow .3s,border-color .3s;}
+.section-card:hover{box-shadow:var(--sh-md);}
+.section-card.has-data{border-left:3px solid var(--success);}
+.section-header{display:flex;align-items:center;gap:14px;padding:18px 26px;cursor:pointer;user-select:none;transition:background .2s;border-bottom:1px solid transparent;}
+.section-header:hover{background:rgba(201,168,76,.03);}
+.section-card.open .section-header{border-bottom-color:var(--border);background:rgba(15,30,60,.02);}
+.section-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:15px;flex-shrink:0;}
+.section-title-grp{flex:1;}
+.section-title{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:600;color:var(--navy);margin:0 0 2px;}
+.section-desc{font-size:10px;color:var(--muted);margin:0;}
+.section-meta{display:flex;align-items:center;gap:10px;}
+.section-filled-badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:50px;background:rgba(45,122,79,.1);color:var(--success);display:none;}
+.section-card.has-data .section-filled-badge{display:inline-block;}
+.section-toggle{width:26px;height:26px;border-radius:50%;background:var(--cream);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;transition:all .3s;flex-shrink:0;}
+.section-card.open .section-toggle{background:var(--navy);color:var(--white);transform:rotate(180deg);border-color:var(--navy);}
+.section-body{display:none;padding:26px;animation:slideIn .3s ease;}
+.section-card.open .section-body{display:block;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+
+.field-grp{margin-bottom:16px;position:relative;}
+.field-label{display:block;font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--slate);margin-bottom:5px;}
+.required-star{color:var(--gold);margin-left:2px;}
+.field-hint{font-size:10px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:4px;}
+.form-control,.form-select{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--navy);background:var(--white);transition:all .2s;outline:none;}
+.form-control:focus,.form-select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.13);background:#fffdf7;}
+.form-control.filled{border-color:rgba(45,122,79,.35);background:rgba(45,122,79,.02);}
+.form-control.input-error{border-color:var(--danger)!important;background:rgba(192,57,43,.03)!important;animation:shake .4s ease;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+.form-control::placeholder{color:#bbb;}
+.input-icon-wrap{position:relative;}
+.input-icon-wrap .form-control{padding-left:38px;}
+.input-icon-wrap .input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;}
+.frow{display:grid;gap:14px;margin-bottom:14px;}
+.c4{grid-template-columns:repeat(4,1fr);}
+.c3{grid-template-columns:repeat(3,1fr);}
+.c2{grid-template-columns:repeat(2,1fr);}
+.c1{grid-template-columns:1fr;}
+@media(max-width:992px){.c4,.c3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:576px){
+    .c4,.c3,.c2{grid-template-columns:1fr;}
+    .form-wrap,.progress-wrap{padding-left:14px;padding-right:14px;}
+    .page-hero{padding:28px 18px 24px;}
+    .hero-title{font-size:1.5rem;}
+}
+
+.image-upload-zone{border:2px dashed var(--border);border-radius:var(--r);padding:28px 18px;text-align:center;cursor:pointer;transition:all .3s;background:var(--cream);position:relative;}
+.image-upload-zone:hover,.image-upload-zone.dragover{border-color:var(--gold);background:rgba(201,168,76,.05);}
+.image-upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:28px;color:var(--gold);margin-bottom:6px;}
+.upload-text{font-size:12px;color:var(--slate);}
+.upload-text strong{color:var(--navy);}
+.upload-hint{font-size:10px;color:var(--muted);margin-top:3px;}
+#imagePreview{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);display:block;margin:0 auto 10px;box-shadow:var(--sh-sm);}
+
+.repeater-entry{background:var(--cream);border:1px solid var(--border);border-radius:var(--r);padding:20px 20px 14px;margin-bottom:10px;position:relative;transition:box-shadow .2s;}
+.repeater-entry:hover{box-shadow:var(--sh-sm);}
+.entry-num{position:absolute;top:-9px;left:14px;background:var(--navy);color:var(--gold);font-size:9px;font-weight:800;letter-spacing:.6px;padding:2px 10px;border-radius:50px;}
+.btn-remove{position:absolute;top:12px;right:12px;background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.25);color:var(--danger);font-size:11px;padding:4px 11px;border-radius:6px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.btn-remove:hover{background:var(--danger);color:#fff;}
+.btn-add{display:inline-flex;align-items:center;gap:8px;background:rgba(15,30,60,.05);border:1.5px dashed rgba(15,30,60,.18);color:var(--navy);font-size:12px;font-weight:500;padding:9px 18px;border-radius:8px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;margin-top:6px;}
+.btn-add:hover{background:var(--navy);color:var(--gold);border-color:var(--navy);}
+
+.submit-bar{background:var(--white);border-radius:var(--r-lg);border:1px solid var(--border);padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:var(--sh-md);margin-top:6px;}
+.submit-note{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;line-height:1.6;}
+.btn-submit{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:13px 32px;border-radius:10px;border:none;cursor:pointer;transition:all .3s;box-shadow:0 4px 16px rgba(15,30,60,.22);white-space:nowrap;}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(15,30,60,.32);}
+.btn-submit:active{transform:translateY(0);}
+.btn-icon{width:26px;height:26px;background:var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--navy);font-size:12px;}
+
+.alert-ok{background:linear-gradient(135deg,#d4edda,#c3e6cb);border:1px solid #b8dab6;color:#155724;border-radius:var(--r);padding:13px 18px;display:flex;align-items:center;gap:9px;margin:0 40px 18px;font-size:13px;font-weight:500;box-shadow:var(--sh-sm);}
+.alert-err{background:linear-gradient(135deg,#fde8e8,#fbd5d5);border:1px solid #f5c0c0;color:#7b1a1a;border-radius:var(--r);padding:13px 18px;display:flex;align-items:center;gap:9px;margin:0 40px 18px;font-size:13px;font-weight:500;box-shadow:var(--sh-sm);}
+
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--border);color:var(--navy);font-size:12px;font-weight:600;padding:8px 16px;border-radius:8px;cursor:pointer;transition:all .2s;text-decoration:none;font-family:'DM Sans',sans-serif;}
+.back-btn:hover{background:var(--cream);border-color:var(--navy);color:var(--navy);}
+</style>
+
+@if(session('success'))
+<div class="alert-ok"><i class="bi bi-check-circle-fill"></i> {{ session('success') }}</div>
+@endif
+@if(session('error'))
+<div class="alert-err"><i class="bi bi-exclamation-triangle-fill"></i> {{ session('error') }}</div>
+@endif
+
+<div class="page-hero">
+    <div class="hero-inner">
+        <div>
+            <div class="hero-badge"><i class="bi bi-pencil-square"></i> Edit Record</div>
+            <h1 class="hero-title">Update Resource Speaker <span>Profile</span></h1>
+            <p class="hero-sub">Modify the information for {{ $speaker->given_name ?? '' }} {{ $speaker->last_name ?? 'this speaker' }}.</p>
         </div>
-
-                    <form action="{{ route('resource_speaker.update', $speaker->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="tab-content mt-3">
-                            <!-- Personal Info Tab (Rstbl) -->
-                            <div class="accordion" id="accordionExample">
-                                <!-- Personal Information Section -->
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="headingPersonal">
-                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePersonal" aria-expanded="true" aria-controls="collapsePersonal">
-                                            Personal Information
-                                        </button>
-                                    </h2>
-                                    <div id="collapsePersonal" class="accordion-collapse collapse show" aria-labelledby="headingPersonal" data-bs-parent="#accordionExample">
-                                        <div class="accordion-body">
-                                            <div class="tab-pane fade show active" id="personal" role="tabpanel">
-                                                <div class="row mb-3">
-                                                    <div class="col-md-3">
-                                                        <label for="last_name" class="form-label">Last Name</label>
-                                                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ $speaker->last_name ?? '' }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label for="given_name" class="form-label">Given Name</label>
-                                                        <input type="text" class="form-control" id="given_name" name="given_name" value="{{ $speaker->given_name ?? '' }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label for="middle_name" class="form-label">Middle Name</label>
-                                                        <input type="text" class="form-control" id="middle_name" name="middle_name" value="{{ $speaker->middle_name ?? '' }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label for="ext_name" class="form-label">Extension Name</label>
-                                                        <input type="text" class="form-control" id="ext_name" name="ext_name" value="{{ $speaker->ext_name ?? '' }}">
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-3">
-                                                    <div class="col-md-3">
-                                                        <label for="date_of_birth" class="form-label">Date of Birth</label>
-                                                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ $speaker->date_of_birth ?? '' }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label for="place_of_birth" class="form-label">Place of Birth</label>
-                                                        <input type="text" class="form-control" id="place_of_birth" name="place_of_birth" value="{{ $speaker->place_of_birth ?? '' }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label for="age" class="form-label">Age</label>
-                                                        <input type="number" class="form-control" id="age" name="age" value="{{ $speaker->age ?? '' }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label for="email" class="form-label">Email</label>
-                                                        <input type="email" class="form-control" id="email" name="email" value="{{ $speaker->email ?? '' }}">
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-3">
-                                                    {{-- <div class="col-md-3">
-                                                        <label for="expertise" class="form-label">Expertise</label>
-                                                        <input type="text" class="form-control" id="expertise" name="expertise" value="{{ $speaker->expertise ?? '' }}">
-                                                    </div> --}}
-                                                    <div class="col-md-3">
-                                                        <label for="home_address" class="form-label">Home Address</label>
-                                                        <input type="text" class="form-control" id="home_address" name="home_address" value="{{ $speaker->home_address ?? '' }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label for="home_building_no" class="form-label">Building No</label>
-                                                        <input type="text" class="form-control" id="home_building_no" name="home_building_no" value="{{ $speaker->home_building_no ?? '' }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label for="home_barangay" class="form-label">Barangay</label>
-                                                        <input type="text" class="form-control" id="home_barangay" name="home_barangay" value="{{ $speaker->home_barangay ?? '' }}">
-                                                    </div>
-                                                   <div class="col-md-3">
-                                                        <label for="home_municipality" class="form-label">Municipality</label>
-                                                        <input type="text" class="form-control" id="home_municipality" name="home_municipality" value="{{ $speaker->home_municipality ?? '' }}">
-                                                    </div>
-                                                </div>
-
-                                                <div class="row mb-3">
-                                                    <div class="col-md-3">
-                                                        <label for="home_province" class="form-label">Province</label>
-                                                        <input type="text" class="form-control" id="home_province" name="home_province" value="{{ $speaker->home_province ?? '' }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label for="home_zip_code" class="form-label">Zip Code</label>
-                                                        <input type="text" class="form-control" id="home_zip_code" name="home_zip_code" value="{{ $speaker->home_zip_code ?? '' }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label for="home_tel_no" class="form-label">Telephone No</label>
-                                                        <input type="text" class="form-control" id="home_tel_no" name="home_tel_no" value="{{ $speaker->home_tel_no ?? '' }}">
-                                                    </div>
-                                                    <input type="hidden" name="updated_by" value="{{ auth()->id() }}">
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header" id="headingExpertise">
-                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExpertise" aria-expanded="false" aria-controls="collapseExpertise">
-                                                    Expertise
-                                                </button>
-                                            </h2>
-                                            <div id="collapseExpertise" class="accordion-collapse collapse" aria-labelledby="headingExpertise" data-bs-parent="#accordionExample">
-                                                <div class="accordion-body">
-
-                                                    <div id="expertise-container">
-                                                        @if(isset($speaker->expertises) && $speaker->expertises->isNotEmpty())
-                                                            @foreach($speaker->expertises as $expertise)
-                                                                <div class="expertise-entry row mb-3">
-                                                                    <div class="col-md-6">
-                                                                        <input type="text" name="expertis[]" class="form-control" value="{{ $expertise->expertis }}">
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <button type="button" class="btn btn-danger remove-entry mt-2">Remove</button>
-                                                                    </div>
-                                                                </div>
-                                                            @endforeach
-                                                        @else
-                                                            <div class="expertise-entry row mb-3">
-                                                                <div class="col-md-6">
-                                                                    <input type="text" name="expertis[]" class="form-control" placeholder="Enter expertise">
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <button type="button" class="btn btn-danger remove-entry mt-2">Remove</button>
-                                                                </div>
-                                                            </div>
-                                                        @endif
-                                                    </div>
-
-                                                    <button type="button" class="btn btn-primary mt-2" id="addMoreExpertise">Add More</button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-                                <!-- Education Section -->
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="headingEducation">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEducation" aria-expanded="false" aria-controls="collapseEducation">
-                                            Educational Background
-                                        </button>
-                                    </h2>
-                                    <div id="collapseEducation" class="accordion-collapse collapse" aria-labelledby="headingEducation" data-bs-parent="#accordionExample">
-                                        <div class="accordion-body">
-                                            <div id="educationRepeater">
-                                                @if($speaker->educationalBackground->count())
-                                                    @foreach($speaker->educationalBackground as $index => $education)
-                                                        <div class="education-entry row mb-3">
-                                                            <div class="col-md-3">
-                                                                <label class="form-label">Level</label>
-                                                                <input type="text" class="form-control" name="education[{{ $index }}][level]" value="{{ $education->level }}">
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <label class="form-label">From</label>
-                                                                <input type="text" class="form-control" name="education[{{ $index }}][from_year]" value="{{ $education->from_year }}">
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <label class="form-label">To</label>
-                                                                <input type="text" class="form-control" name="education[{{ $index }}][to_year]" value="{{ $education->to_year }}">
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <label class="form-label">School</label>
-                                                                <input type="text" class="form-control" name="education[{{ $index }}][school]" value="{{ $education->school }}">
-                                                            </div>
-                                                            <div class="col-md-3 mt-2">
-                                                                <label class="form-label">Year Graduated</label>
-                                                                <input type="text" class="form-control" name="education[{{ $index }}][year_graduated]" value="{{ $education->year_graduated }}">
-                                                            </div>
-                                                            <div class="col-md-3 mt-2">
-                                                                <label class="form-label">Awards</label>
-                                                                <input type="text" class="form-control" name="education[{{ $index }}][awards]" value="{{ $education->awards }}">
-                                                            </div>
-                                                            <div class="col-md-2 mt-4">
-                                                                <button type="button" class="btn btn-danger btn-remove-education mt-2">Remove</button>
-                                                            </div>
-                                                            <hr class="mt-3">
-                                                        </div>
-                                                    @endforeach
-                                                @endif
-                                            </div>
-                                            <button type="button" class="btn btn-primary mt-2" id="addEducation">Add More</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                <!-- Work Experience Section -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingWorkExperience">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWorkExperience" aria-expanded="false" aria-controls="collapseWorkExperience">
-                            Work Experience
-                        </button>
-                    </h2>
-                    <div id="collapseWorkExperience" class="accordion-collapse collapse" aria-labelledby="headingWorkExperience" data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            <div id="workExperienceRepeater">
-                                @if($speaker->workExperiences->count())
-                                    @foreach($speaker->workExperiences as $index => $experience)
-                                        <div class="work-entry row mb-3 border p-3 rounded">
-                                            <div class="col-md-3">
-                                                <label class="form-label">Company Name</label>
-                                                <input type="text" class="form-control" name="work[{{ $index }}][name_company]" value="{{ $experience->name_company }}">
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label class="form-label">Date Started</label>
-                                                <input type="date" class="form-control" name="work[{{ $index }}][date_started]" value="{{ $experience->date_started }}">
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label class="form-label">Date Ended</label>
-                                                <input type="date" class="form-control" name="work[{{ $index }}][date_ended]" value="{{ $experience->date_ended }}">
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label class="form-label">Position</label>
-                                                <input type="text" class="form-control" name="work[{{ $index }}][position]" value="{{ $experience->position }}">
-                                            </div>
-                                            <div class="col-md-3 mt-2">
-                                                <label class="form-label">Company Address</label>
-                                                <input type="text" class="form-control" name="work[{{ $index }}][address]" value="{{ $experience->address }}">
-                                            </div>
-                                            <div class="col-md-3 mt-2">
-                                                <label class="form-label">Division</label>
-                                                <input type="text" class="form-control" name="work[{{ $index }}][division]" value="{{ $experience->division }}">
-                                            </div>
-                                            <div class="col-md-2 mt-4">
-                                                <button type="button" class="btn btn-danger btn-remove-work mt-4">Remove</button>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                @endif
-                            </div>
-
-                            <!-- Add Button -->
-                            <button type="button" class="btn btn-primary mt-3" id="addWorkExperience">Add More</button>
-                        </div>
-                    </div>
-                </div>
-
-
-
-   <!-- Office Information Section -->
-   <div class="accordion-item">
-    <h2 class="accordion-header" id="headingOffice">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOffice" aria-expanded="false" aria-controls="collapseOffice">
-            Office Information
-        </button>
-    </h2>
-    <div id="collapseOffice" class="accordion-collapse collapse" aria-labelledby="headingOffice" data-bs-parent="#accordionExample">
-        <div class="accordion-body">
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <label for="office_organization" class="form-label">Office Organization</label>
-                    <input type="text" class="form-control" id="office_organization" name="office_organization"
-                           value="{{ optional($speaker->office)->office_organization ?? '' }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="position" class="form-label">Position</label>
-                    <input type="text" class="form-control" id="position" name="position"
-                           value="{{ optional($speaker->office)->position ?? '' }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="address" class="form-label">Office Address</label>
-                    <input type="text" class="form-control" id="address" name="address"
-                           value="{{ optional($speaker->office)->address ?? '' }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="building_no" class="form-label">Building No</label>
-                    <input type="text" class="form-control" id="building_no" name="building_no"
-                           value="{{ optional($speaker->office)->building_no ?? '' }}">
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <label for="barangay" class="form-label">Barangay</label>
-                    <input type="text" class="form-control" id="barangay" name="barangay"
-                           value="{{ optional($speaker->office)->barangay ?? '' }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="municipality" class="form-label">Municipality</label>
-                    <input type="text" class="form-control" id="municipality" name="municipality"
-                           value="{{ optional($speaker->office)->municipality ?? '' }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="province" class="form-label">Province</label>
-                    <input type="text" class="form-control" id="province" name="province"
-                           value="{{ optional($speaker->office)->province ?? '' }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="zip_code" class="form-label">Zip Code</label>
-                    <input type="text" class="form-control" id="zip_code" name="zip_code"
-                           value="{{ optional($speaker->office)->zip_code ?? '' }}">
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <label for="tel_no" class="form-label">Telephone No</label>
-                    <input type="text" class="form-control" id="tel_no" name="tel_no"
-                           value="{{ optional($speaker->office)->tel_no ?? '' }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="cell_no" class="form-label">Cellphone No</label>
-                    <input type="text" class="form-control" id="cell_no" name="cell_no"
-                           value="{{ optional($speaker->office)->cell_no ?? '' }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="fax_no" class="form-label">Fax No</label>
-                    <input type="text" class="form-control" id="fax_no" name="fax_no"
-                           value="{{ optional($speaker->office)->fax_no ?? '' }}">
-                </div>
-            </div>
+        <div class="hero-right">
+            <a href="{{ route('resource_speaker.view', $speaker->id) }}" class="back-btn">
+                <i class="bi bi-arrow-left"></i> Back to View
+            </a>
         </div>
     </div>
 </div>
 
-                    <!-- Training Section -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingTraining">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTraining" aria-expanded="false" aria-controls="collapseTraining">
-                                Training's/ Siminars
-                            </button>
-                        </h2>
-                        <div id="collapseTraining" class="accordion-collapse collapse" aria-labelledby="headingTraining" data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                <div id="trainingRepeater">
-                                    @if(!empty($speaker->experienceTrainer) && $speaker->experienceTrainer->count())
-                                        @foreach($speaker->experienceTrainer as $trainer)
-                                            <div class="training-entry row mb-3 border p-3 rounded">
-                                                <div class="col-md-3">
-                                                    <label class="form-label">Training Title</label>
-                                                    <input type="text" class="form-control" name="rst_title[{{ $trainer->id }}]" value="{{ $trainer->rst_title }}">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label class="form-label">Date</label>
-                                                    <input type="date" class="form-control" name="rst_date[{{ $trainer->id }}]" value="{{ $trainer->rst_date }}">
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label class="form-label">Venue</label>
-                                                    <input type="text" class="form-control" name="rst_venue[{{ $trainer->id }}]" value="{{ $trainer->rst_venue }}">
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <label class="form-label">No. of Hours</label>
-                                                    <input type="number" class="form-control" name="rst_no_hours[{{ $trainer->id }}]" value="{{ $trainer->rst_no_hours }}">
-                                                </div>
-                                                <div class="col-md-1 d-flex align-items-end">
-                                                    <button type="button" class="btn btn-danger btn-remove-training">Remove</button>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    @endif
-                                </div>
-                                <button type="button" class="btn btn-primary mt-3" id="addTraining">Add More</button>
-                            </div>
-                        </div>
-                    </div>
+<div class="form-wrap">
+    <div class="form-toolbar">
+        <div class="toolbar-left"><i class="bi bi-layout-text-sidebar-reverse"></i> Update Speaker Information</div>
+        <div class="toolbar-right">
+            <button type="button" class="btn-toolbar" onclick="expandAll()"><i class="bi bi-arrows-expand"></i> Expand All</button>
+            <button type="button" class="btn-toolbar" onclick="collapseAll()"><i class="bi bi-arrows-collapse"></i> Collapse All</button>
+        </div>
+    </div>
 
+    <div class="section-search-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" id="sectionSearch" placeholder="Search sections… (e.g. 'email', 'education', 'office')">
+    </div>
 
+<form action="{{ route('resource_speaker.update', $speaker->id) }}" method="POST" enctype="multipart/form-data" novalidate>
+@csrf
+@method('PUT')
+<input type="hidden" name="updated_by" value="{{ auth()->id() }}">
 
-                <!-- Experience as Trainer Section -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingTrainerExperience">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTrainerExperience" aria-expanded="false" aria-controls="collapseTrainerExperience">
-                            Experience as Trainer
-                        </button>
-                    </h2>
-                    <div id="collapseTrainerExperience" class="accordion-collapse collapse" aria-labelledby="headingTrainerExperience" data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            <div id="trainerExperienceRepeater">
-                                @if(!empty($speaker->trainings) && $speaker->trainings->count())
-                                @foreach($speaker->trainings as $exper)
-                                        <div class="trainer-entry row mb-3 border p-3 rounded">
-                                            <div class="col-md-3">
-                                                <label class="form-label">Training Title</label>
-                                                <input type="text" class="form-control" name="rt_title[]" value="{{ $exper->rt_title }}">
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label class="form-label">Date</label>
-                                                <input type="date" class="form-control" name="rt_date[]" value="{{ $exper->rt_date }}">
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label class="form-label">Venue</label>
-                                                <input type="text" class="form-control" name="rt_venue[]" value="{{ $exper->rt_venue }}">
-                                            </div>
-                                            <div class="col-md-2">
-                                                <label class="form-label">No. of Hours</label>
-                                                <input type="number" class="form-control" name="rt_no_hours[]" value="{{ $exper->rt_no_hours }}">
-                                            </div>
-                                            <div class="col-md-1 d-flex align-items-end">
-                                                <button type="button" class="btn btn-danger btn-remove-trainer">Remove</button>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                @endif
-                            </div>
-                            <button type="button" class="btn btn-primary mt-3" id="addTrainerExperience">Add More</button>
-                        </div>
-                    </div>
-                </div>
-
-
-<!-- Publications Section -->
-<div class="accordion-item">
-    <h2 class="accordion-header" id="headingPublications">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePublications" aria-expanded="false" aria-controls="collapsePublications">
-            Publications
-        </button>
-    </h2>
-    <div id="collapsePublications" class="accordion-collapse collapse" aria-labelledby="headingPublications" data-bs-parent="#accordionExample">
-        <div class="accordion-body">
-            <div id="publicationsRepeater">
-                @if(!empty($speaker->publications) && $speaker->publications->count())
-                    @foreach($speaker->publications as $publication)
-                        <div class="publication-entry row mb-3 border p-3 rounded">
-                            <div class="col-md-3">
-                                <label for="title" class="form-label">Publication Title</label>
-                                <input type="text" class="form-control" name="p_title[{{ $publication->id }}]" value="{{ $publication->p_title }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="nature" class="form-label">Nature</label>
-                                <input type="text" class="form-control" name="p_nature[{{ $publication->id }}]" value="{{ $publication->p_nature }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="date" class="form-label">Date</label>
-                                <input type="date" class="form-control" name="p_date[{{ $publication->id }}]" value="{{ $publication->p_date }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="venue" class="form-label">Venue</label>
-                                <input type="text" class="form-control" name="p_venue[{{ $publication->id }}]" value="{{ $publication->p_venue }}">
-                            </div>
-                            <div class="col-md-1 d-flex align-items-end">
-                                <button type="button" class="btn btn-danger btn-remove-publication">Remove</button>
-                            </div>
-                        </div>
-                    @endforeach
+{{-- 1. PERSONAL INFO --}}
+<div class="section-card open" data-section="1" data-keywords="personal name email gender birth address phone contact">
+    <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon"><i class="bi bi-person-circle"></i></div>
+        <div class="section-title-grp"><p class="section-title">Personal Information</p><p class="section-desc">Basic details, contact, and home address</p></div>
+        <div class="section-meta"><span class="section-filled-badge"><i class="bi bi-check2"></i> Filled</span><div class="section-toggle"><i class="bi bi-chevron-down"></i></div></div>
+    </div>
+    <div class="section-body">
+        <div style="max-width:270px;margin-bottom:22px;">
+            <label class="field-label">Profile Photo</label>
+            <div class="image-upload-zone" id="uploadZone">
+                @if($speaker->img)
+                <img id="imagePreview" src="{{ asset($speaker->img) }}" alt="Preview" style="display:block;">
+                @else
+                <img id="imagePreview" src="" alt="Preview">
                 @endif
+                <div id="uploadPlaceholder" @if($speaker->img) style="display:none;" @endif>
+                    <div class="upload-icon"><i class="bi bi-camera"></i></div>
+                    <div class="upload-text"><strong>Click to upload</strong> or drag & drop</div>
+                    <div class="upload-hint">JPG, PNG, WEBP — max 5MB</div>
+                </div>
+                <input type="file" id="img" name="img" accept="image/*" onchange="previewImage(event)">
             </div>
-            <button type="button" class="btn btn-primary mt-3" id="addPublication">Add More</button>
+            <div class="field-hint"><i class="bi bi-info-circle"></i> Upload a new photo to replace existing.</div>
+        </div>
+        <div class="frow c4">
+            <div class="field-grp"><label class="field-label">Last Name <span class="required-star">*</span></label><div class="input-icon-wrap"><i class="bi bi-person input-icon"></i><input type="text" class="form-control" id="last_name" name="last_name" value="{{ old('last_name', $speaker->last_name ?? '') }}" placeholder="Santos" required></div></div>
+            <div class="field-grp"><label class="field-label">Given Name <span class="required-star">*</span></label><input type="text" class="form-control" id="given_name" name="given_name" value="{{ old('given_name', $speaker->given_name ?? '') }}" placeholder="Maria" required></div>
+            <div class="field-grp"><label class="field-label">Middle Name</label><input type="text" class="form-control" id="middle_name" name="middle_name" value="{{ old('middle_name', $speaker->middle_name ?? '') }}" placeholder="Cruz"></div>
+            <div class="field-grp"><label class="field-label">Extension</label><input type="text" class="form-control" id="ext_name" name="ext_name" value="{{ old('ext_name', $speaker->ext_name ?? '') }}" placeholder="Jr., Sr., III"></div>
+        </div>
+        <div class="frow c4">
+            <div class="field-grp"><label class="field-label">Date of Birth</label><input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', $speaker->date_of_birth ?? '') }}"></div>
+            <div class="field-grp"><label class="field-label">Place of Birth</label><input type="text" class="form-control" id="place_of_birth" name="place_of_birth" value="{{ old('place_of_birth', $speaker->place_of_birth ?? '') }}" placeholder="City / Municipality"></div>
+            <div class="field-grp"><label class="field-label">Age</label><input type="number" class="form-control" id="age" name="age" min="1" max="150" value="{{ old('age', $speaker->age ?? '') }}" placeholder="0"></div>
+            <div class="field-grp"><label class="field-label">Email</label><div class="input-icon-wrap"><i class="bi bi-envelope input-icon"></i><input type="email" class="form-control" id="email" name="email" value="{{ old('email', $speaker->email ?? '') }}" placeholder="email@example.com"></div></div>
+        </div>
+        <div class="frow c2">
+            <div class="field-grp"><label class="field-label">Home Address</label><input type="text" class="form-control" id="home_address" name="home_address" value="{{ old('home_address', $speaker->home_address ?? '') }}" placeholder="Street / Purok"></div>
+            <div class="field-grp"><label class="field-label">Building No</label><input type="text" class="form-control" id="home_building_no" name="home_building_no" value="{{ old('home_building_no', $speaker->home_building_no ?? '') }}" placeholder="#00"></div>
+        </div>
+        <div class="frow c4">
+            <div class="field-grp"><label class="field-label">Barangay</label><input type="text" class="form-control" id="home_barangay" name="home_barangay" value="{{ old('home_barangay', $speaker->home_barangay ?? '') }}" placeholder="Barangay"></div>
+            <div class="field-grp"><label class="field-label">Municipality</label><input type="text" class="form-control" id="home_municipality" name="home_municipality" value="{{ old('home_municipality', $speaker->home_municipality ?? '') }}" placeholder="Municipality / City"></div>
+            <div class="field-grp"><label class="field-label">Province</label><input type="text" class="form-control" id="home_province" name="home_province" value="{{ old('home_province', $speaker->home_province ?? '') }}" placeholder="Province"></div>
+            <div class="field-grp"><label class="field-label">Zip Code</label><input type="text" class="form-control" id="home_zip_code" name="home_zip_code" value="{{ old('home_zip_code', $speaker->home_zip_code ?? '') }}" placeholder="0000"></div>
+        </div>
+        <div class="frow c2">
+            <div class="field-grp"><label class="field-label">Telephone No</label><input type="text" class="form-control" id="home_tel_no" name="home_tel_no" value="{{ old('home_tel_no', $speaker->home_tel_no ?? '') }}" placeholder="(074) XXX-XXXX"></div>
+            <div class="field-grp"><label class="field-label">Cellphone No</label><input type="text" class="form-control" id="home_cell_no" name="home_cell_no" value="{{ old('home_cell_no', $speaker->home_cell_no ?? '') }}" placeholder="+63 9XX XXX XXXX"></div>
+        </div>
+    </div>
+</div>
+
+{{-- 2. EXPERTISE --}}
+<div class="section-card" data-section="2" data-keywords="expertise specialization skill area">
+    <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon"><i class="bi bi-stars"></i></div>
+        <div class="section-title-grp"><p class="section-title">Expertise</p><p class="section-desc">Areas of specialization and skills</p></div>
+        <div class="section-meta"><span class="section-filled-badge"><i class="bi bi-check2"></i> Filled</span><div class="section-toggle"><i class="bi bi-chevron-down"></i></div></div>
+    </div>
+    <div class="section-body">
+        <div id="expertise-container">
+            @if(isset($speaker->expertises) && $speaker->expertises->count())
+                @foreach($speaker->expertises as $index => $expertise)
+                <div class="repeater-entry"><span class="entry-num">Entry #{{ $index + 1 }}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                    <div class="frow c1" style="max-width:500px;margin-top:10px;"><div class="field-grp"><label class="field-label">Expertise / Specialization</label><input type="text" class="form-control" name="expertis[]" value="{{ $expertise->expertis }}" placeholder="e.g. Data Science, Public Speaking"></div></div>
+                </div>
+                @endforeach
+            @else
+            <div class="repeater-entry"><span class="entry-num">Entry #1</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                <div class="frow c1" style="max-width:500px;margin-top:10px;"><div class="field-grp"><label class="field-label">Expertise / Specialization</label><input type="text" class="form-control" name="expertis[]" placeholder="e.g. Data Science, Public Speaking"></div></div>
+            </div>
+            @endif
+        </div>
+        <button type="button" class="btn-add" id="addMoreExpertise"><i class="bi bi-plus-lg"></i> Add Another Expertise</button>
+    </div>
+</div>
+
+{{-- 3. OFFICE --}}
+<div class="section-card" data-section="3" data-keywords="office organization position agency employer work address building">
+    <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon"><i class="bi bi-building"></i></div>
+        <div class="section-title-grp"><p class="section-title">Office Information</p><p class="section-desc">Current employer and office address</p></div>
+        <div class="section-meta"><span class="section-filled-badge"><i class="bi bi-check2"></i> Filled</span><div class="section-toggle"><i class="bi bi-chevron-down"></i></div></div>
+    </div>
+    <div class="section-body">
+        <div class="frow c4">
+            <div class="field-grp"><label class="field-label">Organization / Agency</label><input type="text" class="form-control" name="office_organization" value="{{ old('office_organization', optional($speaker->office)->office_organization ?? '') }}" placeholder="Agency name"></div>
+            <div class="field-grp"><label class="field-label">Position / Designation</label><input type="text" class="form-control" name="off_position" value="{{ old('off_position', optional($speaker->office)->position ?? '') }}" placeholder="e.g. Director"></div>
+            <div class="field-grp"><label class="field-label">Office Address</label><input type="text" class="form-control" name="off_address" value="{{ old('off_address', optional($speaker->office)->address ?? '') }}" placeholder="Street"></div>
+            <div class="field-grp"><label class="field-label">Building No</label><input type="text" class="form-control" name="off_building_no" value="{{ old('off_building_no', optional($speaker->office)->building_no ?? '') }}" placeholder="#00"></div>
+        </div>
+        <div class="frow c4">
+            <div class="field-grp"><label class="field-label">Barangay</label><input type="text" class="form-control" name="off_barangay" value="{{ old('off_barangay', optional($speaker->office)->barangay ?? '') }}" placeholder="Barangay"></div>
+            <div class="field-grp"><label class="field-label">Municipality</label><input type="text" class="form-control" name="off_municipality" value="{{ old('off_municipality', optional($speaker->office)->municipality ?? '') }}" placeholder="Municipality"></div>
+            <div class="field-grp"><label class="field-label">Province</label><input type="text" class="form-control" name="off_province" value="{{ old('off_province', optional($speaker->office)->province ?? '') }}" placeholder="Province"></div>
+            <div class="field-grp"><label class="field-label">Zip Code</label><input type="text" class="form-control" name="off_zip_code" value="{{ old('off_zip_code', optional($speaker->office)->zip_code ?? '') }}" placeholder="0000"></div>
+        </div>
+        <div class="frow c3">
+            <div class="field-grp"><label class="field-label">Telephone No</label><input type="text" class="form-control" name="off_tel_no" value="{{ old('off_tel_no', optional($speaker->office)->tel_no ?? '') }}" placeholder="(074) XXX-XXXX"></div>
+            <div class="field-grp"><label class="field-label">Cellphone No</label><input type="text" class="form-control" name="off_cell_no" value="{{ old('off_cell_no', optional($speaker->office)->cell_no ?? '') }}" placeholder="+63 9XX XXX XXXX"></div>
+            <div class="field-grp"><label class="field-label">Fax No</label><input type="text" class="form-control" name="off_fax_no" value="{{ old('off_fax_no', optional($speaker->office)->fax_no ?? '') }}" placeholder="Fax number"></div>
         </div>
     </div>
 </div>
 
 
-  <!-- References Section -->
-<div class="accordion-item">
-    <h2 class="accordion-header" id="headingReferences">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReferences" aria-expanded="false" aria-controls="collapseReferences">
-            References
-        </button>
-    </h2>
-    <div id="collapseReferences" class="accordion-collapse collapse" aria-labelledby="headingReferences" data-bs-parent="#accordionExample">
-        <div class="accordion-body">
-            <div id="referencesRepeater">
-                @if(isset($speaker) && $speaker->referencesTrainings->count())
-                    @foreach($speaker->referencesTrainings as $ref)
-                        <div class="reference-entry row mb-3 border p-3 rounded">
-                            <div class="col-md-3">
-                                <label class="form-label">Agency Name</label>
-                                <input type="text" class="form-control" name="references[name_agency][]" value="{{ $ref->name_agency }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Address</label>
-                                <input type="text" class="form-control" name="references[address][]" value="{{ $ref->address }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Contact Person</label>
-                                <input type="text" class="form-control" name="references[contact_person][]" value="{{ $ref->contact_person }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Position</label>
-                                <input type="text" class="form-control" name="references[position][]" value="{{ $ref->position }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Tel No.</label>
-                                <input type="text" class="form-control" name="references[tel_no][]" value="{{ $ref->tel_no }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Cell No.</label>
-                                <input type="text" class="form-control" name="references[cell_no][]" value="{{ $ref->cell_no }}">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Fax No.</label>
-                                <input type="text" class="form-control" name="references[fax_no][]" value="{{ $ref->fax_no }}">
-                            </div>
-                            <div class="col-md-3 d-flex align-items-end">
-                                <button type="button" class="btn btn-danger btn-remove-reference">Remove</button>
-                            </div>
-                        </div>
-                    @endforeach
-                @endif
+
+{{-- 4. EDUCATION --}}
+<div class="section-card" data-section="4" data-keywords="education school university college degree level graduated awards">
+    <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon"><i class="bi bi-mortarboard"></i></div>
+        <div class="section-title-grp"><p class="section-title">Educational Background</p><p class="section-desc">Formal education and academic achievements</p></div>
+        <div class="section-meta"><span class="section-filled-badge"><i class="bi bi-check2"></i> Filled</span><div class="section-toggle"><i class="bi bi-chevron-down"></i></div></div>
+    </div>
+    <div class="section-body">
+        <div id="education-container">
+            @if($speaker->educationalBackground->count())
+                @foreach($speaker->educationalBackground as $index => $education)
+                <div class="repeater-entry"><span class="entry-num">Entry #{{ $index + 1 }}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                    <div class="frow c3" style="margin-top:10px;">
+                        <div class="field-grp"><label class="field-label">Level</label><input type="text" class="form-control" name="level[]" value="{{ $education->level }}" placeholder="e.g. College, Post-grad"></div>
+                        <div class="field-grp"><label class="field-label">School / University</label><input type="text" class="form-control" name="school[]" value="{{ $education->school }}" placeholder="School name"></div>
+                        <div class="field-grp"><label class="field-label">Year Graduated</label><input type="text" class="form-control" name="year_graduated[]" value="{{ $education->year_graduated }}" placeholder="YYYY"></div>
+                    </div>
+                    <div class="frow c3">
+                        <div class="field-grp"><label class="field-label">From Year</label><input type="text" class="form-control" name="from_year[]" value="{{ $education->from_year }}" placeholder="YYYY"></div>
+                        <div class="field-grp"><label class="field-label">To Year</label><input type="text" class="form-control" name="to_year[]" value="{{ $education->to_year }}" placeholder="YYYY"></div>
+                        <div class="field-grp"><label class="field-label">Honors / Awards</label><input type="text" class="form-control" name="awards[]" value="{{ $education->awards }}" placeholder="e.g. Cum Laude"></div>
+                    </div>
+                </div>
+                @endforeach
+            @else
+            <div class="repeater-entry"><span class="entry-num">Entry #1</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                <div class="frow c3" style="margin-top:10px;">
+                    <div class="field-grp"><label class="field-label">Level</label><input type="text" class="form-control" name="level[]" placeholder="e.g. College, Post-grad"></div>
+                    <div class="field-grp"><label class="field-label">School / University</label><input type="text" class="form-control" name="school[]" placeholder="School name"></div>
+                    <div class="field-grp"><label class="field-label">Year Graduated</label><input type="text" class="form-control" name="year_graduated[]" placeholder="YYYY"></div>
+                </div>
+                <div class="frow c3">
+                    <div class="field-grp"><label class="field-label">From Year</label><input type="text" class="form-control" name="from_year[]" placeholder="YYYY"></div>
+                    <div class="field-grp"><label class="field-label">To Year</label><input type="text" class="form-control" name="to_year[]" placeholder="YYYY"></div>
+                    <div class="field-grp"><label class="field-label">Honors / Awards</label><input type="text" class="form-control" name="awards[]" placeholder="e.g. Cum Laude"></div>
+                </div>
             </div>
-            <button type="button" class="btn btn-primary mt-3" id="addReference">Add More</button>
+            @endif
         </div>
+        <button type="button" class="btn-add" id="addMoreEducation"><i class="bi bi-plus-lg"></i> Add Another Education</button>
     </div>
 </div>
 
-
-
-</div>
+{{-- 5. WORK EXPERIENCE --}}
+<div class="section-card" data-section="5" data-keywords="work experience company employment job position division">
+    <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon"><i class="bi bi-briefcase"></i></div>
+        <div class="section-title-grp"><p class="section-title">Work Experience</p><p class="section-desc">Previous and current employment history</p></div>
+        <div class="section-meta"><span class="section-filled-badge"><i class="bi bi-check2"></i> Filled</span><div class="section-toggle"><i class="bi bi-chevron-down"></i></div></div>
+    </div>
+    <div class="section-body">
+        <div id="work-experience-container">
+            @if($speaker->workExperiences->count())
+                @foreach($speaker->workExperiences as $index => $experience)
+                <div class="repeater-entry"><span class="entry-num">Entry #{{ $index + 1 }}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                    <div class="frow c3" style="margin-top:10px;">
+                        <div class="field-grp"><label class="field-label">Company / Agency</label><input type="text" class="form-control" name="work_name_company[]" value="{{ $experience->name_company }}" placeholder="Company name"></div>
+                        <div class="field-grp"><label class="field-label">Position</label><input type="text" class="form-control" name="work_position[]" value="{{ $experience->position }}" placeholder="Job title"></div>
+                        <div class="field-grp"><label class="field-label">Division / Dept</label><input type="text" class="form-control" name="work_division[]" value="{{ $experience->division }}" placeholder="Department"></div>
+                    </div>
+                    <div class="frow c3">
+                        <div class="field-grp"><label class="field-label">Date Started</label><input type="date" class="form-control" name="work_date_started[]" value="{{ $experience->date_started }}"></div>
+                        <div class="field-grp"><label class="field-label">Date Ended</label><input type="date" class="form-control" name="work_date_ended[]" value="{{ $experience->date_ended }}"></div>
+                        <div class="field-grp"><label class="field-label">Address</label><input type="text" class="form-control" name="work_address[]" value="{{ $experience->address }}" placeholder="Company address"></div>
+                    </div>
                 </div>
-                <div class="modal-footer bg-success mt-4">
-                    {{-- <a href="{{url('/rstbl')}}" type="button" class="btn btn-secondary">Close</a> &nbsp;&nbsp; --}}
-                    <button type="submit" class="btn btn-primary">Update</button>
+                @endforeach
+            @else
+            <div class="repeater-entry"><span class="entry-num">Entry #1</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                <div class="frow c3" style="margin-top:10px;">
+                    <div class="field-grp"><label class="field-label">Company / Agency</label><input type="text" class="form-control" name="work_name_company[]" placeholder="Company name"></div>
+                    <div class="field-grp"><label class="field-label">Position</label><input type="text" class="form-control" name="work_position[]" placeholder="Job title"></div>
+                    <div class="field-grp"><label class="field-label">Division / Dept</label><input type="text" class="form-control" name="work_division[]" placeholder="Department"></div>
                 </div>
-            </form>
+                <div class="frow c3">
+                    <div class="field-grp"><label class="field-label">Date Started</label><input type="date" class="form-control" name="work_date_started[]"></div>
+                    <div class="field-grp"><label class="field-label">Date Ended</label><input type="date" class="form-control" name="work_date_ended[]"></div>
+                    <div class="field-grp"><label class="field-label">Address</label><input type="text" class="form-control" name="work_address[]" placeholder="Company address"></div>
+                </div>
+            </div>
+            @endif
+        </div>
+        <button type="button" class="btn-add" id="addMoreWorkExperience"><i class="bi bi-plus-lg"></i> Add Another Work Experience</button>
+    </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{{-- 6. TRAININGS — uses rt_title[] to save into trainings() --}}
+<div class="section-card" data-section="6" data-keywords="training seminar attended hours venue date">
+    <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon"><i class="bi bi-journal-text"></i></div>
+        <div class="section-title-grp"><p class="section-title">Trainings / Seminars Attended</p><p class="section-desc">Relevant training and seminar participation</p></div>
+        <div class="section-meta"><span class="section-filled-badge"><i class="bi bi-check2"></i> Filled</span><div class="section-toggle"><i class="bi bi-chevron-down"></i></div></div>
+    </div>
+    <div class="section-body">
+        <div id="training-container">
+            @if(!empty($speaker->trainings) && $speaker->trainings->count())
+                @foreach($speaker->trainings as $index => $training)
+                <div class="repeater-entry"><span class="entry-num">Entry #{{ $index + 1 }}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                    <div class="frow c4" style="margin-top:10px;">
+                        <div class="field-grp"><label class="field-label">Training Title</label><input type="text" class="form-control" name="rt_title[]" value="{{ $training->rt_title }}" placeholder="Training name"></div>
+                        <div class="field-grp"><label class="field-label">Venue</label><input type="text" class="form-control" name="rt_venue[]" value="{{ $training->rt_venue }}" placeholder="Location"></div>
+                        <div class="field-grp"><label class="field-label">Date</label><input type="date" class="form-control" name="rt_date[]" value="{{ $training->rt_date }}"></div>
+                        <div class="field-grp"><label class="field-label">No. of Hours</label><input type="number" class="form-control" name="rt_no_hours[]" value="{{ $training->rt_no_hours }}" placeholder="0" min="0"></div>
+                    </div>
+                </div>
+                @endforeach
+            @else
+            <div class="repeater-entry"><span class="entry-num">Entry #1</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                <div class="frow c4" style="margin-top:10px;">
+                    <div class="field-grp"><label class="field-label">Training Title</label><input type="text" class="form-control" name="rt_title[]" placeholder="Training name"></div>
+                    <div class="field-grp"><label class="field-label">Venue</label><input type="text" class="form-control" name="rt_venue[]" placeholder="Location"></div>
+                    <div class="field-grp"><label class="field-label">Date</label><input type="date" class="form-control" name="rt_date[]"></div>
+                    <div class="field-grp"><label class="field-label">No. of Hours</label><input type="number" class="form-control" name="rt_no_hours[]" placeholder="0" min="0"></div>
+                </div>
+            </div>
+            @endif
+        </div>
+        <button type="button" class="btn-add" id="addMoreTraining"><i class="bi bi-plus-lg"></i> Add Another Training</button>
+    </div>
+</div>
+
+{{-- 7. TRAINER EXPERIENCE — uses rst_title[] to save into experienceTrainer() --}}
+<div class="section-card" data-section="7" data-keywords="trainer resource speaker experience facilitated conducted">
+    <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon"><i class="bi bi-people"></i></div>
+        <div class="section-title-grp"><p class="section-title">Experience as Trainer / Resource Speaker</p><p class="section-desc">Trainings conducted or facilitated</p></div>
+        <div class="section-meta"><span class="section-filled-badge"><i class="bi bi-check2"></i> Filled</span><div class="section-toggle"><i class="bi bi-chevron-down"></i></div></div>
+    </div>
+    <div class="section-body">
+        <div id="trainerExperienceRepeater">
+            @if(!empty($speaker->experienceTrainer) && $speaker->experienceTrainer->count())
+                @foreach($speaker->experienceTrainer as $index => $exper)
+                <div class="repeater-entry"><span class="entry-num">Entry #{{ $index + 1 }}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                    <div class="frow c4" style="margin-top:10px;">
+                        <div class="field-grp"><label class="field-label">Training Title</label><input type="text" class="form-control" name="rst_title[]" value="{{ $exper->rst_title }}" placeholder="Training name"></div>
+                        <div class="field-grp"><label class="field-label">Venue</label><input type="text" class="form-control" name="rst_venue[]" value="{{ $exper->rst_venue }}" placeholder="Location"></div>
+                        <div class="field-grp"><label class="field-label">Date</label><input type="date" class="form-control" name="rst_date[]" value="{{ $exper->rst_date }}"></div>
+                        <div class="field-grp"><label class="field-label">No. of Hours</label><input type="number" class="form-control" name="rst_no_hours[]" value="{{ $exper->rst_no_hours }}" placeholder="0" min="0"></div>
+                    </div>
+                </div>
+                @endforeach
+            @else
+            <div class="repeater-entry"><span class="entry-num">Entry #1</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                <div class="frow c4" style="margin-top:10px;">
+                    <div class="field-grp"><label class="field-label">Training Title</label><input type="text" class="form-control" name="rst_title[]" placeholder="Training name"></div>
+                    <div class="field-grp"><label class="field-label">Venue</label><input type="text" class="form-control" name="rst_venue[]" placeholder="Location"></div>
+                    <div class="field-grp"><label class="field-label">Date</label><input type="date" class="form-control" name="rst_date[]"></div>
+                    <div class="field-grp"><label class="field-label">No. of Hours</label><input type="number" class="form-control" name="rst_no_hours[]" placeholder="0" min="0"></div>
+                </div>
+            </div>
+            @endif
+        </div>
+        <button type="button" class="btn-add" id="addTrainerExperience"><i class="bi bi-plus-lg"></i> Add Another Entry</button>
+    </div>
+</div>
+
+{{-- 8. PUBLICATIONS --}}
+<div class="section-card" data-section="8" data-keywords="publication research paper journal book article nature">
+    <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon"><i class="bi bi-file-earmark-text"></i></div>
+        <div class="section-title-grp"><p class="section-title">Publications</p><p class="section-desc">Research papers, articles, and publications</p></div>
+        <div class="section-meta"><span class="section-filled-badge"><i class="bi bi-check2"></i> Filled</span><div class="section-toggle"><i class="bi bi-chevron-down"></i></div></div>
+    </div>
+    <div class="section-body">
+        <div id="publication-container">
+            @if(!empty($speaker->publications) && $speaker->publications->count())
+                @foreach($speaker->publications as $index => $publication)
+                <div class="repeater-entry"><span class="entry-num">Entry #{{ $index + 1 }}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                    <div class="frow c4" style="margin-top:10px;">
+                        <div class="field-grp"><label class="field-label">Publication Title</label><input type="text" class="form-control" name="publication_title[]" value="{{ $publication->p_title }}" placeholder="Title"></div>
+                        <div class="field-grp"><label class="field-label">Nature</label><input type="text" class="form-control" name="p_nature[]" value="{{ $publication->p_nature }}" placeholder="e.g. Journal, Book"></div>
+                        <div class="field-grp"><label class="field-label">Date</label><input type="date" class="form-control" name="p_date[]" value="{{ $publication->p_date }}"></div>
+                        <div class="field-grp"><label class="field-label">Publisher / Venue</label><input type="text" class="form-control" name="p_venue[]" value="{{ $publication->p_venue }}" placeholder="Publisher name"></div>
+                    </div>
+                </div>
+                @endforeach
+            @else
+            <div class="repeater-entry"><span class="entry-num">Entry #1</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                <div class="frow c4" style="margin-top:10px;">
+                    <div class="field-grp"><label class="field-label">Publication Title</label><input type="text" class="form-control" name="publication_title[]" placeholder="Title"></div>
+                    <div class="field-grp"><label class="field-label">Nature</label><input type="text" class="form-control" name="p_nature[]" placeholder="e.g. Journal, Book"></div>
+                    <div class="field-grp"><label class="field-label">Date</label><input type="date" class="form-control" name="p_date[]"></div>
+                    <div class="field-grp"><label class="field-label">Publisher / Venue</label><input type="text" class="form-control" name="p_venue[]" placeholder="Publisher name"></div>
+                </div>
+            </div>
+            @endif
+        </div>
+        <button type="button" class="btn-add" id="addMorePublication"><i class="bi bi-plus-lg"></i> Add Another Publication</button>
+    </div>
+</div>
+
+{{-- 9. REFERENCES --}}
+<div class="section-card" data-section="9" data-keywords="references agency contact person telephone fax cell">
+    <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon"><i class="bi bi-person-lines-fill"></i></div>
+        <div class="section-title-grp"><p class="section-title">References</p><p class="section-desc">Agency references and contact persons</p></div>
+        <div class="section-meta"><span class="section-filled-badge"><i class="bi bi-check2"></i> Filled</span><div class="section-toggle"><i class="bi bi-chevron-down"></i></div></div>
+    </div>
+    <div class="section-body">
+        <div id="references-container">
+            @if(isset($speaker) && $speaker->referencesTrainings->count())
+                @foreach($speaker->referencesTrainings as $index => $ref)
+                <div class="repeater-entry"><span class="entry-num">Entry #{{ $index + 1 }}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                    <div class="frow c4" style="margin-top:10px;">
+                        <div class="field-grp"><label class="field-label">Agency Name</label><input type="text" class="form-control" name="name_agency[]" value="{{ $ref->name_agency }}" placeholder="Agency"></div>
+                        <div class="field-grp"><label class="field-label">Address</label><input type="text" class="form-control" name="ref_address[]" value="{{ $ref->address }}" placeholder="Address"></div>
+                        <div class="field-grp"><label class="field-label">Contact Person</label><input type="text" class="form-control" name="contact_person[]" value="{{ $ref->contact_person }}" placeholder="Full name"></div>
+                        <div class="field-grp"><label class="field-label">Position</label><input type="text" class="form-control" name="ref_position[]" value="{{ $ref->position }}" placeholder="Position"></div>
+                    </div>
+                    <div class="frow c3">
+                        <div class="field-grp"><label class="field-label">Telephone No</label><input type="text" class="form-control" name="ref_tel_no[]" value="{{ $ref->tel_no }}" placeholder="Tel number"></div>
+                        <div class="field-grp"><label class="field-label">Cellphone No</label><input type="text" class="form-control" name="ref_cell_no[]" value="{{ $ref->cell_no }}" placeholder="Cell number"></div>
+                        <div class="field-grp"><label class="field-label">Fax No</label><input type="text" class="form-control" name="ref_fax_no[]" value="{{ $ref->fax_no }}" placeholder="Fax number"></div>
+                    </div>
+                </div>
+                @endforeach
+            @else
+            <div class="repeater-entry"><span class="entry-num">Entry #1</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+                <div class="frow c4" style="margin-top:10px;">
+                    <div class="field-grp"><label class="field-label">Agency Name</label><input type="text" class="form-control" name="name_agency[]" placeholder="Agency"></div>
+                    <div class="field-grp"><label class="field-label">Address</label><input type="text" class="form-control" name="ref_address[]" placeholder="Address"></div>
+                    <div class="field-grp"><label class="field-label">Contact Person</label><input type="text" class="form-control" name="contact_person[]" placeholder="Full name"></div>
+                    <div class="field-grp"><label class="field-label">Position</label><input type="text" class="form-control" name="ref_position[]" placeholder="Position"></div>
+                </div>
+                <div class="frow c3">
+                    <div class="field-grp"><label class="field-label">Telephone No</label><input type="text" class="form-control" name="ref_tel_no[]" placeholder="Tel number"></div>
+                    <div class="field-grp"><label class="field-label">Cellphone No</label><input type="text" class="form-control" name="ref_cell_no[]" placeholder="Cell number"></div>
+                    <div class="field-grp"><label class="field-label">Fax No</label><input type="text" class="form-control" name="ref_fax_no[]" placeholder="Fax number"></div>
+                </div>
+            </div>
+            @endif
+        </div>
+        <button type="button" class="btn-add" id="addMoreReferences"><i class="bi bi-plus-lg"></i> Add Another Reference</button>
+    </div>
+</div>
+
+{{-- SUBMIT BAR --}}
+<div class="submit-bar">
+    <div class="submit-note">
+        <i class="bi bi-shield-check" style="color:var(--success);font-size:15px;"></i>
+        Changes will be saved to the database.
+    </div>
+    <button type="submit" class="btn-submit">
+        <div class="btn-icon"><i class="bi bi-save"></i></div>
+        Update Speaker
+    </button>
+</div>
+
+</form>
+</div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const addBtn = document.getElementById('addEducation');
-        const container = document.getElementById('educationRepeater');
+window.toggleSection = h => { h.closest('.section-card').classList.toggle('open'); };
+window.expandAll = () => { document.querySelectorAll('.section-card').forEach(c=>c.classList.add('open')); };
+window.collapseAll = () => { document.querySelectorAll('.section-card').forEach(c=>c.classList.remove('open')); };
 
-        addBtn.addEventListener('click', function () {
-            // Calculate current number of education-entry blocks
-            const eduIndex = container.querySelectorAll('.education-entry').length;
-
-            const div = document.createElement('div');
-            div.className = 'education-entry row mb-3 border p-3 rounded';
-
-            div.innerHTML = `
-                <div class="col-md-3">
-                    <label class="form-label">Level</label>
-                    <input type="text" class="form-control" name="education[${eduIndex}][level]">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">From</label>
-                    <input type="text" class="form-control" name="education[${eduIndex}][from_year]">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">To</label>
-                    <input type="text" class="form-control" name="education[${eduIndex}][to_year]">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">School</label>
-                    <input type="text" class="form-control" name="education[${eduIndex}][school]">
-                </div>
-                <div class="col-md-3 mt-2">
-                    <label class="form-label">Year Graduated</label>
-                    <input type="text" class="form-control" name="education[${eduIndex}][year_graduated]">
-                </div>
-                <div class="col-md-3 mt-2">
-                    <label class="form-label">Awards</label>
-                    <input type="text" class="form-control" name="education[${eduIndex}][awards]">
-                </div>
-                <div class="col-md-2 mt-4">
-                    <button type="button" class="btn btn-danger btn-remove-education mt-4">Remove</button>
-                </div>
-                <hr class="mt-3">
-            `;
-
-            container.appendChild(div);
-        });
-
-        // Use event delegation for dynamic remove buttons
-        container.addEventListener('click', function (event) {
-            if (event.target.classList.contains('btn-remove-education')) {
-                const entry = event.target.closest('.education-entry');
-                if (entry) {
-                    entry.remove();
-                }
-            }
-        });
-    });
-
-
-
-    //workExperiences
-    $(document).ready(function () {
-        let workIndex = $('#workExperienceRepeater .work-entry').length;
-
-        $('#addWorkExperience').on('click', function () {
-            let html = `
-                <div class="work-entry row mb-3 border p-3 rounded">
-                    <div class="col-md-3">
-                        <label class="form-label">Company Name</label>
-                        <input type="text" class="form-control" name="work[${workIndex}][name_company]">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Date Started</label>
-                        <input type="date" class="form-control" name="work[${workIndex}][date_started]">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Date Ended</label>
-                        <input type="date" class="form-control" name="work[${workIndex}][date_ended]">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Position</label>
-                        <input type="text" class="form-control" name="work[${workIndex}][position]">
-                    </div>
-                    <div class="col-md-3 mt-2">
-                        <label class="form-label">Company Address</label>
-                        <input type="text" class="form-control" name="work[${workIndex}][address]">
-                    </div>
-                    <div class="col-md-3 mt-2">
-                        <label class="form-label">Division</label>
-                        <input type="text" class="form-control" name="work[${workIndex}][division]">
-                    </div>
-                    <div class="col-md-2 mt-4">
-                        <button type="button" class="btn btn-danger btn-remove-work mt-4">Remove</button>
-                    </div>
-                </div>
-            `;
-            $('#workExperienceRepeater').append(html);
-            workIndex++;
-        });
-
-        // Remove button functionality
-        $('body').on('click', '.btn-remove-work', function () {
-            $(this).closest('.work-entry').remove();
-        });
-    });
-
-
-    //Training Section
-    $(document).ready(function () {
-    // Set the initial training index
-    let trainingIndex = $('#trainingRepeater .training-entry').length;
-
-    // Add More button functionality
-    $('#addTraining').on('click', function () {
-        let html = `
-            <div class="training-entry row mb-3 border p-3 rounded">
-                <div class="col-md-3">
-                    <label class="form-label">Training Title</label>
-                    <input type="text" class="form-control" name="rst_title[${trainingIndex}]" value="">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Date</label>
-                    <input type="date" class="form-control" name="rst_date[${trainingIndex}]" value="">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Venue</label>
-                    <input type="text" class="form-control" name="rst_venue[${trainingIndex}]" value="">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">No. of Hours</label>
-                    <input type="number" class="form-control" name="rst_no_hours[${trainingIndex}]" value="">
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="button" class="btn btn-danger btn-remove-training">Remove</button>
-                </div>
-            </div>
-        `;
-        $('#trainingRepeater').append(html); // Append the new training entry
-        trainingIndex++; // Increment the index for the next dynamic field
-    });
-
-    // Remove button functionality
-    $('body').on('click', '.btn-remove-training', function () {
-        $(this).closest('.training-entry').remove(); // Remove the closest training-entry element
+document.getElementById('sectionSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase().trim();
+    document.querySelectorAll('.section-card').forEach(card => {
+        const kw = (card.dataset.keywords||'') + ' ' + card.querySelector('.section-title').textContent.toLowerCase();
+        const match = !q || kw.includes(q);
+        card.style.display = match ? '' : 'none';
+        if (match && q) card.classList.add('open');
     });
 });
 
+window.previewImage = function(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const r = new FileReader();
+    r.onload = ev => { const p=document.getElementById('imagePreview'); p.src=ev.target.result; p.style.display='block'; document.getElementById('uploadPlaceholder').style.display='none'; };
+    r.readAsDataURL(file);
+};
 
-
-//Publications
-$(document).ready(function () {
-    let publicationIndex = $('#publicationsRepeater .publication-entry').length;
-
-    // Add More button functionality
-    $('#addPublication').on('click', function () {
-        let html = `
-            <div class="publication-entry row mb-3 border p-3 rounded">
-                <div class="col-md-3">
-                    <label for="title" class="form-label">Publication Title</label>
-                    <input type="text" class="form-control" name="p_title[${publicationIndex}]" value="">
-                </div>
-                <div class="col-md-3">
-                    <label for="nature" class="form-label">Nature</label>
-                    <input type="text" class="form-control" name="p_nature[${publicationIndex}]" value="">
-                </div>
-                <div class="col-md-3">
-                    <label for="date" class="form-label">Date</label>
-                    <input type="date" class="form-control" name="p_date[${publicationIndex}]" value="">
-                </div>
-                <div class="col-md-3">
-                    <label for="venue" class="form-label">Venue</label>
-                    <input type="text" class="form-control" name="p_venue[${publicationIndex}]" value="">
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="button" class="btn btn-danger btn-remove-publication">Remove</button>
-                </div>
-            </div>
-        `;
-        $('#publicationsRepeater').append(html); // Append the new publication entry
-        publicationIndex++; // Increment the index for the next dynamic field
-    });
-
-    // Remove button functionality
-    $('body').on('click', '.btn-remove-publication', function () {
-        $(this).closest('.publication-entry').remove(); // Remove the closest publication-entry element
-    });
+// Expertise
+let expertiseCount = document.querySelectorAll('#expertise-container .repeater-entry').length;
+document.getElementById('addMoreExpertise').addEventListener('click', function() {
+    expertiseCount++;
+    const div = document.createElement('div');
+    div.className = 'repeater-entry';
+    div.innerHTML = `<span class="entry-num">Entry #${expertiseCount}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+        <div class="frow c1" style="max-width:500px;margin-top:10px;"><div class="field-grp"><label class="field-label">Expertise / Specialization</label><input type="text" class="form-control" name="expertis[]" placeholder="e.g. Data Science, Public Speaking"></div></div>`;
+    document.getElementById('expertise-container').appendChild(div);
 });
+document.getElementById('expertise-container').addEventListener('click', e => { if(e.target.classList.contains('remove-entry')) e.target.closest('.repeater-entry').remove(); });
 
-// Experience as Trainer Section
-
-    document.getElementById('addTrainerExperience').addEventListener('click', function () {
-        const container = document.getElementById('trainerExperienceRepeater');
-        const entry = document.createElement('div');
-        entry.classList.add('trainer-entry', 'row', 'mb-3', 'border', 'p-3', 'rounded');
-        entry.innerHTML = `
-            <div class="col-md-3">
-                <label class="form-label">Training Title</label>
-                <input type="text" class="form-control" name="rt_title[]" value="">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Date</label>
-                <input type="date" class="form-control" name="rt_date[]" value="">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Venue</label>
-                <input type="text" class="form-control" name="rt_venue[]" value="">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">No. of Hours</label>
-                <input type="number" class="form-control" name="rt_no_hours[]" value="">
-            </div>
-            <div class="col-md-1 d-flex align-items-end">
-                <button type="button" class="btn btn-danger btn-remove-trainer">Remove</button>
-            </div>
-        `;
-        container.appendChild(entry);
-    });
-
-    document.addEventListener('click', function (e) {
-        if (e.target.classList.contains('btn-remove-trainer')) {
-            e.target.closest('.trainer-entry').remove();
-        }
-    });
-
-// Expertis
-document.addEventListener('DOMContentLoaded', function () {
-    const container = document.getElementById('expertise-container');
-    const addMoreBtn = document.getElementById('addMoreExpertise');
-
-    addMoreBtn.addEventListener('click', function () {
-        const entry = document.createElement('div');
-        entry.classList.add('expertise-entry', 'row', 'mb-3');
-
-        entry.innerHTML = `
-            <div class="col-md-6">
-                <input type="text" name="expertis[]" class="form-control" placeholder="Enter expertise" value="">
-            </div>
-            <div class="col-md-3">
-                <button type="button" class="btn btn-danger remove-entry mt-2">Remove</button>
-            </div>
-        `;
-
-        container.appendChild(entry);
-    });
-
-    container.addEventListener('click', function (e) {
-        if (e.target.classList.contains('remove-entry')) {
-            e.target.closest('.expertise-entry').remove();
-        }
-    });
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-    const container = document.getElementById('referencesRepeater');
-    const addBtn = document.getElementById('addReference');
-
-    const template = () => `
-        <div class="reference-entry row mb-3 border p-3 rounded">
-            <div class="col-md-3">
-                <label class="form-label">Agency Name</label>
-                <input type="text" class="form-control" name="references[name_agency][]" value="">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Address</label>
-                <input type="text" class="form-control" name="references[address][]" value="">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Contact Person</label>
-                <input type="text" class="form-control" name="references[contact_person][]" value="">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Position</label>
-                <input type="text" class="form-control" name="references[position][]" value="">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Tel No.</label>
-                <input type="text" class="form-control" name="references[tel_no][]" value="">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Cell No.</label>
-                <input type="text" class="form-control" name="references[cell_no][]" value="">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Fax No.</label>
-                <input type="text" class="form-control" name="references[fax_no][]" value="">
-            </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="button" class="btn btn-danger btn-remove-reference">Remove</button>
-            </div>
+// Education
+let eduCount = document.querySelectorAll('#education-container .repeater-entry').length;
+document.getElementById('addMoreEducation').addEventListener('click', function() {
+    eduCount++;
+    const div = document.createElement('div');
+    div.className = 'repeater-entry';
+    div.innerHTML = `<span class="entry-num">Entry #${eduCount}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+        <div class="frow c3" style="margin-top:10px;">
+            <div class="field-grp"><label class="field-label">Level</label><input type="text" class="form-control" name="level[]" placeholder="e.g. College, Post-grad"></div>
+            <div class="field-grp"><label class="field-label">School / University</label><input type="text" class="form-control" name="school[]" placeholder="School name"></div>
+            <div class="field-grp"><label class="field-label">Year Graduated</label><input type="text" class="form-control" name="year_graduated[]" placeholder="YYYY"></div>
+        </div>
+        <div class="frow c3">
+            <div class="field-grp"><label class="field-label">From Year</label><input type="text" class="form-control" name="from_year[]" placeholder="YYYY"></div>
+            <div class="field-grp"><label class="field-label">To Year</label><input type="text" class="form-control" name="to_year[]" placeholder="YYYY"></div>
+            <div class="field-grp"><label class="field-label">Honors / Awards</label><input type="text" class="form-control" name="awards[]" placeholder="e.g. Cum Laude"></div>
         </div>`;
-
-    addBtn.addEventListener('click', () => {
-        container.insertAdjacentHTML('beforeend', template());
-    });
-
-    container.addEventListener('click', function (e) {
-        if (e.target.classList.contains('btn-remove-reference')) {
-            e.target.closest('.reference-entry').remove();
-        }
-    });
+    document.getElementById('education-container').appendChild(div);
 });
-</script>
+document.getElementById('education-container').addEventListener('click', e => { if(e.target.classList.contains('remove-entry')) e.target.closest('.repeater-entry').remove(); });
 
+// Work Experience
+let workCount = document.querySelectorAll('#work-experience-container .repeater-entry').length;
+document.getElementById('addMoreWorkExperience').addEventListener('click', function() {
+    workCount++;
+    const div = document.createElement('div');
+    div.className = 'repeater-entry';
+    div.innerHTML = `<span class="entry-num">Entry #${workCount}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+        <div class="frow c3" style="margin-top:10px;">
+            <div class="field-grp"><label class="field-label">Company / Agency</label><input type="text" class="form-control" name="work_name_company[]" placeholder="Company name"></div>
+            <div class="field-grp"><label class="field-label">Position</label><input type="text" class="form-control" name="work_position[]" placeholder="Job title"></div>
+            <div class="field-grp"><label class="field-label">Division / Dept</label><input type="text" class="form-control" name="work_division[]" placeholder="Department"></div>
+        </div>
+        <div class="frow c3">
+            <div class="field-grp"><label class="field-label">Date Started</label><input type="date" class="form-control" name="work_date_started[]"></div>
+            <div class="field-grp"><label class="field-label">Date Ended</label><input type="date" class="form-control" name="work_date_ended[]"></div>
+            <div class="field-grp"><label class="field-label">Address</label><input type="text" class="form-control" name="work_address[]" placeholder="Company address"></div>
+        </div>`;
+    document.getElementById('work-experience-container').appendChild(div);
+});
+document.getElementById('work-experience-container').addEventListener('click', e => { if(e.target.classList.contains('remove-entry')) e.target.closest('.repeater-entry').remove(); });
+
+// Training
+let trainCount = document.querySelectorAll('#training-container .repeater-entry').length;
+document.getElementById('addMoreTraining').addEventListener('click', function() {
+    trainCount++;
+    const div = document.createElement('div');
+    div.className = 'repeater-entry';
+    div.innerHTML = `<span class="entry-num">Entry #${trainCount}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+        <div class="frow c4" style="margin-top:10px;">
+            <div class="field-grp"><label class="field-label">Training Title</label><input type="text" class="form-control" name="rst_title[]" placeholder="Training name"></div>
+            <div class="field-grp"><label class="field-label">Venue</label><input type="text" class="form-control" name="rst_venue[]" placeholder="Location"></div>
+            <div class="field-grp"><label class="field-label">Date</label><input type="date" class="form-control" name="rst_date[]"></div>
+            <div class="field-grp"><label class="field-label">No. of Hours</label><input type="number" class="form-control" name="rst_no_hours[]" placeholder="0" min="0"></div>
+        </div>`;
+    document.getElementById('training-container').appendChild(div);
+});
+document.getElementById('training-container').addEventListener('click', e => { if(e.target.classList.contains('remove-entry')) e.target.closest('.repeater-entry').remove(); });
+
+// Trainer Experience
+let trainerCount = document.querySelectorAll('#trainerExperienceRepeater .repeater-entry').length;
+document.getElementById('addTrainerExperience').addEventListener('click', function() {
+    trainerCount++;
+    const div = document.createElement('div');
+    div.className = 'repeater-entry';
+    div.innerHTML = `<span class="entry-num">Entry #${trainerCount}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+        <div class="frow c4" style="margin-top:10px;">
+            <div class="field-grp"><label class="field-label">Training Title</label><input type="text" class="form-control" name="rt_title[]" placeholder="Training name"></div>
+            <div class="field-grp"><label class="field-label">Venue</label><input type="text" class="form-control" name="rt_venue[]" placeholder="Location"></div>
+            <div class="field-grp"><label class="field-label">Date</label><input type="date" class="form-control" name="rt_date[]"></div>
+            <div class="field-grp"><label class="field-label">No. of Hours</label><input type="number" class="form-control" name="rt_no_hours[]" placeholder="0" min="0"></div>
+        </div>`;
+    document.getElementById('trainerExperienceRepeater').appendChild(div);
+});
+document.getElementById('trainerExperienceRepeater').addEventListener('click', e => { if(e.target.classList.contains('remove-entry')) e.target.closest('.repeater-entry').remove(); });
+
+// Publications
+let pubCount = document.querySelectorAll('#publication-container .repeater-entry').length;
+document.getElementById('addMorePublication').addEventListener('click', function() {
+    pubCount++;
+    const div = document.createElement('div');
+    div.className = 'repeater-entry';
+    div.innerHTML = `<span class="entry-num">Entry #${pubCount}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+        <div class="frow c4" style="margin-top:10px;">
+            <div class="field-grp"><label class="field-label">Publication Title</label><input type="text" class="form-control" name="publication_title[]" placeholder="Title"></div>
+            <div class="field-grp"><label class="field-label">Nature</label><input type="text" class="form-control" name="p_nature[]" placeholder="e.g. Journal, Book"></div>
+            <div class="field-grp"><label class="field-label">Date</label><input type="date" class="form-control" name="p_date[]"></div>
+            <div class="field-grp"><label class="field-label">Publisher / Venue</label><input type="text" class="form-control" name="p_venue[]" placeholder="Publisher name"></div>
+        </div>`;
+    document.getElementById('publication-container').appendChild(div);
+});
+document.getElementById('publication-container').addEventListener('click', e => { if(e.target.classList.contains('remove-entry')) e.target.closest('.repeater-entry').remove(); });
+
+// References
+let refCount = document.querySelectorAll('#references-container .repeater-entry').length;
+document.getElementById('addMoreReferences').addEventListener('click', function() {
+    refCount++;
+    const div = document.createElement('div');
+    div.className = 'repeater-entry';
+    div.innerHTML = `<span class="entry-num">Entry #${refCount}</span><button type="button" class="btn-remove remove-entry">✕ Remove</button>
+        <div class="frow c4" style="margin-top:10px;">
+            <div class="field-grp"><label class="field-label">Agency Name</label><input type="text" class="form-control" name="name_agency[]" placeholder="Agency"></div>
+            <div class="field-grp"><label class="field-label">Address</label><input type="text" class="form-control" name="ref_address[]" placeholder="Address"></div>
+            <div class="field-grp"><label class="field-label">Contact Person</label><input type="text" class="form-control" name="contact_person[]" placeholder="Full name"></div>
+            <div class="field-grp"><label class="field-label">Position</label><input type="text" class="form-control" name="ref_position[]" placeholder="Position"></div>
+        </div>
+        <div class="frow c3">
+            <div class="field-grp"><label class="field-label">Telephone No</label><input type="text" class="form-control" name="ref_tel_no[]" placeholder="Tel number"></div>
+            <div class="field-grp"><label class="field-label">Cellphone No</label><input type="text" class="form-control" name="ref_cell_no[]" placeholder="Cell number"></div>
+            <div class="field-grp"><label class="field-label">Fax No</label><input type="text" class="form-control" name="ref_fax_no[]" placeholder="Fax number"></div>
+        </div>`;
+    document.getElementById('references-container').appendChild(div);
+});
+document.getElementById('references-container').addEventListener('click', e => { if(e.target.classList.contains('remove-entry')) e.target.closest('.repeater-entry').remove(); });
+</script>
 
 @endsection

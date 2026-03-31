@@ -125,7 +125,7 @@
     @endif
 
     <div class="card mb-4 mt-2">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
             <div>
                 <i class="fas fa-list me-2"></i>
                 Specialist Master List
@@ -134,14 +134,14 @@
                 @endif
             </div>
             <div>
-                @if(auth()->user()->emp_type == '0')
+                {{-- @if(auth()->user()->emp_type == '0')
                 <form action="{{ route('resource_speaker.export_excel') }}" method="GET" class="d-inline">
                     <input type="hidden" name="status" value="{{ $status }}">
                     <button type="submit" class="btn btn-success btn-sm">
                         <i class="fas fa-file-excel me-1"></i>Export to Excel
                     </button>
                 </form>
-                @endif
+                @endif --}}
                 @if(auth()->user()->emp_type == '2')
                 <a href="{{ route('resource_speaker.create') }}" class="btn btn-success">
                     <i class="fa-solid fa-circle-plus"></i> Create

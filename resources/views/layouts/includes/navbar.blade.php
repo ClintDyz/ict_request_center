@@ -1,11 +1,11 @@
-<nav class="sb-topnav navbar navbar-expand fixed-top" style="background-color: #3490dc">
+<nav class="sb-topnav navbar navbar-expand fixed-top" style="background: linear-gradient(90deg, #1a2f5a 0%, #243a6e 100%);">
     {{-- Check if emp_type is NOT 1 or 2. If it is, use #! --}}
     @if(in_array(auth()->user()->emp_type, ['1', '2']))
         {{-- For emp_type 1 or 2: Set href to non-clickable '#' --}}
-        <a class="navbar-brand ps-3" href="#!">RSMIS</a>
+        <a class="navbar-brand ps-3" href="#!" style="color: white;">RSMIS</a>
     @else
         {{-- For emp_type 0 (or others): Set href to the home page --}}
-        <a class="navbar-brand ps-3" href="{{url('/')}}">RSMIS</a>
+        <a class="navbar-brand ps-3" href="{{url('/')}}" style="color: white;">RSMIS</a>
     @endif
 
     <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars" style="color: white"></i></button>
@@ -14,7 +14,7 @@
     </form>
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i> {{ Auth::user()->lastname }}, {{ Auth::user()->firstname }}</a>
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: white;"><i class="fas fa-user fa-fw" style="color: white;"></i> {{ Auth::user()->lastname }}, {{ Auth::user()->firstname }}</a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li>
                     <a class="dropdown-item" href="{{ route('accounts.profile') }}">

@@ -35,17 +35,55 @@
 }
 
 .card-header {
-    border-bottom: 2px solid #f0f0f0;
+    background: linear-gradient(90deg, #1a2f5a 0%, #243a6e 100%);
+    color: white;
+    border-bottom: none;
     padding: 1rem 1.25rem;
+    border-radius: 8px 8px 0 0;
+}
+
+.card-header h5 {
+    margin-bottom: 0;
+}
+
+.timeline-icon {
+    background: linear-gradient(90deg, #1a2f5a 0%, #c9a84c 100%) !important;
 }
 
 .modal-content {
     border-radius: 8px;
+    border: none;
 }
 
 .modal-header {
+    background: linear-gradient(90deg, #1a2f5a 0%, #243a6e 100%);
+    color: white;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
+}
+
+.modal-header .close {
+    color: white;
+    text-shadow: none;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #1a2f5a 0%, #243a6e 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #1a2f5a 0%, #243a6e 100%);
+}
+
+.btn-outline-secondary {
+    border-color: #001a3e;
+    color: #001a3e;
+}
+
+.btn-outline-secondary:hover {
+    background: #001a3e;
+    color: white;
 }
 </style>
 
@@ -70,7 +108,7 @@
     @endif
 
     <!-- Profile Header -->
-    <div class="card profile-header mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+    <div class="card profile-header mb-4"     style="background: linear-gradient(135deg, #1a2f5a 0%, #243a6e 100%); border: none;">
         <div class="card-body p-4">
             <div class="d-flex align-items-center">
                 <div class="profile-avatar mr-4">
@@ -107,8 +145,8 @@
         <!-- Personal Information -->
         <div class="col-lg-6 mb-4">
             <div class="card h-100">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-user text-primary"></i> Personal Information</h5>
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user"></i> Personal Information</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless">
@@ -140,8 +178,8 @@
         <!-- Work Information -->
         <div class="col-lg-6 mb-4">
             <div class="card h-100">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-briefcase text-primary"></i> Work Information</h5>
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-briefcase"></i> Work Information</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless">
@@ -179,14 +217,14 @@
 
     <!-- Activity Timeline -->
     <div class="card mb-4">
-        <div class="card-header bg-white">
-            <h5 class="mb-0"><i class="fas fa-history text-primary"></i> Activity Timeline</h5>
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-history"></i> Activity Timeline</h5>
         </div>
         <div class="card-body">
             <div class="timeline">
                 <div class="timeline-item mb-3">
                     <div class="d-flex">
-                        <div class="timeline-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 40px; height: 40px; min-width: 40px;">
+                        <div class="timeline-icon text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 40px; height: 40px; min-width: 40px;">
                             <i class="fas fa-user-plus"></i>
                         </div>
                         <div>
@@ -199,7 +237,7 @@
 
                 <div class="timeline-item">
                     <div class="d-flex">
-                        <div class="timeline-icon bg-info text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 40px; height: 40px; min-width: 40px;">
+                        <div class="timeline-icon text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 40px; height: 40px; min-width: 40px;">
                             <i class="fas fa-edit"></i>
                         </div>
                         <div>
@@ -232,9 +270,9 @@
 <div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header">
                 <h5 class="modal-title"><i class="fas fa-user-edit"></i> Edit Profile</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
+                <button type="button" class="close" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
             </div>
@@ -387,7 +425,7 @@
 <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
+            <div class="modal-header">
                 <h5 class="modal-title"><i class="fas fa-key"></i> Change Password</h5>
                 <button type="button" class="close" data-dismiss="modal">
                     <span>&times;</span>
@@ -424,7 +462,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning">
+                    <button type="submit" class="btn btn-primary">
                         <i class="fas fa-lock"></i> Update Password
                     </button>
                 </div>

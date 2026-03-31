@@ -1,7 +1,31 @@
+// Navy Color Theme - DOST RSMIS
+// Using #1a2f5a and #243a6e
+
 // Body
-$body-bg: #f8fafc;
+$body-bg: #f7f4ee;
 
 // Typography
 $font-family-sans-serif: 'Nunito', sans-serif;
 $font-size-base: 0.9rem;
 $line-height-base: 1.6;
+
+// Primary Colors - Navy theme
+$primary: #1a2f5a;
+$secondary: #243a6e;
+$info: #5a7ab8;
+$success: #7CB342;
+$warning: #e8c97a;
+$danger: #E53935;
+
+// Custom Colors
+$accent-navy: #1a2f5a;
+$accent-navy-light: #243a6e;
+$accent-gold: #c9a84c;
+$accent-cream: #f7f4ee;
+$accent-light: #ede9e0;
+
+// Soft gradients
+$gradient-primary: linear-gradient(135deg, #1a2f5a 0%, #243a6e 100%);
+$gradient-sidebar: linear-gradient(180deg, #1a2f5a 0%, #243a6e 100%);
+$gradient-navbar: linear-gradient(90deg, #1a2f5a 0%, #243a6e 100%);
+$gradient-active: linear-gradient(90deg, #1a2f5a 0%, #c9a84c 100%);

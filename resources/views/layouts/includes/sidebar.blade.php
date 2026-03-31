@@ -1,22 +1,37 @@
 <style>
+.sb-sidenav .nav-link {
+    color: white !important;
+}
+
 .sb-sidenav .nav-link.active {
-    /* Styles for the active link (blue background, white text) */
-    background-color: #0d6efd;
+    background: linear-gradient(90deg, #1a2f5a 0%, #c9a84c 100%);
+    color: white !important;
+}
+
+.sb-sidenav .nav-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white !important;
+}
+
+.sb-sidenav .sb-nav-link-icon {
     color: white !important;
 }
 
 .sb-sidenav-collapse-arrow i {
-    /* Smooth transition for the dropdown arrow rotation */
     transition: transform 0.3s;
+    color: white !important;
 }
 
 .sb-sidenav-collapse-arrow i.rotate {
-    /* Rotation class for the dropdown arrow when open */
     transform: rotate(180deg);
+}
+
+.sb-sidenav-menu-heading {
+    color: #FFD700 !important;
 }
 </style>
 
-<nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+<nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion" style="background: linear-gradient(180deg, #1a2f5a 0%, #243a6e 100%);">
     <div class="sb-sidenav-menu sibedar">
         <div class="nav">
 
@@ -96,6 +111,11 @@
                 <a class="nav-link {{ request()->is('user') ? 'active' : '' }}" href="{{ url('/user') }}">
                     <div class="sb-nav-link-icon"><i class="fas fa-user"></i></div>
                     Accounts
+                </a>
+
+                <a class="nav-link {{ request()->is('audit-logs') ? 'active' : '' }}" href="{{ url('/audit-logs') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-history"></i></div>
+                    Audit Logs
                 </a>
             @endif
         </div>

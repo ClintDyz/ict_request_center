@@ -46,6 +46,23 @@
     .tooltip:hover .tooltiptext {
         visibility: visible;
     }
+/* Find your PDF modal CSS and increase size */
+#pdfModal .modal-dialog {
+    max-width: 90%;
+    width: 90%;
+}
+
+#pdfModal .modal-body {
+    height: 85vh;
+}
+
+#pdfModal object,
+#pdfModal iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 80vh;
+}
+
 </style>
 
 <div class="container-fluid px-4">

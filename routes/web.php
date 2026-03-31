@@ -20,6 +20,17 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect('/login');
 });
+
+// Audit Logs
+Route::middleware(['auth'])->group(function () {
+    Route::get('/audit-logs', [App\Http\Controllers\AuditLogController::class, 'index'])->name('audit_logs.index');
+    Route::get('/audit-logs/export', [App\Http\Controllers\AuditLogController::class, 'export'])->name('audit_logs.export');
+});
+
+Route::get('/informed-consent', function () {
+    return view('informed_consent');
+})->name('informed_consent');
+
     Route::get('/resource_speaker/create', [App\Http\Controllers\RstblController::class, 'create'])->name('resource_speaker.create'); // Show form
     Route::post('/resource_speaker', [App\Http\Controllers\RstblController::class, 'store'])->name('resource_speaker.store'); // Handle form submission
 

@@ -2,21 +2,20 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\RsTraining;
 
 class Rstbl extends Model
 {
-    use HasFactory;
-
+    use HasFactory, Auditable;
     protected $table = 'rstbl';
 
     protected $fillable = [
         'img','last_name', 'given_name', 'middle_name', 'ext_name', 'date_of_birth',
-        'place_of_birth', 'age', 'email', 'building_no', 'home_address',
+        'place_of_birth', 'age', 'email', 'building_no', 'home_address', 'expertise',
         'home_building_no', 'home_barangay', 'home_municipality', 'home_province',
-        'home_zip_code', 'home_tel_no', 'home_cell_no', 'home_fax_no', 'gender',  'status', 'created_by'
+        'home_zip_code', 'home_tel_no', 'home_cell_no', 'home_fax_no', 'gender',  'status', 'created_by', 'updated_by'
     ];
 
     public function referencesTrainings()

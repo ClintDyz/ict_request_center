@@ -23,7 +23,7 @@
             align-items: center;
             overflow: hidden;
             position: relative;
-            background: #001a3e;
+            background: #1a2f5a;
         }
 
         /* ------------------------------
@@ -53,15 +53,18 @@
         }
 
         .btn-create {
-            background: #2563EB;
-            border: none;
+            background: #c9a84c;
+            color: #1a2f5a;
+            border: 2px solid #c9a84c;
             padding: 8px 16px;
             font-weight: 600;
             border-radius: 8px;
         }
 
         .btn-create:hover {
-            opacity: 0.9;
+            background: #e8c97a;
+            border-color: #e8c97a;
+            color: #1a2f5a;
         }
 
         /* ----------------------------------------------------------
@@ -72,9 +75,9 @@
             position: absolute;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle at 20% 30%, rgba(0,128,255,0.4), transparent 60%),
-                        radial-gradient(circle at 80% 70%, rgba(0,255,188,0.35), transparent 60%),
-                        radial-gradient(circle at 40% 90%, rgba(0,102,255,0.4), transparent 60%);
+            background: radial-gradient(circle at 20% 30%, rgba(26,47,90,0.4), transparent 60%),
+                        radial-gradient(circle at 80% 70%, rgba(36,58,110,0.35), transparent 60%),
+                        radial-gradient(circle at 40% 90%, rgba(26,47,90,0.4), transparent 60%);
             animation: gradientMove 40s ease-in-out infinite alternate;
             z-index: 1;
         }
@@ -121,7 +124,7 @@
 
         .left-panel {
             width: 50%;
-            background: linear-gradient(145deg, #0A1A33, #16476A);
+            background: linear-gradient(145deg, #1a2f5a, #243a6e);
             color: white;
             padding: 60px 30px;
             text-align: center;
@@ -155,12 +158,12 @@
         }
 
         .form-control:focus {
-            border-color: #4b8bff;
-            box-shadow: 0 0 0 3px rgba(78, 138, 255, 0.25);
+            border-color: #1a2f5a;
+            box-shadow: 0 0 0 3px rgba(26, 47, 90, 0.25);
         }
 
         .btn-login {
-            background: linear-gradient(90deg, #0046FF, #0CC6FF);
+            background: linear-gradient(90deg, #1a2f5a, #243a6e);
             border: none;
             height: 48px;
             border-radius: 10px;
@@ -190,7 +193,7 @@
         </a> --}}
 
         <div class="ms-auto">
-            <a href="{{ route('resource_speaker.create') }}" class="btn btn-create text-white">
+            <a href="{{ route('informed_consent') }}" class="btn btn-create text-white">
                 <i class="fa-solid fa-user me-1"></i> Application for Speaker
             </a>
         </div>
